@@ -1,8 +1,8 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 5 - Part 2: Masked Animation               |
-; | Filename:   5-2.asm                                                             |
-; | Based on:   Tutorial 4's masked-sprite renderer                                  |
+; | Program:    SAM Coupe Sprites Tutorial 6 - Part 2: Masked Animation              |
+; | Filename:   blog4\6-2.asm                                                       |
+; | Based on:   Tutorial 5's static masked-sprite renderer                           |
 ; -----------------------------------------------------------------------------------
 ;
 ; Hold any key to play the jump sequence; release it to return to the idle sequence.
@@ -249,15 +249,16 @@ Current_Delay:  DEFB    0
 Screen_Page:    DEFB    0
 ;
 Idle_Animation: DEFB    2
-                DEFW    Dizzy_Masked_Image1,Dizzy_Masked_Image2
+                DEFW    Dizzy_Interleaved_Image1,Dizzy_Interleaved_Image2
 ;
 Jump_Animation: DEFB    7
-                DEFW    Dizzy_Masked_Image1,Dizzy_Masked_Image3
-                DEFW    Dizzy_Masked_Image4,Dizzy_Masked_Image5
-                DEFW    Dizzy_Masked_Image6,Dizzy_Masked_Image7
-                DEFW    Dizzy_Masked_Image8,Dizzy_Masked_Image9
+                DEFW    Dizzy_Interleaved_Image1,Dizzy_Interleaved_Image3
+                DEFW    Dizzy_Interleaved_Image4,Dizzy_Interleaved_Image5
+                DEFW    Dizzy_Interleaved_Image6,Dizzy_Interleaved_Image7
+                DEFW    Dizzy_Interleaved_Image8,Dizzy_Interleaved_Image9
 ;
-                INCLUDE "dizzy_masked.asm"
+                INCLUDE "../blog3/dizzy_palette.asm"
+                INCLUDE "../blog3/dizzy_interleaved.asm"
 ;
 Background_Buffer: DEFS 512
 Stack_Start:    DEFS    256

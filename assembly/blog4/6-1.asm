@@ -1,7 +1,7 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 5 - Part 1: Animation                     |
-; | Filename:   5-1.asm                                                             |
+; | Program:    SAM Coupe Sprites Tutorial 6 - Part 1: Raw-Frame Animation           |
+; | Filename:   blog4\6-1.asm                                                       |
 ; | Author:     Pete Gallagher - PJG Creations Ltd                                   |
 ; -----------------------------------------------------------------------------------
 ;
@@ -172,7 +172,7 @@ Animation_Frames:
                 DEFW    Image1,Image2
 Animation_End:
 ;
-                INCLUDE "dizzy.asm"
+                INCLUDE "../blog3/dizzy.asm"
 ;
 Stack_Start:    DEFS    256
 Stack:

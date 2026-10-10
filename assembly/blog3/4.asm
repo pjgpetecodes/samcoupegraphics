@@ -1,232 +1,181 @@
 ;
 ; -----------------------------------------------------------------------------------
-; |                                                                                 |
-; | Program:    SAM Coupe Sprites Tutorial 4                                        |
-; | Filename:   Sprites4.asm                                                        |
-; | Version:    1.1                                                                 |
-; | Date:       13/03/2023                                                          |
-; | Author:     Pete Gallagher - PJG Creations Ltd                                  |
-; |                                                                                 |
+; | Program:    SAM Coupe Sprites Tutorial 4 - Separate Sprite Data                  |
+; | Filename:   blog3\4.asm                                                         |
 ; -----------------------------------------------------------------------------------
 ;
-		ORG 	0x8000			; Store the program in User Address Space
-                DUMP	1,0     ;
-                autoexec		; Automatically Execute the Program
+; Pixel colours and transparency masks can be stored separately, then paired at
+; runtime into the mask/pixel format used by the drawing routine.
 ;
 ; ***********************************************************************************
-; *                                                                                 *
-; *                                    Equates                                      *
-; *                                                                                 *
+; *                                 Program Setup                                   *
 ; ***********************************************************************************
 ;
-LMPR:           EQU     250             ; The Lower Memory Page Register Address 
-HMPR:           EQU     251             ; The Higher Memory Page Register Address 
-VMPR:           EQU     252             ; The Video Memory Page Register Address 
-JCLSBL:         EQU     334             ; The Clear Screen Routine...
-                                        ; ... Set A to 0 to clear the whole screen) (0x14E)
-JREADKEY:       EQU     361             ; The Keyboard Read Routine...
-                                        ; ... Returns with Z Flag set if no key pressed...
-                                        ; ... Otherwise A = Keycode for key pressed
+                ORG     0x8000
+                DUMP    1,0
+                AUTOEXEC
+;
+LMPR:           EQU     250             ; Lower Memory Page Register
+VMPR:           EQU     252             ; Video Memory Page Register
+JCLSBL:         EQU     334             ; ROM clear-screen routine
 ;
 ; ***********************************************************************************
-; *                                                                                 *
 ; *                                Application Start                                *
-; *                                                                                 *
 ; ***********************************************************************************
 ;
-                DI                      ; Disable Interupts
+Start:          DI                      ; Disable interrupts
+                LD      (System_SP+1),SP; Save BASIC's stack pointer before paging screen RAM
+                CALL    Clear_Screen    ; Clear the screen while the ROM is paged in
+                DI                      ; Disable interrupts before paging screen RAM
+                LD      SP,0xC000       ; Use a safe stack outside the screen memory
+                IN      A,(VMPR)        ; Read the current screen page
+                AND     0b00011110      ; Keep only the page number
+                OR      0b00100000      ; Map RAM into the lower memory area
+                LD      (Screen_Page),A ; Save the page value for restoring the screen
+                OUT     (LMPR),A        ; Page the screen RAM into the lower memory area
 ;
-; Becuase the Stack Pointer lives in Page B, but we're paging the Screen into Pages A and B,
-; we need to make sure we save the current Stack Pointer location, and create our own location.
-; We rewrite our program here effectively, by storing it's original location in a holding position.
+                CALL    Build_Interleaved ; Create mask/pixel pairs for the drawing routine
+                LD      HL,0             ; Top-left screen byte, as in Blog 2 Tutorial 3-2
+                LD      DE,Sprite1_Interleaved ; Point to the interleaved sprite data
+                CALL    Draw_Sprite     ; Draw Dizzy using the mask/pixel data
 ;
-                LD	(System_SP+1),SP; Get the Current Stack Pointer Location and Overwrite...
-                                        ; ... the holding value below.
+                LD      A,0x1F          ; Page ROM 0 back into the lower memory area
+                OUT     (LMPR),A        ; Restore the BASIC ROM mapping
+System_SP:      LD      SP,0            ; Restore BASIC's original stack pointer
+                EI                      ; Enable interrupts
+                RET                     ; Return to BASIC
 ;
-; Get the Current Screen Page and set the LMPR register up so we can write to the screen
-;
-                IN      A,(VMPR)        ; Get the VMPR Register, which holds info about...
-                                        ; ... which Page the Screen is Paged Into
-                AND     0b00011110      ; We're only interested in the Screen Page...
-                                        ; ... so mask off everything but the Page Bits...
-                                        ; ... The result will be stored in the A Register
-                OR      0b00100000      ; Set Bit 5 which, when loaded into the LMPR register...
-                                        ; ... will Set the RAM in Page 0
-                LD		(Scr_Page+1),A  ; Overwrite the holding value for the Screen Page location...
-                                        ; ... now that we know it
-;                
-                CALL    Clear_Screen    ; Clear the Screen
-;
-                LD		SP,0xC000       ; Set the Stack Pointer to a location of our choosing
-;
-                LD		A,(Scr_Page+1)  ; Get the current Screen Location which we stored earlier
-                OR      0b00100000      ; Set Bit 5 which, when loaded into the LMPR register...
-                                        ; ... will Set the RAM in Page 0
-                OUT     (LMPR),A        ;
-;
-; All of the above shifting around of the Stack Pointer, allows us to Call routines...
-; ... Which of course will store their return location on the Stack Pointer...
-; ... This would've overwritten some of the Screen Page if left unreseolved...
-;
-;                CALL    Wait_For_Key    ; Wait for a keypress
-;
-; Print a sprite in the top left corner
-;
-                LD      HL,0x0000       ; Point to the Top Left corner of our screen
-;
-; Print a Sprite
-;
-print_sprite:	LD 		DE,Sprite1_1    ; Set pointer to start of our Sprite 
-                LD      C,32            ; Setup Line counter, 32 lines per sprite to print
-;
-; This is the start of our Sprite Printing Loop
-;
-Print_Loop:		LD 		B,16			; Set up loop counter, 16 bytes per line of a sprite to print
-;
-Print_Loop1:	BIT     0,C             ; Check if this is an odd or even line...
-                JR 		NZ,Odd_Line		; ... If this is an odd line (Bit 0 is a 1), then print an odd line...
-                JP      Even_Line       ; ... Otherwise, print an even line
-;
-; We've printed a pixel... Wait for a keypress then set for the next pixel in our Sprite...
-;               
-Print_Loop2:    
-;
-; Note: You can uncomment this line if you want to step through the Sprite being drawn!
-;
-;                CALL    Wait_For_Key    ;               
-;
-                INC     DE              ; Move to next Sprite Byte
-                INC 	HL				; Move to the next Screen Position
-				
-                DJNZ 	Print_Loop1		; If we've not yet reach the last Sprite Byte, then loop                
-;
-                LD      L,0             ; Point to the Left of our screen
-                BIT     0,C             ; Check if this is an odd or even line...
-                JR 		Z,Print_Loop3   ; ... If this is an even line (Bit 0 is a 0), Dont' increment yet...
-                INC     H               ; ... Otherwise, set for the next line
-;
-; Increment the Line Counter
-;
-Print_Loop3:    LD      A,C             ; Move C Register to A ready for Subtraction
-                LD      C,1             ; C= 1
-                SUB     C               ; Set for Next Sprite Line - Decrement C by 1 - Subtract C (1) from A 
-                LD      C,A             ; Move A Register back to C Register (Line Counter)
-                JR 		NZ,Print_loop   ; Repeat if we're not on the last line
-;
-;                CALL    Wait_For_Key    ;               
-;
-; We must remember to switch BASIC back into Page 0
-;
-                LD      A,0x1F          ; Set ROM0 back into Page A...
-                OUT     (LMPR), A       ; ... So that when we try to return to BASIC it all still works!
-;
-; Return the System Stack Pointer to it's original location in Bank B somewhere...
-;
-System_SP:		LD      SP,0            ; Place holder for the System Stack Location...
-                                        ; This will be overwritten above once we know it's location
-                EI                      ; Enable Interupts
-;
-; Return back to BASIC
-;
-                RET                     ;
-;
-;
-;
-Odd_Line:       SET     7,L             ; Set the top bit of the L Register to point to the Odd Screen Line
-				JP		Mask_Sprite		; Jump to the Mask Sprite routine
-;
-;
-Even_Line:      RES     7,L             ; Clear the top bit of the L Resister to point to the Even Screen Line
-;
-; Mask the Sprite
-;
-Mask_Sprite:	LD 		A,(DE)			; Get the Mask Byte
-				AND 	(HL)			; AND with the Byte at the current Screen Location 
-				INC 	DE				; Point to the Sprite Byte
-				PUSH	BC				; Save the line and byte counters
-				LD		C,A				; Keep the masked screen byte
-				LD		A,(DE)			; Get the Sprite Pixels
-				OR		C				; OR in the Sprite Pixels
-				LD 		(HL), A			; Write the result to the Screen
-				POP		BC				; Restore the line and byte counters
-;
-                JP      Print_Loop2     ;
+Clear_Screen:   XOR     A               ; Clear the A register to clear the full screen
+                CALL    JCLSBL          ; Call the system clear-screen routine
+                DI                      ; Disable interrupts before continuing
+                RET                     ; Return to the caller
 ;
 ; ***********************************************************************************
-; *                                                                                 *
-; *                                Clear the Screen                                 *
-; *                                                                                 *
+; *                         Build Mask/Pixel Sprite Data                            *
 ; ***********************************************************************************
 ;
-Clear_Screen:   XOR     A               ; Clear the A register, so when passed into clear screen...
-                                        ; ...it clears the whole screen
-                CALL    JCLSBL          ; Clear the Screen
-                DI                      ; Disable Interupts
-                RET                     ;
+Build_Interleaved:
+                LD      HL,Sprite1_Pixels ; Point to the source colour bytes
+                LD      IX,Sprite1_Mask   ; Point to the matching mask bytes
+                LD      DE,Sprite1_Interleaved  ; Point to the interleaved output buffer
+                LD      B,32                    ; 32 rows in the sprite
+;
+Interleave_Row: PUSH    BC              ; Keep the row counter while processing a row
+                LD      C,16            ; 16 packed pixel bytes per row
+;
+Interleave_Byte:
+                LD      A,(IX+0)        ; Read the mask byte
+                LD      (DE),A          ; Store the mask before its pixel byte
+                INC     DE              ; Advance to the pixel byte in the buffer
+                CPL                     ; Transparent bits must contribute zero
+                AND     (HL)            ; Clear the white matte where the mask is transparent
+                LD      (DE),A          ; Store the cleaned pixel byte
+                INC     DE              ; Advance to the next mask/pixel pair
+                INC     HL              ; Point to the next source colour byte
+                INC     IX              ; Point to the next source mask byte
+                DEC     C               ; Count down the 16 bytes in this row
+                JR      NZ,Interleave_Byte ; Continue until this row is complete
+                POP     BC              ; Restore the row counter
+                DJNZ    Interleave_Row  ; Repeat for all 32 sprite rows
+                RET                     ; Return with the interleaved data ready
 ;
 ; ***********************************************************************************
-; *                                                                                 *
-; *                                Wait for a KeyPres                               *
-; *                                                                                 *
+; *                               Draw Masked Sprite                                *
 ; ***********************************************************************************
 ;
-Wait_For_Key:   PUSH    BC              ; Save the BC Registers
-                PUSH    DE              ; Save the DE Registers
-                PUSH    HL              ; Save the HL Registers
-                LD		A,0x1F          ; Set for ROM in Page A
-                OUT 	(LMPR),A        ; 
+Draw_Sprite:    LD      C,32             ; Process all 32 sprite rows
 ;
-Key_Loop:       CALL	JREADKEY		; Read the Keyboard (Zero if no key)
-       			JR 		Z,Key_Loop      ; If no key pressed, then loop
+Sprite_Row:     PUSH    BC              ; Preserve row count while B counts bytes
+                LD      B,16             ; Process the 16 sprite bytes in this row
 ;
-No_Key_Loop:    CALL	JREADKEY		; Read the Keyboard (Zero if no key)
-       			JR 		NZ,No_Key_Loop  ; If key still pressed, then loop
+Sprite_Byte:    LD      A,(DE)           ; Read the mask byte
+                AND     (HL)            ; Keep screen bits selected by the mask
+                LD      C,A             ; Save the masked background byte
+                INC     DE              ; Point to the corresponding pixel byte
+                LD      A,(DE)           ; Read the cleaned sprite pixels
+                OR      C               ; Combine sprite pixels with the background
+                LD      (HL),A          ; Write the combined byte to the screen
+                INC     DE              ; Point to the next mask/pixel pair
+                INC     HL              ; Advance to the next screen byte
+                DJNZ    Sprite_Byte     ; Continue across the 16-byte sprite row
+                LD      BC,112          ; Skip the rest of the 128-byte screen row
+                ADD     HL,BC           ; Point to the next screen row
+                POP     BC              ; Restore the sprite row counter
+                DEC     C               ; Count down the sprite rows
+                JR      NZ,Sprite_Row   ; Continue until all 32 rows are drawn
+                RET                     ; Return after drawing the sprite
 ;
-                DI                      ; Disable Interuprts
-;				
-Scr_Page:		LD      A,0          	; Place holder for the Screen Page...
-                                        ; ...The 0 will be overwritten above once we know where it is...
-                OUT		(LMPR),A        ; Page the Screen into the relevant Page 
-                POP     HL              ; Retrieve the HL Registers
-                POP     DE              ; Retrieve the DE Registers
-                POP     BC              ; Retrieve the BC Registers
-                RET                     ;
+Sprite1_Pixels: ; 32 rows of 16 bytes of MODE 4 colour data
+Sprite1_1:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_2:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_3:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_4:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_5:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_6:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_7:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFF, 0xFF, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_8:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xFF, 0xFF, 0xFF, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_9:      DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xF0, 0x0F, 0x00, 0xFF, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_10:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0x0F, 0xF0, 0xFF, 0x0F, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_11:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xF0, 0xFF, 0xF0, 0xFF, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_12:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xF0, 0xF0, 0x00, 0x00, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_13:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xF0, 0xF0, 0x00, 0x00, 0xF0, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_14:     DEFB    0xFF, 0xFF, 0xF0, 0x00, 0x0F, 0xFF, 0x00, 0xFF, 0xF0, 0x0F, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0xFF
+Sprite1_15:     DEFB    0xFF, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0xFF, 0x00, 0x0F, 0xFF, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0xFF
+Sprite1_16:     DEFB    0xFF, 0xFF, 0x0A, 0xAA, 0x0F, 0xF0, 0xFF, 0xFF, 0xFF, 0xF0, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0xFF
+Sprite1_17:     DEFB    0xFF, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0xFF
+Sprite1_18:     DEFB    0xFF, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0xF0, 0x00, 0x00, 0xFF, 0xFF, 0x0A, 0xAA, 0x0F, 0xFF, 0xFF
+Sprite1_19:     DEFB    0xFF, 0xFF, 0xF0, 0x00, 0xF0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xF0, 0x00, 0xFF, 0xFF, 0xFF
+Sprite1_20:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_21:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x0F, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_22:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_23:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0A, 0xAA, 0xAF, 0xAA, 0xAA, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_24:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xAA, 0xAF, 0xA0, 0xAF, 0xAA, 0xA0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_25:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xAA, 0xAA, 0xA0, 0xAA, 0xAA, 0xA0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_26:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xAA, 0xAA, 0xA0, 0xAA, 0xAA, 0xA0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_27:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_28:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_29:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_30:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_31:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_32:     DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 ;
-; ***********************************************************************************
-; *                                                                                 *
-; *                                     Sprites                                     *
-; *                                                                                 *
-; ***********************************************************************************
+Sprite1_Mask:
+Sprite1_M_1:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_2:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_3:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_4:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_5:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_6:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_7:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_8:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_9:    DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_10:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_11:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_12:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_13:   DEFB    0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF
+Sprite1_M_14:   DEFB    0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF
+Sprite1_M_15:   DEFB    0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+Sprite1_M_16:   DEFB    0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+Sprite1_M_17:   DEFB    0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+Sprite1_M_18:   DEFB    0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+Sprite1_M_19:   DEFB    0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF
+Sprite1_M_20:   DEFB    0xFF, 0xFF, 0xF0, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0xFF, 0xFF, 0xFF
+Sprite1_M_21:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_22:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_23:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_24:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_25:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_26:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_27:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_28:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_29:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_30:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_31:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+Sprite1_M_32:   DEFB    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 ;
-Sprite1_1:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_2:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_3:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_4:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_5:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &00, &FF, &00, &FF, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_6:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &00, &00, &00, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_7:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &00, &0F, &00, &FF, &00, &FF, &00, &0F, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_8:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_9:    DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &00, &0F, &00, &F0, &00, &0F, &00, &00, &00, &FF, &00, &0F, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_10:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &00, &0F, &00, &0F, &00, &F0, &00, &FF, &00, &0F, &00, &0F, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_11:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &F0, &00, &FF, &00, &F0, &00, &FF, &00, &F0, &00, &F0, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_12:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &F0, &00, &F0, &00, &00, &00, &00, &00, &F0, &00, &F0, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_13:   DEFB      &FF, &00, &FF, &00, &F0, &0F, &00, &FF, &00, &F0, &00, &F0, &00, &F0, &00, &00, &00, &00, &00, &F0, &00, &F0, &00, &FF, &00, &FF, &FF, &00, &FF, &00, &FF, &00
-Sprite1_14:   DEFB      &FF, &00, &FF, &00, &00, &F0, &00, &00, &00, &0F, &00, &FF, &00, &00, &00, &FF, &00, &F0, &00, &0F, &00, &FF, &00, &00, &00, &00, &0F, &F0, &FF, &00, &FF, &00
-Sprite1_15:   DEFB      &FF, &00, &F0, &0F, &00, &0A, &00, &AA, &00, &0F, &00, &FF, &00, &FF, &00, &00, &00, &0F, &00, &FF, &00, &FF, &00, &0A, &00, &AA, &00, &0F, &FF, &00, &FF, &00
-Sprite1_16:   DEFB      &FF, &00, &F0, &0F, &00, &0A, &00, &AA, &00, &0F, &00, &F0, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &00, &FF, &00, &0A, &00, &AA, &00, &0F, &FF, &00, &FF, &00
-Sprite1_17:   DEFB      &FF, &00, &F0, &0F, &00, &0A, &00, &AA, &00, &0F, &00, &FF, &00, &00, &00, &00, &00, &00, &00, &0F, &00, &FF, &00, &0A, &00, &AA, &00, &0F, &FF, &00, &FF, &00
-Sprite1_18:   DEFB      &FF, &00, &F0, &0F, &00, &0A, &00, &AA, &00, &0F, &00, &FF, &00, &F0, &00, &00, &00, &00, &00, &FF, &00, &FF, &00, &0A, &00, &AA, &00, &0F, &FF, &00, &FF, &00
-Sprite1_19:   DEFB      &FF, &00, &FF, &00, &00, &F0, &00, &00, &00, &F0, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &00, &F0, &00, &00, &0F, &F0, &FF, &00, &FF, &00
-Sprite1_20:   DEFB      &FF, &00, &FF, &00, &F0, &0F, &00, &FF, &F0, &0F, &00, &0F, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &0F, &F0, &0F, &00, &FF, &FF, &00, &FF, &00, &FF, &00
-Sprite1_21:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &0F, &00, &FF, &00, &FF, &00, &00, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_22:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &00, &00, &00, &00, &00, &00, &00, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_23:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &00, &0A, &00, &AA, &00, &AF, &00, &AA, &00, &AA, &00, &0F, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_24:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &AA, &00, &AF, &00, &A0, &00, &AF, &00, &AA, &00, &A0, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_25:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &AA, &00, &AA, &00, &A0, &00, &AA, &00, &AA, &00, &A0, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_26:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &AA, &00, &AA, &00, &A0, &00, &AA, &00, &AA, &00, &A0, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_27:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &00, &F0, &00, &00, &00, &00, &00, &0F, &00, &00, &00, &00, &00, &00, &0F, &F0, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_28:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &F0, &0F, &00, &FF, &00, &FF, &0F, &F0, &00, &FF, &00, &FF, &00, &FF, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_29:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_30:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_31:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
-Sprite1_32:   DEFB      &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00, &FF, &00
+Sprite1_Interleaved: ; Mask/pixel pairs, with transparent matte bits cleared
+                DEFS    1024
+;
+Screen_Page:    DEFB    0               ; Screen page used while drawing
+Stack_Start:    DEFS    256             ; Reserve a safe work stack
+Stack:
