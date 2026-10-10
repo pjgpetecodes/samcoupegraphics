@@ -92,7 +92,7 @@ them in `assembly\blog4`. `blog4\main.asm` is an earlier, independent animation 
 Draft post: [`assembly\blog5\blog-post.md`](assembly/blog5/blog-post.md).
 
 `assembly\blog5\7-1.asm` continues from `blog4\6-4.asm` and adds idle and jump
-sequences chosen with the keyboard (hold any key to jump). It includes the sprite
+sequences; pressing any key plays the jump once. It includes the sprite
 data from `assembly\blog4`.
 
 ## Debug in SimCoupe

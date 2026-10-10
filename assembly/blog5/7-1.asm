@@ -5,8 +5,8 @@
 ; | Based on:   Tutorial 6 part 4 (blog4\6-4.asm)                                   |
 ; -----------------------------------------------------------------------------------
 ;
-; The flicker-free animation from Tutorial 6 now reacts to the keyboard. Hold any
-; key to play the jump sequence; release it to return to the idle sequence.
+; The flicker-free animation from Tutorial 6 now reacts to the keyboard. Press any
+; key to play the jump sequence once; Dizzy then returns to the idle sequence.
 ; Reset to stop the demo.
 ;
 ; ***********************************************************************************
@@ -97,18 +97,16 @@ Show_Pending_Frame:
 ; ***********************************************************************************
 ;
 Choose_Animation:
-                CALL    JREADKEY        ; Z is set when no key is pressed
-                LD      HL,Idle_Animation
-                JR      Z,Set_Animation ; No key, so play the idle sequence
-                LD      HL,Jump_Animation ; A key is down, so play the jump
-;
-Set_Animation:  EX      DE,HL           ; DE = requested sequence
                 LD      HL,(Current_Animation)
+                LD      DE,Idle_Animation
                 OR      A               ; Clear the carry flag
                 SBC     HL,DE
-                RET     Z               ; Do not restart a sequence that is already playing
-                EX      DE,HL           ; HL = requested sequence again
-                LD      (Current_Animation),HL
+                RET     NZ              ; A jump is playing, so ignore the keyboard
+                CALL    JREADKEY        ; Z is set when no key is pressed
+                RET     Z               ; No key, so keep idling
+                LD      HL,Jump_Animation ; A key was pressed, so play the jump once
+;
+Set_Animation:  LD      (Current_Animation),HL
                 XOR     A               ; Start from the first frame
                 LD      (Current_Frame),A
                 LD      A,Frame_Delay
@@ -129,7 +127,13 @@ Update_Animation:
                 INC     A
                 CP      B
                 JR      C,Store_Frame   ; Still inside the sequence
-                XOR     A               ; After the last frame, return to frame zero
+                LD      HL,(Current_Animation)
+                LD      DE,Jump_Animation
+                OR      A               ; Clear the carry flag
+                SBC     HL,DE
+                LD      HL,Idle_Animation
+                JR      Z,Set_Animation ; The jump has finished, so go back to idle
+                XOR     A               ; The idle loops, so return to frame zero
 ;
 Store_Frame:    LD      (Current_Frame),A
                 ; Fall through to draw the new frame

@@ -14,7 +14,7 @@ https://github.com/pjgpetecodes/samcoupegraphics
 
 # Controlling Animation with the Keyboard
 
-In the previous tutorial Dizzy played one nine frame loop, drawn on a hidden screen page so it never flickers. Now we want him to react to us. Hold a key, and he jumps. Let go, and he goes back to idling.
+In the previous tutorial Dizzy played one nine frame loop, drawn on a hidden screen page so it never flickers. Now we want him to react to us. Press a key, and he jumps once. Then he goes back to idling.
 
 We continue directly from `assembly/blog4/6-4.asm`, and `assembly/blog5/7-1.asm` only adds the new parts. It uses the same frames, so it includes the data file that lives in the `blog4` folder.
 
@@ -53,29 +53,38 @@ Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
 
 ```z80
 Choose_Animation:
-                CALL    JREADKEY        ; Z is set when no key is pressed
-                LD      HL,Idle_Animation
-                JR      Z,Set_Animation ; No key, so play the idle sequence
-                LD      HL,Jump_Animation ; A key is down, so play the jump
-```
-
-The ROM is paged in whenever we reach this point, because `Draw_Frame` puts it back before it returns, so the ROM routine is safe to call.
-
-## Not Restarting a Sequence
-
-`Choose_Animation` runs on every interrupt, so while a key is held it asks for the jump 50 times a second. If `Set_Animation` restarted the sequence every time, Dizzy would never get past frame 0. So it now compares the requested table with the one already playing, and returns if they match;
-
-```z80
-Set_Animation:  EX      DE,HL           ; DE = requested sequence
                 LD      HL,(Current_Animation)
+                LD      DE,Idle_Animation
                 OR      A               ; Clear the carry flag
                 SBC     HL,DE
-                RET     Z               ; Do not restart a sequence that is already playing
-                EX      DE,HL           ; HL = requested sequence again
-                LD      (Current_Animation),HL
+                RET     NZ              ; A jump is playing, so ignore the keyboard
+                CALL    JREADKEY        ; Z is set when no key is pressed
+                RET     Z               ; No key, so keep idling
+                LD      HL,Jump_Animation ; A key was pressed, so play the jump once
+;
+Set_Animation:  LD      (Current_Animation),HL
 ```
 
-The rest of `Set_Animation` is as before. At the start of the program we ask for `Idle_Animation`, and hold any key to see him jump.
+We only look at the keyboard while the idle is playing, so a jump can't be restarted part way through. The ROM is paged in whenever we reach this point, because `Draw_Frame` puts it back before it returns, so the ROM routine is safe to call.
+
+`Set_Animation` is exactly as it was in `6-4.asm`, and the jump simply starts from its first frame.
+
+## Returning to Idle
+
+The idle loops forever, but the jump should play once. At the end of a sequence, `Update_Animation` checks whether it was the jump, and if so starts the idle again;
+
+```z80
+                JR      C,Store_Frame   ; Still inside the sequence
+                LD      HL,(Current_Animation)
+                LD      DE,Jump_Animation
+                OR      A               ; Clear the carry flag
+                SBC     HL,DE
+                LD      HL,Idle_Animation
+                JR      Z,Set_Animation ; The jump has finished, so go back to idle
+                XOR     A               ; The idle loops, so return to frame zero
+```
+
+`LD` doesn't change the flags, so the `Z` from the compare is still there for the `JR`. If a key is still down when the jump ends, `Choose_Animation` will start another one.
 
 ## The Full Assembly
 
@@ -89,7 +98,7 @@ https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog5/7-1.as
 python .\.vscode\sam_build.py .\assembly\blog5\7-1.asm --build-only
 ```
 
-Then run the disk in SimCoupe and hold a key to see the jump sequence. The demo loops forever, so reset the SAM to stop it.
+Then run the disk in SimCoupe and press a key to see Dizzy jump once. The demo loops forever, so reset the SAM to stop it.
 
 ## Where to Go Next
 
