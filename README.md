@@ -61,11 +61,12 @@ pixel bytes interleaved instead of building that block at runtime. `5-2.asm`
 adds the striped background to this interleaved-data version.
 
 The source Dizzy frames and palette are in `assembly\blog3\dizzy.asm`.
-`assembly\blog3\dizzy_interleaved.asm` contains generated interleaved
+`assembly\blog4\dizzy_interleaved.asm` contains generated interleaved
 mask/pixel pairs for `Image1`–`Image9`, padded to 16 bytes by 32 lines.
-`assembly\blog3\dizzy_system_interleaved.asm` contains generated Dizzy animation
-frames remapped to the existing system palette. The Blog 4 animation examples
-use the original colors and load the separately generated `dizzy_palette.asm`.
+`assembly\blog4\dizzy_system_interleaved.asm` contains generated Dizzy animation
+frames remapped to the existing system palette, and is used by the Blog 4
+animation examples. `assembly\blog4\dizzy_palette.asm` holds the original palette
+for `dizzy_interleaved.asm`.
 Source colour index 0 is marked transparent. Regenerate the includes after
 editing the source frames.
 
@@ -77,13 +78,22 @@ python .\.vscode\generate_dizzy_masked.py
 
 Draft post: [`assembly\blog4\blog-post.md`](assembly/blog4/blog-post.md).
 
-`assembly\blog4\6-1.asm` introduces animation by copying raw, unmasked frames;
-it is intended for a plain background. `6-2.asm` animates the masked frames and
-restores the background before each draw, but draws in place. `6-3.asm` keeps
-that masking and background preservation while drawing to the hidden screen
-page and flipping pages at the frame interrupt to avoid visible tearing.
-These examples share interleaved sprite data in `assembly\blog3` using relative
-includes. `blog4\main.asm` is an earlier, independent animation experiment.
+`assembly\blog4\6-1.asm` continues from `blog3\5.asm` and alternates two
+interleaved Dizzy frames stored in the program (system palette, no palette
+setup). `6-2.asm` moves the frames into the external
+`blog4\dizzy_system_interleaved.asm` file, `6-3.asm` plays all nine from a table,
+`6-4.asm` draws on a hidden screen page and flips pages at the frame interrupt to
+avoid visible tearing. All four use the default palette and draw Dizzy at the
+top left of a blank screen. Parts 2-4 include the sprite data that sits beside
+them in `assembly\blog4`. `blog4\main.asm` is an earlier, independent animation experiment.
+
+## Blog 5: keyboard control
+
+Draft post: [`assembly\blog5\blog-post.md`](assembly/blog5/blog-post.md).
+
+`assembly\blog5\7-1.asm` continues from `blog4\6-4.asm` and adds idle and jump
+sequences chosen with the keyboard (hold any key to jump). It includes the sprite
+data from `assembly\blog4`.
 
 ## Debug in SimCoupe
 

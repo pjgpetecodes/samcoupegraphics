@@ -1,265 +1,220 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 6 - Part 2: Masked Animation              |
-; | Filename:   blog4\6-2.asm                                                       |
-; | Based on:   Tutorial 5's static masked-sprite renderer                           |
+; | Program:    SAM Coupe Sprites Tutorial 6 - Part 4: Flicker-Free Animation       |
+; | Filename:   blog4\6-4.asm                                                       |
+; | Based on:   Tutorial 6 part 3 (blog4\6-3.asm)                                   |
 ; -----------------------------------------------------------------------------------
 ;
-; Hold any key to play the jump sequence; release it to return to the idle sequence.
-; The original screen rectangle is saved and restored between frames, so transparent
-; pixels preserve the background without leaving pixels from the previous frame.
+; Part 3 draws straight onto the screen being displayed, so you can catch Dizzy
+; half-drawn. Here each frame is drawn on a hidden screen page, and the pages are
+; swapped at the next frame interrupt. Reset to stop the demo.
+;
+; ***********************************************************************************
+; *                                 Program Setup                                   *
+; ***********************************************************************************
 ;
                 ORG     0x8000
                 DUMP    1,0
                 AUTOEXEC
 ;
-; ***********************************************************************************
-; *                                    Equates                                      *
-; ***********************************************************************************
+LMPR:           EQU     250             ; Lower Memory Page Register
+VMPR:           EQU     252             ; Video Memory Page Register
+JCLSBL:         EQU     334             ; ROM clear-screen routine
 ;
-LMPR:           EQU     250
-VMPR:           EQU     252
-JCLSBL:         EQU     334
-JPALET:         EQU     340
-JREADKEY:       EQU     361
-;
-; The 16-byte-wide, 32-line sprite fits in one 16 KB screen-memory page here.
-Sprite_Position:EQU     56 + 80*128     ; X = 112 pixels, Y = 80 lines
-Frame_Delay:    EQU     5               ; Five 50 Hz interrupts per animation frame
+Frame_Delay:    EQU     5               ; Hold each frame for five 50 Hz interrupts
 ;
 ; ***********************************************************************************
 ; *                                Application Start                                *
 ; ***********************************************************************************
 ;
-Start:          DI
+Start:          DI                      ; Disable interrupts
+                LD      (System_SP+1),SP; Save BASIC's stack pointer before paging screen RAM
+                CALL    Clear_Screen    ; Clear the displayed screen while the ROM is paged in
+                DI                      ; Disable interrupts before paging screen RAM
+                IN      A,(VMPR)        ; Read the current screen page
+                AND     0b00011110      ; Keep only the page number
+                LD      (Display_Page),A ; This page is the one being displayed
+                LD      SP,0xC000       ; Use a safe stack outside the screen memory
+                CALL    Clear_Hidden_Page ; Blank the page we will draw on
+;
+                LD      HL,Dizzy_Animation ; Start the animation sequence
+                CALL    Set_Animation   ; Draw the first frame on the hidden page
+;
+Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
+                CALL    Show_Pending_Frame ; Swap pages if a new frame is ready
+                CALL    Update_Animation ; Change frame when the delay expires
+                JR      Animation_Loop  ; Repeat forever
+;
+Exit:           DI                      ; Not reached while the loop runs, kept from 5.asm
+System_SP:      LD      SP,0            ; Restore BASIC's original stack pointer
+                EI                      ; Enable interrupts
+                RET                     ; Return to BASIC
+;
+Clear_Screen:   XOR     A               ; Clear the A register to clear the full screen
+                CALL    JCLSBL          ; Call the system clear-screen routine
+                DI                      ; Disable interrupts before continuing
+                RET                     ; Return to the caller
+;
+; The ROM only clears the displayed screen, so we blank the hidden page ourselves.
+; A MODE 4 screen is 24 KB, so we clear the first 0x6000 bytes of the paged-in RAM.
+;
+Clear_Hidden_Page:
+                LD      A,(Display_Page)
+                XOR     0b00000100      ; Select the page that is not displayed
+                OR      0b00100000      ; Map RAM into the lower memory area
+                OUT     (LMPR),A        ; Page the hidden screen RAM in
+                LD      HL,0
+                LD      DE,1
+                LD      BC,0x5FFF
+                LD      (HL),0          ; Colour zero, as the ROM clear uses
+                LDIR                    ; Fill the rest of the screen with zeros
+                LD      A,0x1F          ; Page ROM 0 back into the lower memory area
+                OUT     (LMPR),A
+                RET                     ; Return to the caller
+;
+; ***********************************************************************************
+; *                         Show a Finished Frame (Page Flip)                       *
+; ***********************************************************************************
+; Only swap pages once a complete frame has been drawn on the hidden page.
+;
+Show_Pending_Frame:
+                LD      A,(Frame_Pending)
+                OR      A
+                RET     Z               ; Nothing new to show
                 XOR     A
-                CALL    JCLSBL          ; Clear while ROM and BASIC's stack are available
-                DI
-                CALL    Set_Palette
-                DI
-;
-                LD      SP,Stack
-                IN      A,(VMPR)
-                AND     0b00011110      ; Keep the screen-memory page
-                OR      0b00100000      ; Map RAM, not ROM, into LMPR
-                LD      (Screen_Page),A
-;
-                CALL    Save_Background
-                LD      HL,Idle_Animation
-                CALL    Set_Animation
-;
-Animation_Loop: HALT                    ; Drawing restores the ROM page and enables IRQs
-                CALL    Choose_Animation
-                CALL    Update_Animation
-                JR      Animation_Loop
+                LD      (Frame_Pending),A
+                LD      A,(Display_Page)
+                XOR     0b00000100      ; The hidden page becomes the displayed page
+                LD      (Display_Page),A
+                OR      0b01100000      ; Keep MODE 4
+                OUT     (VMPR),A        ; Display the finished frame in a single step
+                RET                     ; Return to the caller
 ;
 ; ***********************************************************************************
-; *                                  Set the Palette                                *
+; *                           Choose and Update the Animation                       *
 ; ***********************************************************************************
 ;
-Set_Palette:    LD      HL,Palette
-                LD      B,16
-                LD      E,0
-;
-Palette_Loop:   PUSH    HL
-                PUSH    BC
-                PUSH    DE
-                LD      B,(HL)
-                LD      C,B
-                LD      A,0xFF
-                CALL    JPALET          ; E = palette index; B and C = SAM colours
-                POP     DE
-                POP     BC
-                POP     HL
-                INC     HL
-                INC     E
-                DJNZ    Palette_Loop
-                RET
-;
-; ***********************************************************************************
-; *                             Choose and Update Animation                         *
-; ***********************************************************************************
-;
-Choose_Animation:
-                CALL    JREADKEY
-                JR      Z,Choose_Idle
-                LD      HL,Jump_Animation
-                JR      Set_Animation
-;
-Choose_Idle:    LD      HL,Idle_Animation
-;
-Set_Animation:  EX      DE,HL
-                LD      HL,(Current_Animation)
-                XOR     A
-                SBC     HL,DE
-                RET     Z               ; Do not restart an unchanged sequence
-                EX      DE,HL
-                LD      (Current_Animation),HL
-                XOR     A
+Set_Animation:  LD      (Current_Animation),HL
+                XOR     A               ; Start from the first frame
                 LD      (Current_Frame),A
                 LD      A,Frame_Delay
                 LD      (Current_Delay),A
-                CALL    Draw_Animated_Sprite
-                RET
+                JR      Draw_Frame      ; Draw the first frame straight away
 ;
 Update_Animation:
-                LD      A,(Current_Delay)
+                LD      A,(Current_Delay) ; Count down the frame delay
                 DEC     A
                 LD      (Current_Delay),A
-                RET     NZ
+                RET     NZ              ; Only redraw when the delay expires
 ;
-                LD      A,Frame_Delay
+                LD      A,Frame_Delay   ; Restart the frame delay
                 LD      (Current_Delay),A
                 LD      HL,(Current_Animation)
-                LD      B,(HL)          ; Number of frames in this sequence
+                LD      B,(HL)          ; The first byte is the number of frames
                 LD      A,(Current_Frame)
                 INC     A
                 CP      B
-                JR      C,Store_Frame
-                XOR     A
+                JR      C,Store_Frame   ; Still inside the sequence
+                XOR     A               ; After the last frame, return to frame zero
 ;
 Store_Frame:    LD      (Current_Frame),A
-                CALL    Draw_Animated_Sprite
-                RET
+                ; Fall through to draw the new frame
 ;
 ; ***********************************************************************************
-; *                            Draw the Current Masked Frame                        *
+; *                         Draw the Current Frame (Hidden Page)                    *
 ; ***********************************************************************************
 ;
-Draw_Animated_Sprite:
-                CALL    Restore_Background
+Draw_Frame:     DI                      ; Interrupts stay off while screen RAM is paged in
+                LD      A,(Display_Page)
+                XOR     0b00000100      ; Always draw on the page that is not displayed
+                OR      0b00100000      ; Map RAM into the lower memory area
+                OUT     (LMPR),A        ; Page the hidden screen RAM into the lower memory area
+;
+                CALL    Clear_Sprite    ; Remove the old frame left on this page
+;
                 LD      A,(Current_Frame)
                 LD      E,A
                 LD      D,0
                 LD      HL,(Current_Animation)
                 INC     HL              ; Skip the frame count byte
                 ADD     HL,DE
-                ADD     HL,DE           ; Each sprite pointer occupies two bytes
-                LD      A,(HL)
+                ADD     HL,DE           ; Each frame pointer occupies two bytes
+                LD      E,(HL)
                 INC     HL
-                LD      H,(HL)
-                LD      L,A
-                LD      DE,Sprite_Position
-                EX      DE,HL           ; HL = screen address; DE = sprite data
-                CALL    Draw_Masked_Sprite
-                RET
+                LD      D,(HL)          ; DE now points to the selected frame data
+                LD      HL,0            ; Top-left screen byte, as in Tutorial 5
+                CALL    Draw_Sprite     ; Draw the frame using the mask/pixel data
 ;
-; Restore the saved screen rectangle so changing silhouettes do not leave trails.
-;
-Restore_Background:
-                DI
-                IN      A,(LMPR)
-                LD      (Restore_Background_LMPR+1),A
-                LD      A,(Screen_Page)
-                OUT     (LMPR),A
-                LD      HL,Background_Buffer
-                LD      DE,Sprite_Position
-                LD      A,32
-;
-Restore_Background_Row:
-                PUSH    AF
-                LD      BC,16
-                LDIR
-                EX      DE,HL
-                LD      BC,112
-                ADD     HL,BC
-                EX      DE,HL
-                POP     AF
-                DEC     A
-                JR      NZ,Restore_Background_Row
-;
-Restore_Background_LMPR:
-                LD      A,0
-                OUT     (LMPR),A
-                EI
-                RET
-;
-; Copy the original rectangle into a tightly packed buffer.
-;
-Save_Background:
-                DI
-                IN      A,(LMPR)
-                LD      (Save_Background_LMPR+1),A
-                LD      A,(Screen_Page)
-                OUT     (LMPR),A
-                LD      HL,Sprite_Position
-                LD      DE,Background_Buffer
-                LD      A,32
-;
-Save_Background_Row:
-                PUSH    AF
-                LD      BC,16
-                LDIR
-                LD      BC,112
-                ADD     HL,BC
-                POP     AF
-                DEC     A
-                JR      NZ,Save_Background_Row
-;
-Save_Background_LMPR:
-                LD      A,0
-                OUT     (LMPR),A
-                EI
-                RET
-;
-; HL = screen offset; DE = sprite bytes, 32 rows of 16 mask/data pairs.
-;
-Draw_Masked_Sprite:
-                DI
-                IN      A,(LMPR)
-                LD      (Draw_Masked_Sprite_LMPR+1),A
-                LD      A,(Screen_Page)
-                OUT     (LMPR),A
-                LD      C,32
-;
-Draw_Masked_Row:
-                PUSH    BC
-                LD      B,16
-;
-Draw_Masked_Byte:
-                LD      A,(DE)          ; Keep screen bits selected by the mask
-                AND     (HL)
-                LD      C,A
-                INC     DE
-                LD      A,(DE)
-                OR      C               ; Add the sprite's opaque pixel bits
-                LD      (HL),A
-                INC     DE
-                INC     HL
-                DJNZ    Draw_Masked_Byte
-                LD      BC,112          ; 16 bytes copied; skip to the next 128-byte line
-                ADD     HL,BC
-                POP     BC
-                DEC     C
-                JR      NZ,Draw_Masked_Row
-;
-Draw_Masked_Sprite_LMPR:
-                LD      A,0
-                OUT     (LMPR),A
-                EI
-                RET
+                LD      A,0x1F          ; Page ROM 0 back into the lower memory area
+                OUT     (LMPR),A        ; The ROM's interrupt handler is needed by HALT
+                LD      A,1
+                LD      (Frame_Pending),A ; Tell the main loop a frame is ready to show
+                EI                      ; Enable interrupts
+                RET                     ; Return to the caller
 ;
 ; ***********************************************************************************
-; *                              Animation Data and Sprites                         *
+; *                         Clear the Sprite's Screen Rectangle                     *
 ; ***********************************************************************************
 ;
-Current_Animation: DEFW 0
-Current_Frame:  DEFB    0
-Current_Delay:  DEFB    0
-Screen_Page:    DEFB    0
+Clear_Sprite:   LD      HL,0            ; Top-left screen byte
+                LD      C,32            ; Clear all 32 sprite rows
 ;
-Idle_Animation: DEFB    2
-                DEFW    Dizzy_Interleaved_Image1,Dizzy_Interleaved_Image2
+Clear_Row:      LD      B,16            ; 16 screen bytes per row
 ;
-Jump_Animation: DEFB    7
-                DEFW    Dizzy_Interleaved_Image1,Dizzy_Interleaved_Image3
-                DEFW    Dizzy_Interleaved_Image4,Dizzy_Interleaved_Image5
-                DEFW    Dizzy_Interleaved_Image6,Dizzy_Interleaved_Image7
-                DEFW    Dizzy_Interleaved_Image8,Dizzy_Interleaved_Image9
+Clear_Byte:     LD      (HL),0          ; Colour zero is the blank background
+                INC     HL              ; Advance to the next screen byte
+                DJNZ    Clear_Byte      ; Continue across the 16-byte row
+                LD      DE,112          ; Skip the rest of the 128-byte screen row
+                ADD     HL,DE           ; Point to the next screen row
+                DEC     C               ; Count down the rows
+                JR      NZ,Clear_Row    ; Continue until all 32 rows are cleared
+                RET                     ; Return after clearing the rectangle
 ;
-                INCLUDE "../blog3/dizzy_palette.asm"
-                INCLUDE "../blog3/dizzy_interleaved.asm"
+; ***********************************************************************************
+; *                               Draw Masked Sprite                                *
+; ***********************************************************************************
 ;
-Background_Buffer: DEFS 512
-Stack_Start:    DEFS    256
-Stack:
+Draw_Sprite:    LD      C,32             ; Process all 32 sprite rows
+;
+Sprite_Row:     PUSH    BC              ; Preserve row count while B counts bytes
+                LD      B,16             ; Process the 16 sprite bytes in this row
+;
+Sprite_Byte:    LD      A,(DE)           ; Read the mask byte
+                AND     (HL)            ; Keep screen bits selected by the mask
+                LD      C,A             ; Save the masked background byte
+                INC     DE              ; Point to the corresponding pixel byte
+                LD      A,(DE)           ; Read the cleaned sprite pixels
+                OR      C               ; Combine sprite pixels with the background
+                LD      (HL),A          ; Write the combined byte to the screen
+                INC     DE              ; Point to the next mask/pixel pair
+                INC     HL              ; Advance to the next screen byte
+                DJNZ    Sprite_Byte     ; Continue across the 16-byte sprite row
+                LD      BC,112          ; Skip the rest of the 128-byte screen row
+                ADD     HL,BC           ; Point to the next screen row
+                POP     BC              ; Restore the sprite row counter
+                DEC     C               ; Count down the sprite rows
+                JR      NZ,Sprite_Row   ; Continue until all 32 rows are drawn
+                RET                     ; Return after drawing the sprite
+;
+; ***********************************************************************************
+; *                               Animation Data                                    *
+; ***********************************************************************************
+;
+Current_Animation: DEFW 0               ; Address of the sequence being played
+Current_Frame:  DEFB    0               ; Index into the current sequence
+Current_Delay:  DEFB    0               ; Interrupts left before the next frame
+Display_Page:   DEFB    0               ; Screen page currently being displayed
+Frame_Pending:  DEFB    0               ; Set when the hidden page holds a finished frame
+;
+; Each sequence starts with its frame count, followed by the frame addresses.
+;
+Dizzy_Animation: DEFB   9
+                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2
+                DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4
+                DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6
+                DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8
+                DEFW    Dizzy_System_Interleaved_Image9
+;
+; The nine interleaved frames come from the Sprite Editor output.
+;
+                INCLUDE "dizzy_system_interleaved.asm"
