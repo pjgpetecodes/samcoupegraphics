@@ -3,8 +3,4 @@
 !.travis.yml
 *-release/
 *.tgz
-*.dsk
-*.dsk.gz
-*.mgt
-*.map
 __pycache__/

@@ -1,0 +1,6 @@
+8000=print_test
+8004=loop2
+800C=print_text
+8011=print_loop
+8016=wait_for_key
+801C=text2
