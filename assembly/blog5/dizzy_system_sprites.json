@@ -4,7 +4,7 @@
   "sprites": [
     {
       "id": "sprite-1",
-      "name": "Dizzy 1",
+      "name": "Idle 1",
       "pixels": [
         {
           "colorIndex": 15,
@@ -4106,7 +4106,7 @@
     },
     {
       "id": "sprite-2",
-      "name": "Dizzy 2",
+      "name": "Idle 2",
       "pixels": [
         {
           "colorIndex": 15,
@@ -8208,7 +8208,7 @@
     },
     {
       "id": "sprite-3",
-      "name": "Dizzy 3",
+      "name": "Roll 1",
       "pixels": [
         {
           "colorIndex": 15,
@@ -12310,7 +12310,7 @@
     },
     {
       "id": "sprite-4",
-      "name": "Dizzy 4",
+      "name": "Roll 2",
       "pixels": [
         {
           "colorIndex": 15,
@@ -16412,7 +16412,7 @@
     },
     {
       "id": "sprite-5",
-      "name": "Dizzy 5",
+      "name": "Roll 3",
       "pixels": [
         {
           "colorIndex": 15,
@@ -20514,7 +20514,7 @@
     },
     {
       "id": "sprite-6",
-      "name": "Dizzy 6",
+      "name": "Roll 4",
       "pixels": [
         {
           "colorIndex": 15,
@@ -24616,7 +24616,7 @@
     },
     {
       "id": "sprite-7",
-      "name": "Dizzy 7",
+      "name": "Roll 5",
       "pixels": [
         {
           "colorIndex": 15,
@@ -28718,7 +28718,7 @@
     },
     {
       "id": "sprite-8",
-      "name": "Dizzy 8",
+      "name": "Roll 6",
       "pixels": [
         {
           "colorIndex": 15,
@@ -32820,7 +32820,7 @@
     },
     {
       "id": "sprite-9",
-      "name": "Dizzy 9",
+      "name": "Roll 7",
       "pixels": [
         {
           "colorIndex": 15,
@@ -36922,7 +36922,7 @@
     },
     {
       "id": "sprite-10",
-      "name": "Dizzy 10",
+      "name": "Walk Left 1",
       "pixels": [
         {
           "colorIndex": 15,
@@ -41024,7 +41024,7 @@
     },
     {
       "id": "sprite-11",
-      "name": "Dizzy 11",
+      "name": "Walk Left 2",
       "pixels": [
         {
           "colorIndex": 15,
@@ -45126,7 +45126,7 @@
     },
     {
       "id": "sprite-12",
-      "name": "Dizzy 12",
+      "name": "Walk Left 3",
       "pixels": [
         {
           "colorIndex": 15,
@@ -49228,7 +49228,7 @@
     },
     {
       "id": "sprite-13",
-      "name": "Dizzy 13",
+      "name": "Walk Left 4",
       "pixels": [
         {
           "colorIndex": 15,
@@ -53330,7 +53330,7 @@
     },
     {
       "id": "sprite-14",
-      "name": "Dizzy 14",
+      "name": "Walk Left 5",
       "pixels": [
         {
           "colorIndex": 15,
@@ -57432,7 +57432,7 @@
     },
     {
       "id": "sprite-15",
-      "name": "Dizzy 15",
+      "name": "Walk Left 6",
       "pixels": [
         {
           "colorIndex": 15,
@@ -61534,7 +61534,7 @@
     },
     {
       "id": "sprite-16",
-      "name": "Dizzy 16",
+      "name": "Walk Left 7",
       "pixels": [
         {
           "colorIndex": 15,
@@ -65636,7 +65636,7 @@
     },
     {
       "id": "sprite-17",
-      "name": "Dizzy 17",
+      "name": "Walk Left 8",
       "pixels": [
         {
           "colorIndex": 15,
@@ -69738,7 +69738,7 @@
     },
     {
       "id": "sprite-18",
-      "name": "Dizzy 18",
+      "name": "Walk Right 1",
       "pixels": [
         {
           "colorIndex": 15,
@@ -73840,7 +73840,7 @@
     },
     {
       "id": "sprite-19",
-      "name": "Dizzy 19",
+      "name": "Walk Right 2",
       "pixels": [
         {
           "colorIndex": 15,
@@ -77942,7 +77942,7 @@
     },
     {
       "id": "sprite-20",
-      "name": "Dizzy 20",
+      "name": "Walk Right 3",
       "pixels": [
         {
           "colorIndex": 15,
@@ -82044,7 +82044,7 @@
     },
     {
       "id": "sprite-21",
-      "name": "Dizzy 21",
+      "name": "Walk Right 4",
       "pixels": [
         {
           "colorIndex": 15,
@@ -86146,7 +86146,7 @@
     },
     {
       "id": "sprite-22",
-      "name": "Dizzy 22",
+      "name": "Walk Right 5",
       "pixels": [
         {
           "colorIndex": 15,
@@ -90248,7 +90248,7 @@
     },
     {
       "id": "sprite-23",
-      "name": "Dizzy 23",
+      "name": "Walk Right 6",
       "pixels": [
         {
           "colorIndex": 15,
@@ -94350,7 +94350,7 @@
     },
     {
       "id": "sprite-24",
-      "name": "Dizzy 24",
+      "name": "Walk Right 7",
       "pixels": [
         {
           "colorIndex": 15,
