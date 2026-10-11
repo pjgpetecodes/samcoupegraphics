@@ -97,6 +97,18 @@ Space bar, and `7-3.asm` adds left and right walking while Z or X is held. All t
 use `assembly\blog5\dizzy_system_interleaved.asm`, which holds all 24 Dizzy frames
 (`assembly\blog5\dizzy_system_sprites.json` is the same set as a Sprite Editor project).
 
+## Blog 6: colour palettes
+
+Draft post: [`assembly\blog6\blog-post.md`](assembly/blog6/blog-post.md).
+
+`assembly\blog6\8-1.asm` continues from `blog5\7-3.asm`, loads a 16 colour CLUT
+palette (re-applied after every `HALT`, because the ROM interrupt resets it) and
+switches to the original Dizzy colour numbers in `tidizzy_interleaved.asm`
+(the first 24 sprites exported from the Sprite Editor). `8-2.asm` lets keys 1 to 5
+change palette entry 0, which recolours the whole background. `8-3.asm` adds sideways jumps (hold Z or X and press Space, frames 26-39) using
+`tidizzy_cropped.asm`, the frames cropped to 13 bytes x 22 rows so that 38 of them fit in memory.
+Sequences now carry a loop flag, so rolls and jumps always play to the end.
+
 ## Debug in SimCoupe
 
 The included SimCoupe version uses **F9** to open the debugger (older versions
