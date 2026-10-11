@@ -1,0 +1,517 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/" target="_blank" rel="noreferrer noopener">Sam Coupe Assembly Language Programming</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/" target="_blank" rel="noreferrer noopener">Graphics in Assembly for the SAM Coupé</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/" target="_blank" rel="noreferrer noopener">Making SAM Coupé Sprites Transparent</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-animation/" target="_blank" rel="noreferrer noopener">Animating SAM Coupé Sprites</a></li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Controlling Animation with the Keyboard</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the previous tutorial Dizzy played one nine frame loop, drawn on a hidden screen page so it never flickers. Now we want him to react to us. We'll build this up in three steps;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Press any key, and Dizzy rolls once, then goes back to idling.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Press Space to roll, and only Space.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Hold Z to walk left, or X to walk right.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>We continue directly from <code>assembly/blog4/6-4.asm</code>, and each step only adds the new parts.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 1: Any Key Rolls</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">All Twenty Four Frames</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Until now we've only used the first nine frames of Dizzy. The Sprite Editor output for the whole set lives in <code>assembly/blog5/dizzy_system_interleaved.asm</code>. It holds all 24 frames, and we include it from our own folder now;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                INCLUDE \u0022dizzy_system_interleaved.asm\u0022","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                INCLUDE \u0022dizzy_system_interleaved.asm\u0022\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                INCLUDE "dizzy_system_interleaved.asm"</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                INCLUDE "dizzy_system_interleaved.asm"</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Each frame is 1024 bytes, so 24 of them take up 24K, and the end of the program has moved up to around <code>0xE169</code>. The stack was previously at <code>0xC000</code>, which is now in the middle of our frame data, so we move it above the end of the program;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      SP,0xFF00       ; Use a safe stack above the program and its 24 frames","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003eSP\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Use a safe stack above the program and its 24 frames\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      SP,0xFF00       ; Use a safe stack above the program and its 24 frames</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      </span><span style="color: #BF9EEE">SP</span><span style="color: #F6F6F4">,</span><span style="color: #BF9EEE">0xFF00</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Use a safe stack above the program and its 24 frames</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Two Sequences</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We use the first nine frames as two tables. A two frame idle, and an eight frame roll;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Idle_Animation: DEFB    2\n                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2\n;\nJump_Animation: DEFB    8\n                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image3\n                DEFW    Dizzy_System_Interleaved_Image4,Dizzy_System_Interleaved_Image5\n                DEFW    Dizzy_System_Interleaved_Image6,Dizzy_System_Interleaved_Image7\n                DEFW    Dizzy_System_Interleaved_Image8,Dizzy_System_Interleaved_Image9","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eIdle_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eJump_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e8\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image3\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image4,Dizzy_System_Interleaved_Image5\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image6,Dizzy_System_Interleaved_Image7\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image8,Dizzy_System_Interleaved_Image9\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Idle_Animation: DEFB    2
+                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2
+;
+Jump_Animation: DEFB    8
+                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image3
+                DEFW    Dizzy_System_Interleaved_Image4,Dizzy_System_Interleaved_Image5
+                DEFW    Dizzy_System_Interleaved_Image6,Dizzy_System_Interleaved_Image7
+                DEFW    Dizzy_System_Interleaved_Image8,Dizzy_System_Interleaved_Image9</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Idle_Animation:</span><span style="color: #F6F6F4"> DEFB    </span><span style="color: #BF9EEE">2</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Jump_Animation:</span><span style="color: #F6F6F4"> DEFB    </span><span style="color: #BF9EEE">8</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image3</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image4,Dizzy_System_Interleaved_Image5</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image6,Dizzy_System_Interleaved_Image7</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image8,Dizzy_System_Interleaved_Image9</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>Update_Animation</code>, <code>Draw_Frame</code> and the page flip don't change at all, as they already work from whichever table <code>Current_Animation</code> points at.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Reading the Keyboard</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The SAM's keyboard is read through port <code>0xFE</code>. The keys are arranged in rows of five, and the top eight bits of the port address choose which rows we read. A key that is held down reads as a zero bit, and one that is up reads as a one.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>If we use <code>0x00</code> for the top byte we select every row at once, so if any key at all is down, one of the low five bits will be zero. We call a new <code>Choose_Animation</code> from the main loop, between the page flip and <code>Update_Animation</code>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt\n                CALL    Show_Pending_Frame ; Swap pages if a new frame is ready\n                CALL    Choose_Animation ; Idle or jump, depending on the keyboard\n                CALL    Update_Animation ; Change frame when the delay expires\n                JR      Animation_Loop  ; Repeat forever","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eAnimation_Loop:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e HALT                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Wait for the next 50 Hz interrupt\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Show_Pending_Frame \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Swap pages if a new frame is ready\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Choose_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Idle or jump, depending on the keyboard\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Update_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Change frame when the delay expires\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Animation_Loop  \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Repeat forever\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
+                CALL    Show_Pending_Frame ; Swap pages if a new frame is ready
+                CALL    Choose_Animation ; Idle or jump, depending on the keyboard
+                CALL    Update_Animation ; Change frame when the delay expires
+                JR      Animation_Loop  ; Repeat forever</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Animation_Loop:</span><span style="color: #F6F6F4"> HALT                    </span><span style="color: #7B7F8B">; Wait for the next 50 Hz interrupt</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Show_Pending_Frame </span><span style="color: #7B7F8B">; Swap pages if a new frame is ready</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Choose_Animation </span><span style="color: #7B7F8B">; Idle or jump, depending on the keyboard</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Update_Animation </span><span style="color: #7B7F8B">; Change frame when the delay expires</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Animation_Loop  </span><span style="color: #7B7F8B">; Repeat forever</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Choose_Animation:\n                LD      HL,(Current_Animation)\n                LD      DE,Idle_Animation\n                OR      A               ; Clear the carry flag\n                SBC     HL,DE\n                RET     NZ              ; A jump is playing, so ignore the keyboard\n                LD      BC,0x00FE       ; Select every keyboard row at once (port 0xFE)\n                IN      A,(C)           ; A bit is 0 when its key is down\n                OR      0b11100000      ; Ignore the top three bits\n                INC     A               ; 0xFF (no key down) becomes zero\n                RET     Z               ; No key, so keep idling\n                LD      HL,Jump_Animation ; A key was pressed, so play the jump once\n;\nSet_Animation:  LD      (Current_Animation),HL","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eChoose_Animation:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Animation)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Idle_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clear the carry flag\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                SBC     HL,DE\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     NZ              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A jump is playing, so ignore the keyboard\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00FE\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Select every keyboard row at once (port 0xFE)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(C)           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A bit is 0 when its key is down\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b11100000\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Ignore the top three bits\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; 0xFF (no key down) becomes zero\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Z               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; No key, so keep idling\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Jump_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A key was pressed, so play the jump once\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSet_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  LD      (Current_Animation),HL\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Choose_Animation:
+                LD      HL,(Current_Animation)
+                LD      DE,Idle_Animation
+                OR      A               ; Clear the carry flag
+                SBC     HL,DE
+                RET     NZ              ; A jump is playing, so ignore the keyboard
+                LD      BC,0x00FE       ; Select every keyboard row at once (port 0xFE)
+                IN      A,(C)           ; A bit is 0 when its key is down
+                OR      0b11100000      ; Ignore the top three bits
+                INC     A               ; 0xFF (no key down) becomes zero
+                RET     Z               ; No key, so keep idling
+                LD      HL,Jump_Animation ; A key was pressed, so play the jump once
+;
+Set_Animation:  LD      (Current_Animation),HL</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Choose_Animation:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Animation)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Idle_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A               </span><span style="color: #7B7F8B">; Clear the carry flag</span></span>
+<span class="line"><span style="color: #F6F6F4">                SBC     HL,DE</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     NZ              </span><span style="color: #7B7F8B">; A jump is playing, so ignore the keyboard</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      BC,</span><span style="color: #BF9EEE">0x00FE</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Select every keyboard row at once (port 0xFE)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(C)           </span><span style="color: #7B7F8B">; A bit is 0 when its key is down</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      </span><span style="color: #BF9EEE">0b11100000</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Ignore the top three bits</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     A               </span><span style="color: #7B7F8B">; 0xFF (no key down) becomes zero</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     Z               </span><span style="color: #7B7F8B">; No key, so keep idling</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Jump_Animation </span><span style="color: #7B7F8B">; A key was pressed, so play the jump once</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Set_Animation:</span><span style="color: #F6F6F4">  LD      (Current_Animation),HL</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>We only look at the keyboard while the idle is playing, so a roll can't be restarted part way through. The top three bits of the port aren't keys, so we set them with <code>OR</code> and then <code>INC A</code> turns the all ones case, where nothing is pressed, into zero so that <code>RET Z</code> can leave.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Set_Animation</code> is exactly as it was in <code>6-4.asm</code>, and the roll simply starts from its first frame.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Returning to Idle</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The idle loops forever, but the roll should play once. At the end of a sequence, <code>Update_Animation</code> checks whether it was the roll, and if so starts the idle again;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                JR      C,Store_Frame   ; Still inside the sequence\n                LD      HL,(Current_Animation)\n                LD      DE,Jump_Animation\n                OR      A               ; Clear the carry flag\n                SBC     HL,DE\n                LD      HL,Idle_Animation\n                JR      Z,Set_Animation ; The jump has finished, so go back to idle\n                XOR     A               ; The idle loops, so return to frame zero","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      C,Store_Frame   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Still inside the sequence\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Animation)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Jump_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clear the carry flag\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                SBC     HL,DE\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Idle_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Set_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The jump has finished, so go back to idle\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The idle loops, so return to frame zero\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                JR      C,Store_Frame   ; Still inside the sequence
+                LD      HL,(Current_Animation)
+                LD      DE,Jump_Animation
+                OR      A               ; Clear the carry flag
+                SBC     HL,DE
+                LD      HL,Idle_Animation
+                JR      Z,Set_Animation ; The jump has finished, so go back to idle
+                XOR     A               ; The idle loops, so return to frame zero</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                JR      C,Store_Frame   </span><span style="color: #7B7F8B">; Still inside the sequence</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Animation)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Jump_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A               </span><span style="color: #7B7F8B">; Clear the carry flag</span></span>
+<span class="line"><span style="color: #F6F6F4">                SBC     HL,DE</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Idle_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Set_Animation </span><span style="color: #7B7F8B">; The jump has finished, so go back to idle</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     A               </span><span style="color: #7B7F8B">; The idle loops, so return to frame zero</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>LD</code> doesn't change the flags, so the <code>Z</code> from the compare is still there for the <code>JR</code>. If a key is still down when the roll ends, <code>Choose_Animation</code> will start another one.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Full Assembly</h3>
+<!-- /wp:heading -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 7-1.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 7-1.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/ca04caf2e6f81f528acd995ffa3cb220","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/ca04caf2e6f81f528acd995ffa3cb220
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 7-1.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/7-1.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step1.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Press any key and Dizzy rolls once, then returns to idle.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The following is showing a Web Embedded version of SimCoupe by Anomixer. You can find the repo for this here; <a href="https://github.com/anomixer/SamCoupeWeb" target="_blank" rel="noreferrer noopener">https://github.com/anomixer/SamCoupeWeb</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F7-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 7-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 2: Only the Space Bar</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Any key is fine for a test, but a game wants specific keys. To look at one key we read just the row it lives in. The top byte of the port address is a mask, with one zero bit for each row we want, so these two addresses give us everything we need for this tutorial;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Port</th><th>Bit 0</th><th>Bit 1</th><th>Bit 2</th><th>Bit 3</th><th>Bit 4</th></tr></thead><tbody><tr><td><code>0x7FFE</code></td><td>Space</td><td>Symbol</td><td>M</td><td>N</td><td>B</td></tr><tr><td><code>0xFEFE</code></td><td>Shift</td><td>Z</td><td>X</td><td>C</td><td>V</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>The only part that changes is <code>Choose_Animation</code>. We read the row that has Space on it, and test bit 0;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      BC,0x7FFE       ; Keyboard row B N M Symbol Space (port 0xFE)\n                IN      A,(C)           ; A bit is 0 when its key is down\n                BIT     0,A             ; Bit 0 is the Space bar\n                RET     NZ              ; Space is up, so keep idling\n                LD      HL,Jump_Animation ; Space was pressed, so play the jump once","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x7FFE\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keyboard row B N M Symbol Space (port 0xFE)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(C)           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A bit is 0 when its key is down\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                BIT     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Bit 0 is the Space bar\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     NZ              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Space is up, so keep idling\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Jump_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Space was pressed, so play the jump once\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      BC,0x7FFE       ; Keyboard row B N M Symbol Space (port 0xFE)
+                IN      A,(C)           ; A bit is 0 when its key is down
+                BIT     0,A             ; Bit 0 is the Space bar
+                RET     NZ              ; Space is up, so keep idling
+                LD      HL,Jump_Animation ; Space was pressed, so play the jump once</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      BC,</span><span style="color: #BF9EEE">0x7FFE</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Keyboard row B N M Symbol Space (port 0xFE)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(C)           </span><span style="color: #7B7F8B">; A bit is 0 when its key is down</span></span>
+<span class="line"><span style="color: #F6F6F4">                BIT     </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">,A             </span><span style="color: #7B7F8B">; Bit 0 is the Space bar</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     NZ              </span><span style="color: #7B7F8B">; Space is up, so keep idling</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Jump_Animation </span><span style="color: #7B7F8B">; Space was pressed, so play the jump once</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>BIT</code> sets the <code>Z</code> flag when the bit is zero, which is when the key is down, so a non-zero result means Space is up and we can leave. Everything else stays the same, and the rest of the keyboard is now ignored.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Full Assembly</h3>
+<!-- /wp:heading -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 7-2.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 7-2.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/501f8b565b0e936c6907a16e4bce2ab9","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/501f8b565b0e936c6907a16e4bce2ab9
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 7-2.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/7-2.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step2.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step2.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Dizzy now only rolls when you press Space.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F7-2.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 7-2.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 3: Holding Keys to Walk</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Now for the keys that we hold. The 24 frames hold two walking cycles as well as the roll. Frames 10 to 17 are Dizzy walking left, and frames 18 to 24 are Dizzy walking right. We add two more tables after the roll;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Walk_Left_Animation: DEFB 8\n                DEFW    Dizzy_System_Interleaved_Image10,Dizzy_System_Interleaved_Image11\n                DEFW    Dizzy_System_Interleaved_Image12,Dizzy_System_Interleaved_Image13\n                DEFW    Dizzy_System_Interleaved_Image14,Dizzy_System_Interleaved_Image15\n                DEFW    Dizzy_System_Interleaved_Image16,Dizzy_System_Interleaved_Image17\n;\nWalk_Right_Animation: DEFB 7\n                DEFW    Dizzy_System_Interleaved_Image18,Dizzy_System_Interleaved_Image19\n                DEFW    Dizzy_System_Interleaved_Image20,Dizzy_System_Interleaved_Image21\n                DEFW    Dizzy_System_Interleaved_Image22,Dizzy_System_Interleaved_Image23\n                DEFW    Dizzy_System_Interleaved_Image24","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eWalk_Left_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFB \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e8\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image10,Dizzy_System_Interleaved_Image11\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image12,Dizzy_System_Interleaved_Image13\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image14,Dizzy_System_Interleaved_Image15\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image16,Dizzy_System_Interleaved_Image17\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eWalk_Right_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFB \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e7\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image18,Dizzy_System_Interleaved_Image19\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image20,Dizzy_System_Interleaved_Image21\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image22,Dizzy_System_Interleaved_Image23\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image24\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Walk_Left_Animation: DEFB 8
+                DEFW    Dizzy_System_Interleaved_Image10,Dizzy_System_Interleaved_Image11
+                DEFW    Dizzy_System_Interleaved_Image12,Dizzy_System_Interleaved_Image13
+                DEFW    Dizzy_System_Interleaved_Image14,Dizzy_System_Interleaved_Image15
+                DEFW    Dizzy_System_Interleaved_Image16,Dizzy_System_Interleaved_Image17
+;
+Walk_Right_Animation: DEFB 7
+                DEFW    Dizzy_System_Interleaved_Image18,Dizzy_System_Interleaved_Image19
+                DEFW    Dizzy_System_Interleaved_Image20,Dizzy_System_Interleaved_Image21
+                DEFW    Dizzy_System_Interleaved_Image22,Dizzy_System_Interleaved_Image23
+                DEFW    Dizzy_System_Interleaved_Image24</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Walk_Left_Animation:</span><span style="color: #F6F6F4"> DEFB </span><span style="color: #BF9EEE">8</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image10,Dizzy_System_Interleaved_Image11</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image12,Dizzy_System_Interleaved_Image13</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image14,Dizzy_System_Interleaved_Image15</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image16,Dizzy_System_Interleaved_Image17</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Walk_Right_Animation:</span><span style="color: #F6F6F4"> DEFB </span><span style="color: #BF9EEE">7</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image18,Dizzy_System_Interleaved_Image19</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image20,Dizzy_System_Interleaved_Image21</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image22,Dizzy_System_Interleaved_Image23</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image24</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Choosing the Sequence</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Previously we only looked at the keyboard when the idle was playing. Now the keyboard decides what is playing at every moment, except during the roll, which we still let finish. We work down the keys in order of priority, loading the sequence for the first one that is down into <code>HL</code>. If none are down we load the idle;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Choose_Animation:\n                LD      HL,(Current_Animation)\n                LD      DE,Jump_Animation\n                OR      A               ; Clear the carry flag\n                SBC     HL,DE\n                RET     Z               ; A jump is playing, so ignore the keyboard\n                LD      BC,0x7FFE       ; Keyboard row B N M Symbol Space (port 0xFE)\n                IN      A,(C)           ; A bit is 0 when its key is down\n                LD      HL,Jump_Animation\n                BIT     0,A             ; Bit 0 is the Space bar\n                JR      Z,Change_Animation\n                LD      BC,0xFEFE       ; Keyboard row Shift Z X C V\n                IN      A,(C)\n                LD      HL,Walk_Left_Animation\n                BIT     1,A             ; Bit 1 is Z\n                JR      Z,Change_Animation\n                LD      HL,Walk_Right_Animation\n                BIT     2,A             ; Bit 2 is X\n                JR      Z,Change_Animation\n                LD      HL,Idle_Animation ; Nothing held, so idle","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eChoose_Animation:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Animation)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Jump_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clear the carry flag\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                SBC     HL,DE\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Z               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A jump is playing, so ignore the keyboard\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x7FFE\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keyboard row B N M Symbol Space (port 0xFE)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(C)           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A bit is 0 when its key is down\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Jump_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                BIT     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Bit 0 is the Space bar\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Change_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFEFE\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keyboard row Shift Z X C V\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(C)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Walk_Left_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                BIT     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Bit 1 is Z\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Change_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Walk_Right_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                BIT     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Bit 2 is X\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Change_Animation\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Idle_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Nothing held, so idle\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Choose_Animation:
+                LD      HL,(Current_Animation)
+                LD      DE,Jump_Animation
+                OR      A               ; Clear the carry flag
+                SBC     HL,DE
+                RET     Z               ; A jump is playing, so ignore the keyboard
+                LD      BC,0x7FFE       ; Keyboard row B N M Symbol Space (port 0xFE)
+                IN      A,(C)           ; A bit is 0 when its key is down
+                LD      HL,Jump_Animation
+                BIT     0,A             ; Bit 0 is the Space bar
+                JR      Z,Change_Animation
+                LD      BC,0xFEFE       ; Keyboard row Shift Z X C V
+                IN      A,(C)
+                LD      HL,Walk_Left_Animation
+                BIT     1,A             ; Bit 1 is Z
+                JR      Z,Change_Animation
+                LD      HL,Walk_Right_Animation
+                BIT     2,A             ; Bit 2 is X
+                JR      Z,Change_Animation
+                LD      HL,Idle_Animation ; Nothing held, so idle</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Choose_Animation:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Animation)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Jump_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A               </span><span style="color: #7B7F8B">; Clear the carry flag</span></span>
+<span class="line"><span style="color: #F6F6F4">                SBC     HL,DE</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     Z               </span><span style="color: #7B7F8B">; A jump is playing, so ignore the keyboard</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      BC,</span><span style="color: #BF9EEE">0x7FFE</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Keyboard row B N M Symbol Space (port 0xFE)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(C)           </span><span style="color: #7B7F8B">; A bit is 0 when its key is down</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Jump_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                BIT     </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">,A             </span><span style="color: #7B7F8B">; Bit 0 is the Space bar</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Change_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      BC,</span><span style="color: #BF9EEE">0xFEFE</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Keyboard row Shift Z X C V</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(C)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Walk_Left_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                BIT     </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">,A             </span><span style="color: #7B7F8B">; Bit 1 is Z</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Change_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Walk_Right_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                BIT     </span><span style="color: #BF9EEE">2</span><span style="color: #F6F6F4">,A             </span><span style="color: #7B7F8B">; Bit 2 is X</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Change_Animation</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Idle_Animation </span><span style="color: #7B7F8B">; Nothing held, so idle</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The <code>LD HL</code> instructions don't change any flags, so each <code>JR Z</code> still sees the result of the <code>BIT</code> just before it. Space wins over Z, and Z wins over X, if more than one is held.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Only Change When We Need To</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>While a key is held, we'll arrive here fifty times a second with the same answer. If we restarted the sequence each time, Dizzy would be stuck on his first frame. So before we switch, we check that the new sequence isn't already the one playing;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Change_Animation:\n                LD      DE,(Current_Animation)\n                OR      A               ; Clear the carry flag\n                PUSH    HL              ; The compare destroys HL, so keep the new sequence\n                SBC     HL,DE\n                POP     HL\n                RET     Z               ; Already playing it, so carry on\n;\nSet_Animation:  LD      (Current_Animation),HL","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eChange_Animation:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,(Current_Animation)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clear the carry flag\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003ePUSH\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    HL              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The compare destroys HL, so keep the new sequence\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                SBC     HL,DE\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003ePOP\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Z               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Already playing it, so carry on\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSet_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  LD      (Current_Animation),HL\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Change_Animation:
+                LD      DE,(Current_Animation)
+                OR      A               ; Clear the carry flag
+                PUSH    HL              ; The compare destroys HL, so keep the new sequence
+                SBC     HL,DE
+                POP     HL
+                RET     Z               ; Already playing it, so carry on
+;
+Set_Animation:  LD      (Current_Animation),HL</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Change_Animation:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,(Current_Animation)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A               </span><span style="color: #7B7F8B">; Clear the carry flag</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">PUSH</span><span style="color: #F6F6F4">    HL              </span><span style="color: #7B7F8B">; The compare destroys HL, so keep the new sequence</span></span>
+<span class="line"><span style="color: #F6F6F4">                SBC     HL,DE</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">POP</span><span style="color: #F6F6F4">     HL</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     Z               </span><span style="color: #7B7F8B">; Already playing it, so carry on</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Set_Animation:</span><span style="color: #F6F6F4">  LD      (Current_Animation),HL</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>When the new sequence differs we fall into <code>Set_Animation</code>, which starts it from the first frame. This works for letting go of a key too. When Z is released nothing is held, so we load the idle, it differs from the walk, and Dizzy goes back to idling.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The walk tables loop just like the idle does, since <code>Update_Animation</code> returns to the first frame at the end of anything that isn't the roll.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Full Assembly</h3>
+<!-- /wp:heading -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 7-3.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 7-3.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/845c7f625c23003f3d59c9f29ba72e71","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/845c7f625c23003f3d59c9f29ba72e71
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 7-3.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/7-3.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step3.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step3.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Hold Z or X and Dizzy walks, and press Space to roll.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F7-3.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 7-3.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog5\\7-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\sam_build.py .\\assembly\\blog5\\7-2.asm \u002d\u002dbuild-only\npython .\\.vscode\\sam_build.py .\\assembly\\blog5\\7-3.asm \u002d\u002dbuild-only","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog5\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e7\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog5\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e7\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog5\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e7\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e3.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog5\7-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog5\7-2.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog5\7-3.asm --build-only</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog5\</span><span style="color: #BF9EEE">7</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog5\</span><span style="color: #BF9EEE">7</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog5\</span><span style="color: #BF9EEE">7</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">3.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Then run the disks in SimCoupe. The demos loop forever, so reset the SAM to stop them.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>So far Dizzy has stayed in a fixed position on a blank screen, and he walks on the spot. Next we can look at scenery behind him, which means saving and restoring the background rather than just clearing it, and then moving him around.</p>
+<!-- /wp:paragraph -->

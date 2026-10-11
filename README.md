@@ -92,8 +92,10 @@ them in `assembly\blog4`. `blog4\main.asm` is an earlier, independent animation 
 Draft post: [`assembly\blog5\blog-post.md`](assembly/blog5/blog-post.md).
 
 `assembly\blog5\7-1.asm` continues from `blog4\6-4.asm` and adds idle and jump
-sequences; pressing any key plays the jump once. It includes the sprite
-data from `assembly\blog4`.
+sequences; pressing any key plays the jump once. `7-2.asm` limits the jump to the
+Space bar, and `7-3.asm` adds left and right walking while Z or X is held. All three
+use `assembly\blog5\dizzy_system_interleaved.asm`, which holds all 24 Dizzy frames
+(`assembly\blog5\dizzy_system_sprites.json` is the same set as a Sprite Editor project).
 
 ## Debug in SimCoupe
 

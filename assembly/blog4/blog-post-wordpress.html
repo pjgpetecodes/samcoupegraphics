@@ -1,0 +1,811 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/" target="_blank" rel="noreferrer noopener">Sam Coupe Assembly Language Programming</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/" target="_blank" rel="noreferrer noopener">Graphics in Assembly for the SAM Coupé</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/" target="_blank" rel="noreferrer noopener">Making SAM Coupé Sprites Transparent</a></li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Animating SAM Coupé Sprites</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the previous tutorial we made Dizzy transparent. We stored a mask byte and a pixel byte for every sprite byte, and drew them over whatever was already on the screen;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"result = (screen AND mask) OR pixel_data","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eresult = (screen AND mask) OR pixel_data\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"plaintext","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>result = (screen AND mask) OR pixel_data</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">result = (screen AND mask) OR pixel_data</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Now we want him to change frames over time. Animation is really two problems;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>How do we choose and time the animation frames?</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>How do we update the screen without leaving old pixels behind, or showing the drawing process?</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>We will build it up in four steps, each one a separate assembly file in the <code>assembly/blog4</code> folder;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Step</th><th>File</th><th>What it adds</th></tr></thead><tbody><tr><td>1</td><td><code>6-1.asm</code></td><td>Takes <code>5.asm</code> and alternates two frames stored in the program</td></tr><tr><td>2</td><td><code>6-2.asm</code></td><td>Moves the frames into an external file; still two frames</td></tr><tr><td>3</td><td><code>6-3.asm</code></td><td>Plays all nine frames from an animation table</td></tr><tr><td>4</td><td><code>6-4.asm</code></td><td>Draws on a hidden screen page, then flips pages to remove the flicker</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>All the sprite data was produced with my SAM Coupé Sprite Editor:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://www.petecodes.co.uk/sam-coupe-sprite-editor" target="_blank" rel="noreferrer noopener">https://www.petecodes.co.uk/sam-coupe-sprite-editor</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 1: Alternating Two Frames</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Our starting point is the final assembly from the previous post (<code>5.asm</code>). It pages the screen into memory, draws one interleaved sprite with <code>Draw_Sprite</code>, and returns to BASIC. To animate, we need three new things;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>A second frame</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Something to say which frame is current</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>A way to wait between frames</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>Everything else, including the <code>Draw_Sprite</code> routine, stays exactly as it was.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Two Frames</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We keep the same interleaved format, but now we store two sprites. The second is Dizzy's other idle frame;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Sprite1_Interleaved:\nSprite1_1:    DEFB    0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, ...\n...\nSprite2_Interleaved:\nSprite2_1:    DEFB    0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, ...","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite1_Interleaved:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite1_1:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, ...\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e...\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite2_Interleaved:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite2_1:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFF\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x00\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e, ...\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Sprite1_Interleaved:
+Sprite1_1:    DEFB    0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, ...
+...
+Sprite2_Interleaved:
+Sprite2_1:    DEFB    0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, ...</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Sprite1_Interleaved:</span></span>
+<span class="line"><span style="color: #62E884">Sprite1_1:</span><span style="color: #F6F6F4">    DEFB    </span><span style="color: #BF9EEE">0xFF</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0x00</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0xFF</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0x00</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0xFF</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0x00</span><span style="color: #F6F6F4">, ...</span></span>
+<span class="line"><span style="color: #F6F6F4">...</span></span>
+<span class="line"><span style="color: #62E884">Sprite2_Interleaved:</span></span>
+<span class="line"><span style="color: #62E884">Sprite2_1:</span><span style="color: #F6F6F4">    DEFB    </span><span style="color: #BF9EEE">0xFF</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0x00</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0xFF</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0x00</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0xFF</span><span style="color: #F6F6F4">, </span><span style="color: #BF9EEE">0x00</span><span style="color: #F6F6F4">, ...</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The SAM has a palette, which lets a program choose which actual colours the 16 colour numbers in MODE 4 stand for. We will cover palettes in a later post. For now we haven't set one up, so both frames use the standard system colours. Notice that Frame 1 is slightly different to the Dizzy from the previous post. The Sprite Editor can output a version of each frame mapped to the system palette, and I have used that here so that the two frames match.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Remembering the Current Frame</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We add a pointer to the frame that is currently on screen;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Current_Frame_Data: DEFW Sprite1_Interleaved ; Frame currently on screen","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCurrent_Frame_Data:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFW Sprite1_Interleaved \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Frame currently on screen\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Current_Frame_Data: DEFW Sprite1_Interleaved ; Frame currently on screen</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Current_Frame_Data:</span><span style="color: #F6F6F4"> DEFW Sprite1_Interleaved </span><span style="color: #7B7F8B">; Frame currently on screen</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>Draw_Sprite</code> expects <code>DE</code> to point at the sprite data, so rather than hard coding <code>Sprite1_Interleaved</code> as we did in <code>5.asm</code>, we load it from this pointer;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      HL,0             ; Top-left screen byte, as in Tutorial 5\n                LD      DE,(Current_Frame_Data) ; Point to the current interleaved frame\n                CALL    Draw_Sprite     ; Draw Dizzy using the mask/pixel data","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Top-left screen byte, as in Tutorial 5\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,(Current_Frame_Data) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Point to the current interleaved frame\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Draw_Sprite     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Draw Dizzy using the mask/pixel data\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      HL,0             ; Top-left screen byte, as in Tutorial 5
+                LD      DE,(Current_Frame_Data) ; Point to the current interleaved frame
+                CALL    Draw_Sprite     ; Draw Dizzy using the mask/pixel data</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      HL,</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Top-left screen byte, as in Tutorial 5</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,(Current_Frame_Data) </span><span style="color: #7B7F8B">; Point to the current interleaved frame</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Draw_Sprite     </span><span style="color: #7B7F8B">; Draw Dizzy using the mask/pixel data</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Waiting with HALT</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The SAM generates a frame interrupt 50 times a second, and the Z80 <code>HALT</code> instruction waits for the next one. That gives us a handy clock. We wait a few interrupts between frames;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Frame_Delay:    EQU     5               ; Hold each frame for five 50 Hz interrupts","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eFrame_Delay:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e5\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Hold each frame for five 50 Hz interrupts\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Frame_Delay:    EQU     5               ; Hold each frame for five 50 Hz interrupts</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Frame_Delay:</span><span style="color: #F6F6F4">    </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">5</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Hold each frame for five 50 Hz interrupts</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      B,Frame_Delay   ; Hold this frame for a few 50 Hz interrupts\nWait_Frame:     HALT                    ; Wait for the next interrupt\n                ...\n                DJNZ    Wait_Frame      ; Keep waiting until the delay expires","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      B,Frame_Delay   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Hold this frame for a few 50 Hz interrupts\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eWait_Frame:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HALT                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Wait for the next interrupt\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                ...\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DJNZ    Wait_Frame      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keep waiting until the delay expires\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      B,Frame_Delay   ; Hold this frame for a few 50 Hz interrupts
+Wait_Frame:     HALT                    ; Wait for the next interrupt
+                ...
+                DJNZ    Wait_Frame      ; Keep waiting until the delay expires</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      B,Frame_Delay   </span><span style="color: #7B7F8B">; Hold this frame for a few 50 Hz interrupts</span></span>
+<span class="line"><span style="color: #62E884">Wait_Frame:</span><span style="color: #F6F6F4">     HALT                    </span><span style="color: #7B7F8B">; Wait for the next interrupt</span></span>
+<span class="line"><span style="color: #F6F6F4">                ...</span></span>
+<span class="line"><span style="color: #F6F6F4">                DJNZ    Wait_Frame      </span><span style="color: #7B7F8B">; Keep waiting until the delay expires</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Five interrupts is a tenth of a second, so Dizzy changes frame ten times a second. Change that one number to speed him up or slow him down.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">A Wrinkle with the ROM</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The final assembly from the previous post (<code>5.asm</code>) paged the screen into the bottom of memory, drew, and then paged the ROM straight back before returning to BASIC. We now need to do that on every frame, because <code>HALT</code> is waiting for an interrupt, and the interrupt handler lives in the ROM. If the screen RAM were still paged in, the Z80 would jump into the middle of a picture!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>So each time round the loop we page the screen in, draw, page the ROM back, and only then enable interrupts and wait;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Animation_Loop: LD      A,(Screen_Page)\n                OUT     (LMPR),A        ; Page the screen RAM into the lower memory area\n;\n                CALL    Clear_Sprite    ; Remove the previous frame\n                LD      HL,0             ; Top-left screen byte, as in Tutorial 5\n                LD      DE,(Current_Frame_Data) ; Point to the current interleaved frame\n                CALL    Draw_Sprite     ; Draw Dizzy using the mask/pixel data\n;\n                LD      A,0x1F          ; Page ROM 0 back into the lower memory area\n                OUT     (LMPR),A        ; Restore the BASIC ROM mapping\n                EI                      ; The ROM interrupt handler is paged in, so allow interrupts","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eAnimation_Loop:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e LD      A,(Screen_Page)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Page the screen RAM into the lower memory area\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Clear_Sprite    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Remove the previous frame\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Top-left screen byte, as in Tutorial 5\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,(Current_Frame_Data) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Point to the current interleaved frame\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Draw_Sprite     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Draw Dizzy using the mask/pixel data\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x1F\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Page ROM 0 back into the lower memory area\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Restore the BASIC ROM mapping\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                EI                      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The ROM interrupt handler is paged in, so allow interrupts\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Animation_Loop: LD      A,(Screen_Page)
+                OUT     (LMPR),A        ; Page the screen RAM into the lower memory area
+;
+                CALL    Clear_Sprite    ; Remove the previous frame
+                LD      HL,0             ; Top-left screen byte, as in Tutorial 5
+                LD      DE,(Current_Frame_Data) ; Point to the current interleaved frame
+                CALL    Draw_Sprite     ; Draw Dizzy using the mask/pixel data
+;
+                LD      A,0x1F          ; Page ROM 0 back into the lower memory area
+                OUT     (LMPR),A        ; Restore the BASIC ROM mapping
+                EI                      ; The ROM interrupt handler is paged in, so allow interrupts</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Animation_Loop:</span><span style="color: #F6F6F4"> LD      A,(Screen_Page)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A        </span><span style="color: #7B7F8B">; Page the screen RAM into the lower memory area</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Clear_Sprite    </span><span style="color: #7B7F8B">; Remove the previous frame</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Top-left screen byte, as in Tutorial 5</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,(Current_Frame_Data) </span><span style="color: #7B7F8B">; Point to the current interleaved frame</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Draw_Sprite     </span><span style="color: #7B7F8B">; Draw Dizzy using the mask/pixel data</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,</span><span style="color: #BF9EEE">0x1F</span><span style="color: #F6F6F4">          </span><span style="color: #7B7F8B">; Page ROM 0 back into the lower memory area</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A        </span><span style="color: #7B7F8B">; Restore the BASIC ROM mapping</span></span>
+<span class="line"><span style="color: #F6F6F4">                EI                      </span><span style="color: #7B7F8B">; The ROM interrupt handler is paged in, so allow interrupts</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Clearing the Old Frame</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You may have spotted the <code>Clear_Sprite</code> call. A masked draw only changes the pixels the sprite owns. It never clears anything. So if Frame 1 has a pixel that Frame 2 doesn't, it would still be there after Frame 2 was drawn on top.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Since our screen is blank, the simple fix is to fill Dizzy's 16 byte by 32 line rectangle with zeros before each draw;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Clear_Sprite:   LD      HL,0            ; Top-left screen byte\n                LD      C,32            ; Clear all 32 sprite rows\n;\nClear_Row:      LD      B,16            ; 16 screen bytes per row\n;\nClear_Byte:     LD      (HL),0          ; Colour zero is the blank background\n                INC     HL              ; Advance to the next screen byte\n                DJNZ    Clear_Byte      ; Continue across the 16-byte row\n                LD      DE,112          ; Skip the rest of the 128-byte screen row\n                ADD     HL,DE           ; Point to the next screen row\n                DEC     C               ; Count down the rows\n                JR      NZ,Clear_Row    ; Continue until all 32 rows are cleared\n                RET                     ; Return after clearing the rectangle","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eClear_Sprite:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   LD      HL,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e            \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Top-left screen byte\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      C,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e32\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e            \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clear all 32 sprite rows\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eClear_Row:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      LD      B,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e16\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e            \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; 16 screen bytes per row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eClear_Byte:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     LD      (HL),\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Colour zero is the blank background\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Advance to the next screen byte\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DJNZ    Clear_Byte      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Continue across the 16-byte row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e112\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Skip the rest of the 128-byte screen row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eADD\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL,DE           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Point to the next screen row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eDEC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     C               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Count down the rows\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      NZ,Clear_Row    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Continue until all 32 rows are cleared\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Return after clearing the rectangle\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Clear_Sprite:   LD      HL,0            ; Top-left screen byte
+                LD      C,32            ; Clear all 32 sprite rows
+;
+Clear_Row:      LD      B,16            ; 16 screen bytes per row
+;
+Clear_Byte:     LD      (HL),0          ; Colour zero is the blank background
+                INC     HL              ; Advance to the next screen byte
+                DJNZ    Clear_Byte      ; Continue across the 16-byte row
+                LD      DE,112          ; Skip the rest of the 128-byte screen row
+                ADD     HL,DE           ; Point to the next screen row
+                DEC     C               ; Count down the rows
+                JR      NZ,Clear_Row    ; Continue until all 32 rows are cleared
+                RET                     ; Return after clearing the rectangle</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Clear_Sprite:</span><span style="color: #F6F6F4">   LD      HL,</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">            </span><span style="color: #7B7F8B">; Top-left screen byte</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      C,</span><span style="color: #BF9EEE">32</span><span style="color: #F6F6F4">            </span><span style="color: #7B7F8B">; Clear all 32 sprite rows</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Clear_Row:</span><span style="color: #F6F6F4">      LD      B,</span><span style="color: #BF9EEE">16</span><span style="color: #F6F6F4">            </span><span style="color: #7B7F8B">; 16 screen bytes per row</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Clear_Byte:</span><span style="color: #F6F6F4">     LD      (HL),</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">          </span><span style="color: #7B7F8B">; Colour zero is the blank background</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     HL              </span><span style="color: #7B7F8B">; Advance to the next screen byte</span></span>
+<span class="line"><span style="color: #F6F6F4">                DJNZ    Clear_Byte      </span><span style="color: #7B7F8B">; Continue across the 16-byte row</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,</span><span style="color: #BF9EEE">112</span><span style="color: #F6F6F4">          </span><span style="color: #7B7F8B">; Skip the rest of the 128-byte screen row</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">ADD</span><span style="color: #F6F6F4">     HL,DE           </span><span style="color: #7B7F8B">; Point to the next screen row</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">DEC</span><span style="color: #F6F6F4">     C               </span><span style="color: #7B7F8B">; Count down the rows</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      NZ,Clear_Row    </span><span style="color: #7B7F8B">; Continue until all 32 rows are cleared</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">                     </span><span style="color: #7B7F8B">; Return after clearing the rectangle</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>This is the same structure as <code>Draw_Sprite</code>, a 32 row outer loop and a 16 byte inner loop, skipping 112 bytes at the end of each row to reach the same position on the next 128 byte screen line. Later on we will replace this with something smarter.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Swapping Frames</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>After the delay, we compare the current frame pointer with Frame 1 and swap to the other one;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      HL,(Current_Frame_Data)\n                LD      DE,Sprite1_Interleaved\n                OR      A\n                SBC     HL,DE           ; Is frame 1 on screen?\n                LD      HL,Sprite2_Interleaved\n                JR      Z,Store_Frame   ; Yes, so show frame 2 next\n                LD      HL,Sprite1_Interleaved ; No, so go back to frame 1\nStore_Frame:    LD      (Current_Frame_Data),HL\n                JR      Animation_Loop  ; Draw the next frame","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Frame_Data)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Sprite1_Interleaved\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                SBC     HL,DE           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Is frame 1 on screen?\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Sprite2_Interleaved\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Store_Frame   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Yes, so show frame 2 next\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Sprite1_Interleaved \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; No, so go back to frame 1\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eStore_Frame:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    LD      (Current_Frame_Data),HL\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Animation_Loop  \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Draw the next frame\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      HL,(Current_Frame_Data)
+                LD      DE,Sprite1_Interleaved
+                OR      A
+                SBC     HL,DE           ; Is frame 1 on screen?
+                LD      HL,Sprite2_Interleaved
+                JR      Z,Store_Frame   ; Yes, so show frame 2 next
+                LD      HL,Sprite1_Interleaved ; No, so go back to frame 1
+Store_Frame:    LD      (Current_Frame_Data),HL
+                JR      Animation_Loop  ; Draw the next frame</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Frame_Data)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Sprite1_Interleaved</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A</span></span>
+<span class="line"><span style="color: #F6F6F4">                SBC     HL,DE           </span><span style="color: #7B7F8B">; Is frame 1 on screen?</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Sprite2_Interleaved</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Store_Frame   </span><span style="color: #7B7F8B">; Yes, so show frame 2 next</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Sprite1_Interleaved </span><span style="color: #7B7F8B">; No, so go back to frame 1</span></span>
+<span class="line"><span style="color: #62E884">Store_Frame:</span><span style="color: #F6F6F4">    LD      (Current_Frame_Data),HL</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Animation_Loop  </span><span style="color: #7B7F8B">; Draw the next frame</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The loop never ends, so reset the SAM to stop the demo.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Full Assembly</h3>
+<!-- /wp:heading -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 6-1.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 6-1.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/96ddddb7d9fae7d221388781ca1cea58","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/96ddddb7d9fae7d221388781ca1cea58
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 6-1.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/6-1.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You should now see an animating Dizzy! You'll notice how flickery it is... Don't worry, we'll fix that later on. </p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"id":5156,"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/simc0015.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/simc0015.gif" alt="" class="wp-image-5156"/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The following is showing a Web Embedded version of SimCoupe by Anomixer. You can find the repo for this here; <a href="https://github.com/anomixer/SamCoupeWeb" target="_blank" rel="noreferrer noopener">https://github.com/anomixer/SamCoupeWeb</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F6-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 6-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 2: An External File</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Two frames stored in the program is fine, but Dizzy has nine frames, and the listing would become enormous. <code>dizzy_system_interleaved.asm</code> is generated by the Sprite Editor and holds all nine, so we move the data out into that file and include it at the end of the program, in place of the two <code>Sprite</code> blocks;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                INCLUDE \u0022dizzy_system_interleaved.asm\u0022","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                INCLUDE \u0022dizzy_system_interleaved.asm\u0022\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                INCLUDE "dizzy_system_interleaved.asm"</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                INCLUDE "dizzy_system_interleaved.asm"</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Each frame in the file has a label, <code>Dizzy_System_Interleaved_Image1</code> through <code>Dizzy_System_Interleaved_Image9</code>, so our code can refer to them by name without caring where they end up in memory. The only other change is that the two labels we used in Step 1 are replaced with these;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Current_Frame_Data: DEFW Dizzy_System_Interleaved_Image1 ; Frame currently on screen","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCurrent_Frame_Data:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFW Dizzy_System_Interleaved_Image1 \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Frame currently on screen\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Current_Frame_Data: DEFW Dizzy_System_Interleaved_Image1 ; Frame currently on screen</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Current_Frame_Data:</span><span style="color: #F6F6F4"> DEFW Dizzy_System_Interleaved_Image1 </span><span style="color: #7B7F8B">; Frame currently on screen</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      HL,(Current_Frame_Data)\n                LD      DE,Dizzy_System_Interleaved_Image1\n                OR      A\n                SBC     HL,DE           ; Is frame 1 on screen?\n                LD      HL,Dizzy_System_Interleaved_Image2\n                JR      Z,Store_Frame   ; Yes, so show frame 2 next\n                LD      HL,Dizzy_System_Interleaved_Image1 ; No, so go back to frame 1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Frame_Data)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Dizzy_System_Interleaved_Image1\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                SBC     HL,DE           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Is frame 1 on screen?\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Dizzy_System_Interleaved_Image2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Store_Frame   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Yes, so show frame 2 next\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Dizzy_System_Interleaved_Image1 \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; No, so go back to frame 1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      HL,(Current_Frame_Data)
+                LD      DE,Dizzy_System_Interleaved_Image1
+                OR      A
+                SBC     HL,DE           ; Is frame 1 on screen?
+                LD      HL,Dizzy_System_Interleaved_Image2
+                JR      Z,Store_Frame   ; Yes, so show frame 2 next
+                LD      HL,Dizzy_System_Interleaved_Image1 ; No, so go back to frame 1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Frame_Data)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Dizzy_System_Interleaved_Image1</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A</span></span>
+<span class="line"><span style="color: #F6F6F4">                SBC     HL,DE           </span><span style="color: #7B7F8B">; Is frame 1 on screen?</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Dizzy_System_Interleaved_Image2</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Store_Frame   </span><span style="color: #7B7F8B">; Yes, so show frame 2 next</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Dizzy_System_Interleaved_Image1 </span><span style="color: #7B7F8B">; No, so go back to frame 1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Everything else is identical, and Dizzy still alternates between two frames. The program has just become much shorter to read, and the other seven frames are ready and waiting.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 6-2.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 6-2.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/90d106c4843961d0194f9801a41738d0","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/90d106c4843961d0194f9801a41738d0
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 6-2.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/6-2.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step2.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step2.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The animation looks just the same as before, but the frame data now lives in its own file.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F6-2.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 6-2.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 3: Animation Tables</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>With nine frames, swapping between two with a compare is no good. An animation is really just a list of frames, so we describe it with a table. The sequence starts with a count of how many frames it has, followed by the frame addresses;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Dizzy_Animation: DEFB   9\n                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2\n                DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4\n                DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6\n                DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8\n                DEFW    Dizzy_System_Interleaved_Image9","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eDizzy_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFB   \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e9\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFW    Dizzy_System_Interleaved_Image9\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Dizzy_Animation: DEFB   9
+                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2
+                DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4
+                DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6
+                DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8
+                DEFW    Dizzy_System_Interleaved_Image9</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Dizzy_Animation:</span><span style="color: #F6F6F4"> DEFB   </span><span style="color: #BF9EEE">9</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFW    Dizzy_System_Interleaved_Image9</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Because the table is just data, we could add further tables for other sequences, and point the program at whichever we like.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Each <code>DEFW</code> is a 16 bit address, so each takes two bytes. The program now remembers which sequence is playing, which frame of it we are on, and how many interrupts are left before we change;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Current_Animation: DEFW 0               ; Address of the sequence being played\nCurrent_Frame:  DEFB    0               ; Index into the current sequence\nCurrent_Delay:  DEFB    0               ; Interrupts left before the next frame","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCurrent_Animation:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFW \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Address of the sequence being played\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCurrent_Frame:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Index into the current sequence\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCurrent_Delay:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Interrupts left before the next frame\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Current_Animation: DEFW 0               ; Address of the sequence being played
+Current_Frame:  DEFB    0               ; Index into the current sequence
+Current_Delay:  DEFB    0               ; Interrupts left before the next frame</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Current_Animation:</span><span style="color: #F6F6F4"> DEFW </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Address of the sequence being played</span></span>
+<span class="line"><span style="color: #62E884">Current_Frame:</span><span style="color: #F6F6F4">  DEFB    </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Index into the current sequence</span></span>
+<span class="line"><span style="color: #62E884">Current_Delay:</span><span style="color: #F6F6F4">  DEFB    </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Interrupts left before the next frame</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Finding the Frame Address</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>To draw frame number <code>Current_Frame</code>, we skip the count byte, add the frame number twice (once per byte of each pointer), then read the address out;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      A,(Current_Frame)\n                LD      E,A\n                LD      D,0\n                LD      HL,(Current_Animation)\n                INC     HL              ; Skip the frame count byte\n                ADD     HL,DE\n                ADD     HL,DE           ; Each frame pointer occupies two bytes\n                LD      E,(HL)\n                INC     HL\n                LD      D,(HL)          ; DE now points to the selected frame data","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Current_Frame)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      E,A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      D,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Animation)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Skip the frame count byte\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eADD\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL,DE\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eADD\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL,DE           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Each frame pointer occupies two bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      E,(HL)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      D,(HL)          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; DE now points to the selected frame data\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      A,(Current_Frame)
+                LD      E,A
+                LD      D,0
+                LD      HL,(Current_Animation)
+                INC     HL              ; Skip the frame count byte
+                ADD     HL,DE
+                ADD     HL,DE           ; Each frame pointer occupies two bytes
+                LD      E,(HL)
+                INC     HL
+                LD      D,(HL)          ; DE now points to the selected frame data</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      A,(Current_Frame)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      E,A</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      D,</span><span style="color: #BF9EEE">0</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Animation)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     HL              </span><span style="color: #7B7F8B">; Skip the frame count byte</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">ADD</span><span style="color: #F6F6F4">     HL,DE</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">ADD</span><span style="color: #F6F6F4">     HL,DE           </span><span style="color: #7B7F8B">; Each frame pointer occupies two bytes</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      E,(HL)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     HL</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      D,(HL)          </span><span style="color: #7B7F8B">; DE now points to the selected frame data</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>DE</code> is now ready for <code>Draw_Sprite</code>, exactly as before.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Stepping Through the Sequence</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Rather than a blocking wait, the main loop now does one <code>HALT</code> per pass, and counts the delay down in memory. That leaves room to do other things on every interrupt later on;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt\n                CALL    Update_Animation ; Change frame when the delay expires\n                JR      Animation_Loop  ; Repeat forever","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eAnimation_Loop:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e HALT                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Wait for the next 50 Hz interrupt\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Update_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Change frame when the delay expires\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Animation_Loop  \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Repeat forever\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
+                CALL    Update_Animation ; Change frame when the delay expires
+                JR      Animation_Loop  ; Repeat forever</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Animation_Loop:</span><span style="color: #F6F6F4"> HALT                    </span><span style="color: #7B7F8B">; Wait for the next 50 Hz interrupt</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Update_Animation </span><span style="color: #7B7F8B">; Change frame when the delay expires</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Animation_Loop  </span><span style="color: #7B7F8B">; Repeat forever</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>Update_Animation</code> only advances when the delay reaches zero, and wraps back to frame zero after the last frame in the table;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Update_Animation:\n                LD      A,(Current_Delay) ; Count down the frame delay\n                DEC     A\n                LD      (Current_Delay),A\n                RET     NZ              ; Only redraw when the delay expires\n;\n                LD      A,Frame_Delay   ; Restart the frame delay\n                LD      (Current_Delay),A\n                LD      HL,(Current_Animation)\n                LD      B,(HL)          ; The first byte is the number of frames\n                LD      A,(Current_Frame)\n                INC     A\n                CP      B\n                JR      C,Store_Frame   ; Still inside the sequence\n                XOR     A               ; After the last frame, return to frame zero\n;\nStore_Frame:    LD      (Current_Frame),A","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eUpdate_Animation:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Current_Delay) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Count down the frame delay\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eDEC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Current_Delay),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     NZ              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Only redraw when the delay expires\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,Frame_Delay   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Restart the frame delay\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Current_Delay),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Current_Animation)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      B,(HL)          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The first byte is the number of frames\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Current_Frame)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                CP      B\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      C,Store_Frame   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Still inside the sequence\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; After the last frame, return to frame zero\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e;\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eStore_Frame:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    LD      (Current_Frame),A\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Update_Animation:
+                LD      A,(Current_Delay) ; Count down the frame delay
+                DEC     A
+                LD      (Current_Delay),A
+                RET     NZ              ; Only redraw when the delay expires
+;
+                LD      A,Frame_Delay   ; Restart the frame delay
+                LD      (Current_Delay),A
+                LD      HL,(Current_Animation)
+                LD      B,(HL)          ; The first byte is the number of frames
+                LD      A,(Current_Frame)
+                INC     A
+                CP      B
+                JR      C,Store_Frame   ; Still inside the sequence
+                XOR     A               ; After the last frame, return to frame zero
+;
+Store_Frame:    LD      (Current_Frame),A</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Update_Animation:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Current_Delay) </span><span style="color: #7B7F8B">; Count down the frame delay</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">DEC</span><span style="color: #F6F6F4">     A</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Current_Delay),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     NZ              </span><span style="color: #7B7F8B">; Only redraw when the delay expires</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,Frame_Delay   </span><span style="color: #7B7F8B">; Restart the frame delay</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Current_Delay),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Current_Animation)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      B,(HL)          </span><span style="color: #7B7F8B">; The first byte is the number of frames</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Current_Frame)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     A</span></span>
+<span class="line"><span style="color: #F6F6F4">                CP      B</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      C,Store_Frame   </span><span style="color: #7B7F8B">; Still inside the sequence</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     A               </span><span style="color: #7B7F8B">; After the last frame, return to frame zero</span></span>
+<span class="line"><span style="color: #7B7F8B">;</span></span>
+<span class="line"><span style="color: #62E884">Store_Frame:</span><span style="color: #F6F6F4">    LD      (Current_Frame),A</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Starting a Sequence</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Set_Animation</code> takes the address of a table in <code>HL</code>. It stores it, resets the frame and delay, and draws the first frame straight away. At the start of the program we call it with <code>Dizzy_Animation</code>, and from then on <code>Update_Animation</code> does the rest.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Full Assembly</h3>
+<!-- /wp:heading -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 6-3.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 6-3.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/85412964fea44fc3966cefdc57992be8","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/85412964fea44fc3966cefdc57992be8
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 6-3.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/6-3.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step3.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step3.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Dizzy now cycles through nine frames. It's still flickery, but we're about to fix that.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F6-3.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 6-3.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 4: Drawing on a Hidden Screen Page</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Run <code>6-3.asm</code> and look closely. We are clearing and redrawing Dizzy directly on the screen that is being displayed. The clear and the masked draw take a while, and the display can catch Dizzy half erased or half drawn. That appears as flicker, especially on the larger frames.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Masking solves the transparency problem, but it doesn't by itself make an update invisible.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The cure is double buffering. We keep two screens. One is displayed, while we do all our slow, messy drawing on the other. Only once a frame is complete do we swap them, in a single step. The animation table, <code>Update_Animation</code>, <code>Clear_Sprite</code> and <code>Draw_Sprite</code> all stay exactly as they were in <code>6-3.asm</code>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Two Screens</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The SAM selects where the displayed screen starts with the Video Memory Page Register (<code>VMPR</code>, port 252). At the start of the program we read the current page and remember it in a new <code>Display_Page</code> variable. The hidden page is then the one four pages along, which we find by flipping a bit;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                IN      A,(VMPR)        ; Read the current screen page\n                AND     0b00011110      ; Keep only the page number\n                LD      (Display_Page),A ; This page is the one being displayed\n                LD      SP,0xC000       ; Use a safe stack outside the screen memory\n                CALL    Clear_Hidden_Page ; Blank the page we will draw on","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(VMPR)        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the current screen page\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eAND\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00011110\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keep only the page number\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Display_Page),A \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; This page is the one being displayed\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003eSP\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xC000\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Use a safe stack outside the screen memory\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Clear_Hidden_Page \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Blank the page we will draw on\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                IN      A,(VMPR)        ; Read the current screen page
+                AND     0b00011110      ; Keep only the page number
+                LD      (Display_Page),A ; This page is the one being displayed
+                LD      SP,0xC000       ; Use a safe stack outside the screen memory
+                CALL    Clear_Hidden_Page ; Blank the page we will draw on</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(VMPR)        </span><span style="color: #7B7F8B">; Read the current screen page</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">AND</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0b00011110</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Keep only the page number</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Display_Page),A </span><span style="color: #7B7F8B">; This page is the one being displayed</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      </span><span style="color: #BF9EEE">SP</span><span style="color: #F6F6F4">,</span><span style="color: #BF9EEE">0xC000</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Use a safe stack outside the screen memory</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Clear_Hidden_Page </span><span style="color: #7B7F8B">; Blank the page we will draw on</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The ROM clear-screen routine only clears the screen being displayed, so we blank the second page ourselves. We page it into the lower memory area with <code>LMPR</code>, and fill the 24 KB of a MODE 4 screen with zeros;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Clear_Hidden_Page:\n                LD      A,(Display_Page)\n                XOR     0b00000100      ; Select the page that is not displayed\n                OR      0b00100000      ; Map RAM into the lower memory area\n                OUT     (LMPR),A        ; Page the hidden screen RAM in\n                LD      HL,0\n                LD      DE,1\n                LD      BC,0x5FFF\n                LD      (HL),0          ; Colour zero, as the ROM clear uses\n                LDIR                    ; Fill the rest of the screen with zeros\n                LD      A,0x1F          ; Page ROM 0 back into the lower memory area\n                OUT     (LMPR),A\n                RET                     ; Return to the caller","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eClear_Hidden_Page:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Display_Page)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00000100\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Select the page that is not displayed\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00100000\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Map RAM into the lower memory area\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Page the hidden screen RAM in\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x5FFF\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (HL),\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Colour zero, as the ROM clear uses\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LDIR                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Fill the rest of the screen with zeros\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x1F\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Page ROM 0 back into the lower memory area\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Return to the caller\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Clear_Hidden_Page:
+                LD      A,(Display_Page)
+                XOR     0b00000100      ; Select the page that is not displayed
+                OR      0b00100000      ; Map RAM into the lower memory area
+                OUT     (LMPR),A        ; Page the hidden screen RAM in
+                LD      HL,0
+                LD      DE,1
+                LD      BC,0x5FFF
+                LD      (HL),0          ; Colour zero, as the ROM clear uses
+                LDIR                    ; Fill the rest of the screen with zeros
+                LD      A,0x1F          ; Page ROM 0 back into the lower memory area
+                OUT     (LMPR),A
+                RET                     ; Return to the caller</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Clear_Hidden_Page:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Display_Page)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0b00000100</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Select the page that is not displayed</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      </span><span style="color: #BF9EEE">0b00100000</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Map RAM into the lower memory area</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A        </span><span style="color: #7B7F8B">; Page the hidden screen RAM in</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,</span><span style="color: #BF9EEE">0</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,</span><span style="color: #BF9EEE">1</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      BC,</span><span style="color: #BF9EEE">0x5FFF</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (HL),</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">          </span><span style="color: #7B7F8B">; Colour zero, as the ROM clear uses</span></span>
+<span class="line"><span style="color: #F6F6F4">                LDIR                    </span><span style="color: #7B7F8B">; Fill the rest of the screen with zeros</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,</span><span style="color: #BF9EEE">0x1F</span><span style="color: #F6F6F4">          </span><span style="color: #7B7F8B">; Page ROM 0 back into the lower memory area</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">                     </span><span style="color: #7B7F8B">; Return to the caller</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Both screens are now blank, and Dizzy is still drawn at the top left, so nothing about the picture changes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Drawing Off Screen</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Screen_Page</code> is no longer needed. <code>Draw_Frame</code> works out the page to use each time, and it is always the <em>other</em> one to <code>Display_Page</code>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Draw_Frame:     DI                      ; Interrupts stay off while screen RAM is paged in\n                LD      A,(Display_Page)\n                XOR     0b00000100      ; Always draw on the page that is not displayed\n                OR      0b00100000      ; Map RAM into the lower memory area\n                OUT     (LMPR),A        ; Page the hidden screen RAM into the lower memory area","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eDraw_Frame:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003eDI\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Interrupts stay off while screen RAM is paged in\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Display_Page)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00000100\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Always draw on the page that is not displayed\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00100000\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Map RAM into the lower memory area\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Page the hidden screen RAM into the lower memory area\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Draw_Frame:     DI                      ; Interrupts stay off while screen RAM is paged in
+                LD      A,(Display_Page)
+                XOR     0b00000100      ; Always draw on the page that is not displayed
+                OR      0b00100000      ; Map RAM into the lower memory area
+                OUT     (LMPR),A        ; Page the hidden screen RAM into the lower memory area</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Draw_Frame:</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">DI</span><span style="color: #F6F6F4">                      </span><span style="color: #7B7F8B">; Interrupts stay off while screen RAM is paged in</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Display_Page)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0b00000100</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Always draw on the page that is not displayed</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      </span><span style="color: #BF9EEE">0b00100000</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Map RAM into the lower memory area</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A        </span><span style="color: #7B7F8B">; Page the hidden screen RAM into the lower memory area</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The rest of the routine is the same, apart from the end. Once the new frame is complete, we set <code>Frame_Pending</code> to say "there is something ready to show";</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      A,0x1F          ; Page ROM 0 back into the lower memory area\n                OUT     (LMPR),A        ; The ROM's interrupt handler is needed by HALT\n                LD      A,1\n                LD      (Frame_Pending),A ; Tell the main loop a frame is ready to show\n                EI                      ; Enable interrupts\n                RET","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x1F\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Page ROM 0 back into the lower memory area\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The ROM's interrupt handler is needed by HALT\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Frame_Pending),A \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Tell the main loop a frame is ready to show\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                EI                      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Enable interrupts\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      A,0x1F          ; Page ROM 0 back into the lower memory area
+                OUT     (LMPR),A        ; The ROM's interrupt handler is needed by HALT
+                LD      A,1
+                LD      (Frame_Pending),A ; Tell the main loop a frame is ready to show
+                EI                      ; Enable interrupts
+                RET</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      A,</span><span style="color: #BF9EEE">0x1F</span><span style="color: #F6F6F4">          </span><span style="color: #7B7F8B">; Page ROM 0 back into the lower memory area</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A        </span><span style="color: #7B7F8B">; The ROM's interrupt handler is needed by HALT</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,</span><span style="color: #BF9EEE">1</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Frame_Pending),A </span><span style="color: #7B7F8B">; Tell the main loop a frame is ready to show</span></span>
+<span class="line"><span style="color: #F6F6F4">                EI                      </span><span style="color: #7B7F8B">; Enable interrupts</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Flipping the Page</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Back in the main loop, we wait for the frame interrupt, and only then flip, by calling <code>Show_Pending_Frame</code> straight after the <code>HALT</code>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Show_Pending_Frame:\n                LD      A,(Frame_Pending)\n                OR      A\n                RET     Z\n                XOR     A\n                LD      (Frame_Pending),A\n                LD      A,(Display_Page)\n                XOR     0b00000100      ; The prepared hidden page becomes visible\n                LD      (Display_Page),A\n                OR      0b01100000      ; Keep the screen in MODE 4\n                OUT     (VMPR),A        ; Change pages at the frame interrupt\n                RET","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eShow_Pending_Frame:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Frame_Pending)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Z\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Frame_Pending),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Display_Page)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00000100\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The prepared hidden page becomes visible\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Display_Page),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b01100000\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keep the screen in MODE 4\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (VMPR),A        \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Change pages at the frame interrupt\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Show_Pending_Frame:
+                LD      A,(Frame_Pending)
+                OR      A
+                RET     Z
+                XOR     A
+                LD      (Frame_Pending),A
+                LD      A,(Display_Page)
+                XOR     0b00000100      ; The prepared hidden page becomes visible
+                LD      (Display_Page),A
+                OR      0b01100000      ; Keep the screen in MODE 4
+                OUT     (VMPR),A        ; Change pages at the frame interrupt
+                RET</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Show_Pending_Frame:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Frame_Pending)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     Z</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     A</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Frame_Pending),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Display_Page)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0b00000100</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; The prepared hidden page becomes visible</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Display_Page),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      </span><span style="color: #BF9EEE">0b01100000</span><span style="color: #F6F6F4">      </span><span style="color: #7B7F8B">; Keep the screen in MODE 4</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (VMPR),A        </span><span style="color: #7B7F8B">; Change pages at the frame interrupt</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Writing the new page number to <code>VMPR</code> is a single <code>OUT</code>, so the viewer sees the old complete frame, then the new complete frame, and never anything in between.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:coblocks/accordion -->
+<div class="wp-block-coblocks-accordion"><!-- wp:coblocks/accordion-item {"title":"Full Assembly Listing for 6-4.asm"} -->
+<div class="wp-block-coblocks-accordion-item"><details><summary class="wp-block-coblocks-accordion-item__title">Full Assembly Listing for 6-4.asm</summary><div class="wp-block-coblocks-accordion-item__content"><!-- wp:embed {"url":"https://gist.github.com/pjgpetecodes/b01d0388da8af4a5df397fc817e053a3","type":"rich","providerNameSlug":"gist"} -->
+<figure class="wp-block-embed is-type-rich is-provider-gist wp-block-embed-gist"><div class="wp-block-embed__wrapper">
+https://gist.github.com/pjgpetecodes/b01d0388da8af4a5df397fc817e053a3
+</div></figure>
+<!-- /wp:embed --></div></details></div>
+<!-- /wp:coblocks/accordion-item --></div>
+<!-- /wp:coblocks/accordion -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Download the Disk Image</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can download the disk image for 6-4.asm to run in SimCoupe or on your real SAM <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/6-4.dsk" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The Result</h3>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step4.gif"><img src="https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step4.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Dizzy now animates smoothly, with no flicker!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">See the result in the SAM Coupe Web Emulator</h3>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F6-4.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 6-4.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Comparing the Versions</h2>
+<!-- /wp:heading -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Example</th><th>Frames</th><th>Where it draws</th><th>Main point</th></tr></thead><tbody><tr><td><code>6-1.asm</code></td><td>Two, in the program</td><td>Displayed screen</td><td><code>5.asm</code> plus frame swapping and timing on a blank screen</td></tr><tr><td><code>6-2.asm</code></td><td>Two, from an external file</td><td>Displayed screen</td><td>Same code as <code>6-1.asm</code>, with the data moved into an included file</td></tr><tr><td><code>6-3.asm</code></td><td>Nine, from an external file</td><td>Displayed screen</td><td>Animation tables and sequences</td></tr><tr><td><code>6-4.asm</code></td><td>Nine, from an external file</td><td>Hidden page, then flips</td><td>Same animation, without showing a partial redraw</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Build an example from the root of the repo with;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog4\\6-1.asm \u002d\u002dbuild-only","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog4\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e6\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog4\6-1.asm --build-only</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog4\</span><span style="color: #BF9EEE">6</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Then run the disk in SimCoupe. The demos loop forever, so reset the SAM to stop them.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We have gone from swapping two frames, to loading them from an external file, to animation tables, to preparing complete frames on a hidden page.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Dizzy still plays the same loop whatever you do. In the next post we will read the keyboard, and choose between idle and jump sequences.</p>
+<!-- /wp:paragraph -->

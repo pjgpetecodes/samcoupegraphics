@@ -7,7 +7,7 @@
 ;
 ; The flicker-free animation from Tutorial 6 now reacts to the keyboard. Press any
 ; key to play the jump sequence once; Dizzy then returns to the idle sequence.
-; Reset to stop the demo.
+; The keyboard is read straight from port 0xFE. Reset to stop the demo.
 ;
 ; ***********************************************************************************
 ; *                                 Program Setup                                   *
@@ -20,7 +20,6 @@
 LMPR:           EQU     250             ; Lower Memory Page Register
 VMPR:           EQU     252             ; Video Memory Page Register
 JCLSBL:         EQU     334             ; ROM clear-screen routine
-JREADKEY:       EQU     361             ; ROM key routine: Z is set when no key is pressed
 ;
 Frame_Delay:    EQU     5               ; Hold each frame for five 50 Hz interrupts
 ;
@@ -35,7 +34,7 @@ Start:          DI                      ; Disable interrupts
                 IN      A,(VMPR)        ; Read the current screen page
                 AND     0b00011110      ; Keep only the page number
                 LD      (Display_Page),A ; This page is the one being displayed
-                LD      SP,0xC000       ; Use a safe stack outside the screen memory
+                LD      SP,0xFF00       ; Use a safe stack above the program and its 24 frames
                 CALL    Clear_Hidden_Page ; Blank the page we will draw on
 ;
                 LD      HL,Idle_Animation ; Start with the idle sequence
@@ -102,7 +101,10 @@ Choose_Animation:
                 OR      A               ; Clear the carry flag
                 SBC     HL,DE
                 RET     NZ              ; A jump is playing, so ignore the keyboard
-                CALL    JREADKEY        ; Z is set when no key is pressed
+                LD      BC,0x00FE       ; Select every keyboard row at once (port 0xFE)
+                IN      A,(C)           ; A bit is 0 when its key is down
+                OR      0b11100000      ; Ignore the top three bits
+                INC     A               ; 0xFF (no key down) becomes zero
                 RET     Z               ; No key, so keep idling
                 LD      HL,Jump_Animation ; A key was pressed, so play the jump once
 ;
@@ -237,4 +239,4 @@ Jump_Animation: DEFB    8
 ;
 ; The nine interleaved frames come from the Sprite Editor output.
 ;
-                INCLUDE "../blog4/dizzy_system_interleaved.asm"
+                INCLUDE "dizzy_system_interleaved.asm"
