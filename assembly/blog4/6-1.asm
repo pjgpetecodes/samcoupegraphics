@@ -37,7 +37,7 @@ Start:          DI                      ; Disable interrupts
                 OR      0b00100000      ; Map RAM into the lower memory area
                 LD      (Screen_Page),A ; Save the page value for restoring the screen
 ;
-Animation_Loop: LD      A,(Screen_Page)
+Animation_Loop: LD      A,(Screen_Page) ; Fetch the saved screen page value
                 OUT     (LMPR),A        ; Page the screen RAM into the lower memory area
 ;
                 CALL    Clear_Sprite    ; Remove the previous frame
@@ -54,14 +54,14 @@ Wait_Frame:     HALT                    ; Wait for the next interrupt
                 DJNZ    Wait_Frame      ; Keep waiting until the delay expires
 ;
                 DI                      ; Disable interrupts before paging screen RAM again
-                LD      HL,(Current_Frame_Data)
-                LD      DE,Sprite1_Interleaved
-                OR      A
-                SBC     HL,DE           ; Is frame 1 on screen?
-                LD      HL,Sprite2_Interleaved
+                LD      HL,(Current_Frame_Data) ; Address of the frame that was just drawn
+                LD      DE,Sprite1_Interleaved ; Address of frame 1, to compare against
+                OR      A               ; Clear the carry flag so SBC is a plain subtraction
+                SBC     HL,DE           ; Is frame 1 on screen? (Zero flag set if so)
+                LD      HL,Sprite2_Interleaved ; Load frame 2's address (LD keeps the flags)
                 JR      Z,Store_Frame   ; Yes, so show frame 2 next
                 LD      HL,Sprite1_Interleaved ; No, so go back to frame 1
-Store_Frame:    LD      (Current_Frame_Data),HL
+Store_Frame:    LD      (Current_Frame_Data),HL ; Remember which frame to draw next
                 JR      Animation_Loop  ; Draw the next frame
 ;
 Exit:           DI                      ; Not reached while the loop runs, kept from 5.asm

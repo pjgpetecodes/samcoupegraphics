@@ -2,14 +2,19 @@ Welcome to the latest in my series of posts on Graphics with the SAM Coupé.
 
 You can find the other posts in this series here;
 
-- Sam Coupe Assembly Language Programming
-- Graphics in Assembly for the SAM Coupé
-- Making SAM Coupé Sprites Transparent
-- The GitHub Repo
+1. [Sam Coupe Assembly Language Programming](https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/)
+2. [Graphics in Assembly for the SAM Coupé](https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/)
+3. [Making SAM Coupé Sprites Transparent](https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/)
 
-You can find all the files for the series in my GitHub Repo here;
+## The GitHub Repo
+
+You can find all the files for the series in my GitHub Repo [here](https://github.com/pjgpetecodes/samcoupegraphics);
 
 https://github.com/pjgpetecodes/samcoupegraphics
+
+## Thankyou's
+
+Thank you to Adrian Brown for supplying the sprites for this blog post and for the regular support in answering my questions!
 
 # Animating SAM Coupé Sprites
 
@@ -27,7 +32,7 @@ Now we want him to change frames over time. Animation is really two problems;
 We will build it up in four steps, each one a separate assembly file in the `assembly/blog4` folder;
 
 | Step | File | What it adds |
-| --- | --- | --- |
+| ---- | ---- | ------------ |
 | 1 | `6-1.asm` | Takes `5.asm` and alternates two frames stored in the program |
 | 2 | `6-2.asm` | Moves the frames into an external file; still two frames |
 | 3 | `6-3.asm` | Plays all nine frames from an animation table |
@@ -143,9 +148,9 @@ This is the same structure as `Draw_Sprite`, a 32 row outer loop and a 16 byte i
 After the delay, we compare the current frame pointer with Frame 1 and swap to the other one;
 
 ```z80
-                LD      HL,(Current_Frame_Data)
-                LD      DE,Sprite1_Interleaved
-                OR      A
+                LD      HL,(Current_Frame_Data) ; Address of the frame that was just drawn
+                LD      DE,Sprite1_Interleaved ; Address of frame 1, to compare against
+                OR      A               ; Clear the carry flag so SBC is a plain subtraction
                 SBC     HL,DE           ; Is frame 1 on screen?
                 LD      HL,Sprite2_Interleaved
                 JR      Z,Store_Frame   ; Yes, so show frame 2 next
@@ -170,11 +175,11 @@ You can download the disk image for 6-1.asm to run in SimCoupe or on your real S
 
 You should now see an animating Dizzy! You'll notice how flickery it is... Don't worry, we'll fix that later on. 
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/simc0015.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog4-step1.gif)
 
 ### See the result in the SAM Coupe Web Emulator
 
-The following is showing a Web Embedded version of SimCoupe by Anomixer. You can find the repo for this here; [https://github.com/anomixer/SamCoupeWeb](https://github.com/anomixer/SamCoupeWeb).
+The following is showing a Web Embedded version of SimCoupe by Anomixer. You can find the repo for this here; https://github.com/anomixer/SamCoupeWeb.
 
 {{emulator:6-1}}
 
@@ -193,11 +198,11 @@ Current_Frame_Data: DEFW Dizzy_System_Interleaved_Image1 ; Frame currently on sc
 ```
 
 ```z80
-                LD      HL,(Current_Frame_Data)
-                LD      DE,Dizzy_System_Interleaved_Image1
-                OR      A
+                LD      HL,(Current_Frame_Data) ; Address of the frame that was just drawn
+                LD      DE,Dizzy_System_Interleaved_Image1 ; Address of frame 1, to compare against
+                OR      A               ; Clear the carry flag so SBC is a plain subtraction
                 SBC     HL,DE           ; Is frame 1 on screen?
-                LD      HL,Dizzy_System_Interleaved_Image2
+                LD      HL,Dizzy_System_Interleaved_Image2 ; Load frame 2's address (LD keeps the flags)
                 JR      Z,Store_Frame   ; Yes, so show frame 2 next
                 LD      HL,Dizzy_System_Interleaved_Image1 ; No, so go back to frame 1
 ```
@@ -214,7 +219,7 @@ You can download the disk image for 6-2.asm to run in SimCoupe or on your real S
 
 ### The Result
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step2.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog4-step2.gif)
 
 The animation looks just the same as before, but the frame data now lives in its own file.
 
@@ -227,12 +232,12 @@ The animation looks just the same as before, but the frame data now lives in its
 With nine frames, swapping between two with a compare is no good. An animation is really just a list of frames, so we describe it with a table. The sequence starts with a count of how many frames it has, followed by the frame addresses;
 
 ```z80
-Dizzy_Animation: DEFB   9
-                DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2
-                DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4
-                DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6
-                DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8
-                DEFW    Dizzy_System_Interleaved_Image9
+Dizzy_Animation:  DEFB   9
+                  DEFW    Dizzy_System_Interleaved_Image1,Dizzy_System_Interleaved_Image2
+                  DEFW    Dizzy_System_Interleaved_Image3,Dizzy_System_Interleaved_Image4
+                  DEFW    Dizzy_System_Interleaved_Image5,Dizzy_System_Interleaved_Image6
+                  DEFW    Dizzy_System_Interleaved_Image7,Dizzy_System_Interleaved_Image8
+                  DEFW    Dizzy_System_Interleaved_Image9
 ```
 
 Because the table is just data, we could add further tables for other sequences, and point the program at whichever we like.
@@ -240,9 +245,9 @@ Because the table is just data, we could add further tables for other sequences,
 Each `DEFW` is a 16 bit address, so each takes two bytes. The program now remembers which sequence is playing, which frame of it we are on, and how many interrupts are left before we change;
 
 ```z80
-Current_Animation: DEFW 0               ; Address of the sequence being played
-Current_Frame:  DEFB    0               ; Index into the current sequence
-Current_Delay:  DEFB    0               ; Interrupts left before the next frame
+Current_Animation: DEFW 0                  ; Address of the sequence being played
+Current_Frame:     DEFB    0               ; Index into the current sequence
+Current_Delay:     DEFB    0               ; Interrupts left before the next frame
 ```
 
 ### Finding the Frame Address
@@ -250,15 +255,15 @@ Current_Delay:  DEFB    0               ; Interrupts left before the next frame
 To draw frame number `Current_Frame`, we skip the count byte, add the frame number twice (once per byte of each pointer), then read the address out;
 
 ```z80
-                LD      A,(Current_Frame)
-                LD      E,A
-                LD      D,0
-                LD      HL,(Current_Animation)
+                LD      A,(Current_Frame); Get the current frame number
+                LD      E,A             ; Put the frame number in E
+                LD      D,0             ; Clear D so DE holds the frame number
+                LD      HL,(Current_Animation); Address of the current animation table
                 INC     HL              ; Skip the frame count byte
-                ADD     HL,DE
+                ADD     HL,DE           ; Add the frame number to the table address
                 ADD     HL,DE           ; Each frame pointer occupies two bytes
-                LD      E,(HL)
-                INC     HL
+                LD      E,(HL)          ; Low byte of the frame address
+                INC     HL              ; Move to the high byte
                 LD      D,(HL)          ; DE now points to the selected frame data
 ```
 
@@ -279,17 +284,17 @@ Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
 ```z80
 Update_Animation:
                 LD      A,(Current_Delay) ; Count down the frame delay
-                DEC     A
-                LD      (Current_Delay),A
+                DEC     A               ; One interrupt has passed
+                LD      (Current_Delay),A; Store the delay counter
                 RET     NZ              ; Only redraw when the delay expires
 ;
                 LD      A,Frame_Delay   ; Restart the frame delay
-                LD      (Current_Delay),A
-                LD      HL,(Current_Animation)
+                LD      (Current_Delay),A; Store the delay counter
+                LD      HL,(Current_Animation); Address of the current animation table
                 LD      B,(HL)          ; The first byte is the number of frames
-                LD      A,(Current_Frame)
-                INC     A
-                CP      B
+                LD      A,(Current_Frame); Get the current frame number
+                INC     A               ; Move on to the next frame
+                CP      B               ; Have we passed the last frame?
                 JR      C,Store_Frame   ; Still inside the sequence
                 XOR     A               ; After the last frame, return to frame zero
 ;
@@ -312,7 +317,7 @@ You can download the disk image for 6-3.asm to run in SimCoupe or on your real S
 
 ### The Result
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step3.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog4-step3.gif)
 
 Dizzy now cycles through nine frames. It's still flickery, but we're about to fix that.
 
@@ -344,17 +349,17 @@ The ROM clear-screen routine only clears the screen being displayed, so we blank
 
 ```z80
 Clear_Hidden_Page:
-                LD      A,(Display_Page)
+                LD      A,(Display_Page); Get the page currently on display
                 XOR     0b00000100      ; Select the page that is not displayed
                 OR      0b00100000      ; Map RAM into the lower memory area
                 OUT     (LMPR),A        ; Page the hidden screen RAM in
-                LD      HL,0
-                LD      DE,1
-                LD      BC,0x5FFF
+                LD      HL,0            ; Start filling at the first screen byte
+                LD      DE,1            ; Copy each byte to the next one
+                LD      BC,0x5FFF       ; Number of bytes left to fill
                 LD      (HL),0          ; Colour zero, as the ROM clear uses
                 LDIR                    ; Fill the rest of the screen with zeros
                 LD      A,0x1F          ; Page ROM 0 back into the lower memory area
-                OUT     (LMPR),A
+                OUT     (LMPR),A        ; Page the chosen RAM in
                 RET                     ; Return to the caller
 ```
 
@@ -366,7 +371,7 @@ Both screens are now blank, and Dizzy is still drawn at the top left, so nothing
 
 ```z80
 Draw_Frame:     DI                      ; Interrupts stay off while screen RAM is paged in
-                LD      A,(Display_Page)
+                LD      A,(Display_Page); Get the page currently on display
                 XOR     0b00000100      ; Always draw on the page that is not displayed
                 OR      0b00100000      ; Map RAM into the lower memory area
                 OUT     (LMPR),A        ; Page the hidden screen RAM into the lower memory area
@@ -377,7 +382,7 @@ The rest of the routine is the same, apart from the end. Once the new frame is c
 ```z80
                 LD      A,0x1F          ; Page ROM 0 back into the lower memory area
                 OUT     (LMPR),A        ; The ROM's interrupt handler is needed by HALT
-                LD      A,1
+                LD      A,1             ; Flag that a new frame is ready
                 LD      (Frame_Pending),A ; Tell the main loop a frame is ready to show
                 EI                      ; Enable interrupts
                 RET
@@ -389,14 +394,14 @@ Back in the main loop, we wait for the frame interrupt, and only then flip, by c
 
 ```z80
 Show_Pending_Frame:
-                LD      A,(Frame_Pending)
-                OR      A
+                LD      A,(Frame_Pending); Has a frame been drawn?
+                OR      A               ; Is a new frame waiting?
                 RET     Z
-                XOR     A
-                LD      (Frame_Pending),A
-                LD      A,(Display_Page)
+                XOR     A               ; Clear A to zero
+                LD      (Frame_Pending),A; Mark the frame as shown
+                LD      A,(Display_Page); Get the page currently on display
                 XOR     0b00000100      ; The prepared hidden page becomes visible
-                LD      (Display_Page),A
+                LD      (Display_Page),A; Remember which page is now displayed
                 OR      0b01100000      ; Keep the screen in MODE 4
                 OUT     (VMPR),A        ; Change pages at the frame interrupt
                 RET
@@ -414,7 +419,7 @@ You can download the disk image for 6-4.asm to run in SimCoupe or on your real S
 
 ### The Result
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog4-step4.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog4-step4.gif)
 
 Dizzy now animates smoothly, with no flicker!
 
@@ -425,7 +430,7 @@ Dizzy now animates smoothly, with no flicker!
 ## Comparing the Versions
 
 | Example | Frames | Where it draws | Main point |
-| --- | --- | --- | --- |
+| ------- | ------ | -------------- | ---------- |
 | `6-1.asm` | Two, in the program | Displayed screen | `5.asm` plus frame swapping and timing on a blank screen |
 | `6-2.asm` | Two, from an external file | Displayed screen | Same code as `6-1.asm`, with the data moved into an included file |
 | `6-3.asm` | Nine, from an external file | Displayed screen | Animation tables and sequences |
@@ -446,3 +451,5 @@ Then run the disk in SimCoupe. The demos loop forever, so reset the SAM to stop 
 We have gone from swapping two frames, to loading them from an external file, to animation tables, to preparing complete frames on a hidden page.
 
 Dizzy still plays the same loop whatever you do. In the next post we will read the keyboard, and choose between idle and jump sequences.
+
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/image-3.png)

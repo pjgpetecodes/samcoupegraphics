@@ -59,17 +59,17 @@ Clear_Screen:   XOR     A               ; Clear the A register to clear the full
 ; A MODE 4 screen is 24 KB, so we clear the first 0x6000 bytes of the paged-in RAM.
 ;
 Clear_Hidden_Page:
-                LD      A,(Display_Page)
+                LD      A,(Display_Page); Get the page currently on display
                 XOR     0b00000100      ; Select the page that is not displayed
                 OR      0b00100000      ; Map RAM into the lower memory area
                 OUT     (LMPR),A        ; Page the hidden screen RAM in
-                LD      HL,0
-                LD      DE,1
-                LD      BC,0x5FFF
+                LD      HL,0            ; Start filling at the first screen byte
+                LD      DE,1            ; Copy each byte to the next one
+                LD      BC,0x5FFF       ; Number of bytes left to fill
                 LD      (HL),0          ; Colour zero, as the ROM clear uses
                 LDIR                    ; Fill the rest of the screen with zeros
                 LD      A,0x1F          ; Page ROM 0 back into the lower memory area
-                OUT     (LMPR),A
+                OUT     (LMPR),A        ; Page the chosen RAM in
                 RET                     ; Return to the caller
 ;
 ; ***********************************************************************************
@@ -78,14 +78,14 @@ Clear_Hidden_Page:
 ; Only swap pages once a complete frame has been drawn on the hidden page.
 ;
 Show_Pending_Frame:
-                LD      A,(Frame_Pending)
-                OR      A
+                LD      A,(Frame_Pending); Has a frame been drawn?
+                OR      A               ; Is a new frame waiting?
                 RET     Z               ; Nothing new to show
-                XOR     A
-                LD      (Frame_Pending),A
-                LD      A,(Display_Page)
+                XOR     A               ; Clear A to zero
+                LD      (Frame_Pending),A; Mark the frame as shown
+                LD      A,(Display_Page); Get the page currently on display
                 XOR     0b00000100      ; The hidden page becomes the displayed page
-                LD      (Display_Page),A
+                LD      (Display_Page),A; Remember which page is now displayed
                 OR      0b01100000      ; Keep MODE 4
                 OUT     (VMPR),A        ; Display the finished frame in a single step
                 RET                     ; Return to the caller
@@ -96,24 +96,24 @@ Show_Pending_Frame:
 ;
 Set_Animation:  LD      (Current_Animation),HL
                 XOR     A               ; Start from the first frame
-                LD      (Current_Frame),A
-                LD      A,Frame_Delay
-                LD      (Current_Delay),A
+                LD      (Current_Frame),A; Store the frame number
+                LD      A,Frame_Delay   ; Load the number of interrupts to hold a frame
+                LD      (Current_Delay),A; Store the delay counter
                 JR      Draw_Frame      ; Draw the first frame straight away
 ;
 Update_Animation:
                 LD      A,(Current_Delay) ; Count down the frame delay
-                DEC     A
-                LD      (Current_Delay),A
+                DEC     A               ; One interrupt has passed
+                LD      (Current_Delay),A; Store the delay counter
                 RET     NZ              ; Only redraw when the delay expires
 ;
                 LD      A,Frame_Delay   ; Restart the frame delay
-                LD      (Current_Delay),A
-                LD      HL,(Current_Animation)
+                LD      (Current_Delay),A; Store the delay counter
+                LD      HL,(Current_Animation); Address of the current animation table
                 LD      B,(HL)          ; The first byte is the number of frames
-                LD      A,(Current_Frame)
-                INC     A
-                CP      B
+                LD      A,(Current_Frame); Get the current frame number
+                INC     A               ; Move on to the next frame
+                CP      B               ; Have we passed the last frame?
                 JR      C,Store_Frame   ; Still inside the sequence
                 XOR     A               ; After the last frame, return to frame zero
 ;
@@ -125,29 +125,29 @@ Store_Frame:    LD      (Current_Frame),A
 ; ***********************************************************************************
 ;
 Draw_Frame:     DI                      ; Interrupts stay off while screen RAM is paged in
-                LD      A,(Display_Page)
+                LD      A,(Display_Page); Get the page currently on display
                 XOR     0b00000100      ; Always draw on the page that is not displayed
                 OR      0b00100000      ; Map RAM into the lower memory area
                 OUT     (LMPR),A        ; Page the hidden screen RAM into the lower memory area
 ;
                 CALL    Clear_Sprite    ; Remove the old frame left on this page
 ;
-                LD      A,(Current_Frame)
-                LD      E,A
-                LD      D,0
-                LD      HL,(Current_Animation)
+                LD      A,(Current_Frame); Get the current frame number
+                LD      E,A             ; Put the frame number in E
+                LD      D,0             ; Clear D so DE holds the frame number
+                LD      HL,(Current_Animation); Address of the current animation table
                 INC     HL              ; Skip the frame count byte
-                ADD     HL,DE
+                ADD     HL,DE           ; Add the frame number to the table address
                 ADD     HL,DE           ; Each frame pointer occupies two bytes
-                LD      E,(HL)
-                INC     HL
+                LD      E,(HL)          ; Low byte of the frame address
+                INC     HL              ; Move to the high byte
                 LD      D,(HL)          ; DE now points to the selected frame data
                 LD      HL,0            ; Top-left screen byte, as in Tutorial 5
                 CALL    Draw_Sprite     ; Draw the frame using the mask/pixel data
 ;
                 LD      A,0x1F          ; Page ROM 0 back into the lower memory area
                 OUT     (LMPR),A        ; The ROM's interrupt handler is needed by HALT
-                LD      A,1
+                LD      A,1             ; Flag that a new frame is ready
                 LD      (Frame_Pending),A ; Tell the main loop a frame is ready to show
                 EI                      ; Enable interrupts
                 RET                     ; Return to the caller

@@ -38,7 +38,7 @@ Start:          DI                      ; Disable interrupts
                 LD      (Screen_Page),A ; Save the page value for drawing
 ;
                 LD      HL,Dizzy_Animation ; Start the animation sequence
-                CALL    Set_Animation
+                CALL    Set_Animation   ; Draw the first frame and reset the counters
 ;
 Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
                 CALL    Update_Animation ; Change frame when the delay expires
@@ -60,24 +60,24 @@ Clear_Screen:   XOR     A               ; Clear the A register to clear the full
 ;
 Set_Animation:  LD      (Current_Animation),HL
                 XOR     A               ; Start from the first frame
-                LD      (Current_Frame),A
-                LD      A,Frame_Delay
-                LD      (Current_Delay),A
+                LD      (Current_Frame),A; Store the frame number
+                LD      A,Frame_Delay   ; Load the number of interrupts to hold a frame
+                LD      (Current_Delay),A; Store the delay counter
                 JR      Draw_Frame      ; Draw the first frame straight away
 ;
 Update_Animation:
                 LD      A,(Current_Delay) ; Count down the frame delay
-                DEC     A
-                LD      (Current_Delay),A
+                DEC     A               ; One interrupt has passed
+                LD      (Current_Delay),A; Store the delay counter
                 RET     NZ              ; Only redraw when the delay expires
 ;
                 LD      A,Frame_Delay   ; Restart the frame delay
-                LD      (Current_Delay),A
-                LD      HL,(Current_Animation)
+                LD      (Current_Delay),A; Store the delay counter
+                LD      HL,(Current_Animation); Address of the current animation table
                 LD      B,(HL)          ; The first byte is the number of frames
-                LD      A,(Current_Frame)
-                INC     A
-                CP      B
+                LD      A,(Current_Frame); Get the current frame number
+                INC     A               ; Move on to the next frame
+                CP      B               ; Have we passed the last frame?
                 JR      C,Store_Frame   ; Still inside the sequence
                 XOR     A               ; After the last frame, return to frame zero
 ;
@@ -89,20 +89,20 @@ Store_Frame:    LD      (Current_Frame),A
 ; ***********************************************************************************
 ;
 Draw_Frame:     DI                      ; Interrupts stay off while screen RAM is paged in
-                LD      A,(Screen_Page)
+                LD      A,(Screen_Page) ; Get the saved screen page value
                 OUT     (LMPR),A        ; Page the screen RAM into the lower memory area
 ;
                 CALL    Clear_Sprite    ; Remove the previous frame
 ;
-                LD      A,(Current_Frame)
-                LD      E,A
-                LD      D,0
-                LD      HL,(Current_Animation)
+                LD      A,(Current_Frame); Get the current frame number
+                LD      E,A             ; Put the frame number in E
+                LD      D,0             ; Clear D so DE holds the frame number
+                LD      HL,(Current_Animation); Address of the current animation table
                 INC     HL              ; Skip the frame count byte
-                ADD     HL,DE
+                ADD     HL,DE           ; Add the frame number to the table address
                 ADD     HL,DE           ; Each frame pointer occupies two bytes
-                LD      E,(HL)
-                INC     HL
+                LD      E,(HL)          ; Low byte of the frame address
+                INC     HL              ; Move to the high byte
                 LD      D,(HL)          ; DE now points to the selected frame data
                 LD      HL,0            ; Top-left screen byte, as in Tutorial 5
                 CALL    Draw_Sprite     ; Draw the frame using the mask/pixel data

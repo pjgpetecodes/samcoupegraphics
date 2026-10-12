@@ -56,11 +56,11 @@ Wait_Frame:     HALT                    ; Wait for the next interrupt
                 DJNZ    Wait_Frame      ; Keep waiting until the delay expires
 ;
                 DI                      ; Disable interrupts before paging screen RAM again
-                LD      HL,(Current_Frame_Data)
-                LD      DE,Dizzy_System_Interleaved_Image1
-                OR      A
+                LD      HL,(Current_Frame_Data) ; Address of the frame that was just drawn
+                LD      DE,Dizzy_System_Interleaved_Image1 ; Address of frame 1, to compare against
+                OR      A               ; Clear the carry flag so SBC is a plain subtraction
                 SBC     HL,DE           ; Is frame 1 on screen?
-                LD      HL,Dizzy_System_Interleaved_Image2
+                LD      HL,Dizzy_System_Interleaved_Image2 ; Load frame 2's address (LD keeps the flags)
                 JR      Z,Store_Frame   ; Yes, so show frame 2 next
                 LD      HL,Dizzy_System_Interleaved_Image1 ; No, so go back to frame 1
 Store_Frame:    LD      (Current_Frame_Data),HL
