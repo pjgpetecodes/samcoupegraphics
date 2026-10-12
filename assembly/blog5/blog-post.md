@@ -2,15 +2,20 @@ Welcome to the latest in my series of posts on Graphics with the SAM Coupé.
 
 You can find the other posts in this series here;
 
-- Sam Coupe Assembly Language Programming
-- Graphics in Assembly for the SAM Coupé
-- Making SAM Coupé Sprites Transparent
-- Animating SAM Coupé Sprites
-- The GitHub Repo
+1. [Sam Coupe Assembly Language Programming](https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/)
+2. [Graphics in Assembly for the SAM Coupé](https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/)
+3. [Making SAM Coupé Sprites Transparent](https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/)
+4. [Animating SAM Coupé Sprites](https://www.petecodes.co.uk/graphics-with-the-sam-coupe-animation/)
 
-You can find all the files for the series in my GitHub Repo here;
+## The GitHub Repo
+
+You can find all the files for the series in my GitHub Repo [here](https://github.com/pjgpetecodes/samcoupegraphics);
 
 https://github.com/pjgpetecodes/samcoupegraphics
+
+## Thankyou's
+
+Thank you to Adrian Brown for supplying the sprites for this blog post and for the regular support in answering my questions!
 
 # Controlling Animation with the Keyboard
 
@@ -119,13 +124,13 @@ You can download the disk image for 7-1.asm to run in SimCoupe or on your real S
 
 ### The Result
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step1.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog5-step1.gif)
 
 Press any key and Dizzy rolls once, then returns to idle.
 
 ### See the result in the SAM Coupe Web Emulator
 
-The following is showing a Web Embedded version of SimCoupe by Anomixer. You can find the repo for this here; [https://github.com/anomixer/SamCoupeWeb](https://github.com/anomixer/SamCoupeWeb).
+The following is showing a Web Embedded version of SimCoupe by Anomixer. You can find the repo for this here; https://github.com/anomixer/SamCoupeWeb.
 
 {{emulator:7-1}}
 
@@ -134,7 +139,7 @@ The following is showing a Web Embedded version of SimCoupe by Anomixer. You can
 Any key is fine for a test, but a game wants specific keys. To look at one key we read just the row it lives in. The top byte of the port address is a mask, with one zero bit for each row we want, so these two addresses give us everything we need for this tutorial;
 
 | Port | Bit 0 | Bit 1 | Bit 2 | Bit 3 | Bit 4 |
-| --- | --- | --- | --- | --- | --- |
+| ---- | ----- | ----- | ----- | ----- | ----- |
 | `0x7FFE` | Space | Symbol | M | N | B |
 | `0xFEFE` | Shift | Z | X | C | V |
 
@@ -162,7 +167,7 @@ You can download the disk image for 7-2.asm to run in SimCoupe or on your real S
 
 ### The Result
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step2.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog5-step2.gif)
 
 Dizzy now only rolls when you press Space.
 
@@ -249,7 +254,7 @@ You can download the disk image for 7-3.asm to run in SimCoupe or on your real S
 
 ### The Result
 
-![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog5-step3.gif)
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/blog5-step3.gif)
 
 Hold Z or X and Dizzy walks, and press Space to roll.
 
@@ -270,3 +275,5 @@ Then run the disks in SimCoupe. The demos loop forever, so reset the SAM to stop
 ## Where to Go Next
 
 So far Dizzy has stayed in a fixed position on a blank screen, and he walks on the spot. Next we can look at scenery behind him, which means saving and restoring the background rather than just clearing it, and then moving him around.
+
+![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/image-3.png)
