@@ -107,7 +107,9 @@ switches to the original Dizzy colour numbers in `tidizzy_interleaved.asm`
 (the first 24 sprites exported from the Sprite Editor). `8-2.asm` lets keys 1 to 5
 change palette entry 0, which recolours the whole background. `8-3.asm` adds sideways jumps (hold Z or X and press Space, frames 26-39) using
 `tidizzy_cropped.asm`, the frames cropped to 13 bytes x 22 rows so that 38 of them fit in memory.
-Sequences now carry a loop flag, so rolls and jumps always play to the end.
+The editor-generated CLUT loader and palette table are shared in
+`assembly\blog6\sam_palette.asm`. Sequences now carry a loop flag, so rolls and
+jumps always play to the end.
 
 ## Debug in SimCoupe
 
@@ -117,3 +119,11 @@ the code page using **H**, `1`, Enter, then navigate using **A**, `8000`,
 Enter. Double-click an instruction to set a breakpoint, exit the debugger with
 **Esc**, and reset/reboot the disk to hit it. See `simcoupe\Manual.md` for this
 version's stepping keys and debugger commands.
+
+## Copilot repository support
+
+Repository-wide guidance is in `.github\copilot-instructions.md`. Focused custom
+agents are available for SAM Coupé assembly, hardware, blog/WordPress
+synchronization, and SimCoupe visual testing. Reusable skills under
+`.github\skills` cover assembly progressions, SAM hardware, WordPress/markdown
+sync, GIF capture, and sprite-data maintenance.

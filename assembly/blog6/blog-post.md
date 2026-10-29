@@ -15,27 +15,27 @@ https://github.com/pjgpetecodes/samcoupegraphics
 
 # Colour Palettes on the SAM Coupé
 
-So far Dizzy has been drawn in whatever colours the SAM gives us when it starts up. That has worked fine, but it means we've been picking colour numbers from the default palette. In this tutorial we take control of the palette, which is one of the best features of the SAM. We'll do it in two steps;
+So far Dizzy has been drawn in whatever colours the SAM gives us when it starts up. In this tutorial we take control of the palette with the palette tools in my SAM Coupé Sprite Editor, then use it in the animation we've already built. We'll do it in three steps;
 
-1. Load our own 16 colour palette, and switch to the original Dizzy sprites.
+1. Design a 16-colour palette in the editor, save it, and export the CLUT loader and palette.
 2. Change a palette entry while the program runs, and watch the whole background change.
 3. Hold Z or X and press Space to jump sideways, using more frames of Dizzy.
 
-We continue directly from `assembly/blog5/7-3.asm`.
+We continue directly from the end of our [previous post on Keyboard Input](https://www.petecodes.co.uk/graphics-with-the-sam-coupe-keyboard-input/) and from the GitHub repo file `assembly/blog5/7-3.asm`.
 
 ## What is a Palette?
 
-In MODE 4 every pixel is four bits, which gives us the numbers 0 to 15. That number doesn't say what colour the pixel is, though. It is an index into the Colour Look Up Table, or CLUT. The CLUT holds 16 entries, and each entry is a 7 bit value which picks one of the SAM's 128 colours.
+In MODE 4 every pixel is four bits, which gives us the numbers 0 to 15. That number doesn't say what colour the pixel is, though. It is an index into the Colour Look Up Table, or CLUT. The CLUT holds 16 entries, and each entry is a 7-bit value which picks one of the SAM's 128 hardware colours.
 
-This is why the palette is so powerful. If we change an entry in the CLUT, every pixel on the screen which uses that index changes colour at once. We don't need to touch the screen memory at all.
+The 16 swatches in the Sprite Editor are these CLUT indices, not the 128 hardware colours themselves. Sprites store the indices. If we edit a palette entry, every pixel in every sprite or animation frame using that index changes colour at once; the sprite pixels and transparency do not need to change.
 
-The CLUT is written through port `248` (`0xF8`). The palette entry we want to write, 0 to 15, goes in the top byte of the port address, so we put it in `B`, and then we send the colour value with `OUT (C),A`.
+The CLUT is written through port `248` (`0xF8`). The palette entry number selects which index to change, and the 7-bit hardware colour is the value written to it. The editor can generate the loader and table for us, so we don't have to hand-code the `OUT` loop.
 
 ## Step 1: Our Own Palette
 
 ### The Dizzy Sprites
 
-In the previous tutorial we used a set of Dizzy frames which had already been recoloured to use only the default colours. This time we use the frames exactly as they came out of the Sprite Editor, from the original Dizzy sprite sheet. These keep the colour numbers Dizzy was originally drawn with, and so they need the palette Dizzy was originally drawn with.
+In the previous tutorial we used frames remapped to the system palette. This time we use the original colour indices from a Dizzy sprite sheet supplied by Adrian Brown (Thanks!).
 
 The data is in `assembly/blog6/tidizzy_interleaved.asm`, and it's the first 24 sprites. They are the same frames in the same order as before, so the animation tables only need new label names;
 
@@ -52,53 +52,97 @@ Jump_Animation: DEFB    8
 
 The full sprite sheet has 62 sprites, which is 62K of data. That's too much to keep in memory next to our program, so we only include the first 24 for now.
 
-### The Palette Table
+### Designing the Palette
 
-Our palette is just 16 bytes of data. Entry 0 is the blank background, and we've made it black, just as the screen was in the previous tutorials;
+Open the palette tools in the Sprite Editor and choose a hardware colour for each of the 16 CLUT indices. The selected colour can be edited with the 128-colour SAM master picker or with its 7-bit channel checkboxes; the editor shows the values in decimal and hexadecimal. The presets include the Default SAM palette (ROM 3.0) and the ROM Mode 3 defaults (group 0 maps logical colours 0, 17, 34, 127 to physical entries 0, 2, 1, 3). The Mode 3 reference is informational only: this editor does not export attribute or 2-bit sprite formats.
+
+![Sprite Editor palette dialog showing the 16 CLUT indices and 128-colour SAM hardware palette](images/blog6-palette-dialog.png)
+
+Save the palette JSON as a separate file if you want to reuse just the palette, and open it again independently of a sprite project. The project JSON and autosave also include the palette. Older projects which don't have palette data use the default palette when opened. The Set transparent checkbox paints transparency regardless of which colour is selected.
+
+There are a couple of important import details. Importing raw assembly assumes the default palette, so open your custom palette afterwards. PNG import quantizes to the current palette, with the first palette index winning a tie. Sprite, mask, and interleaved exports contain colour indices only; the palette has to be loaded separately.
+
+### Exporting the CLUT Loader and Palette
+
+The Export panel can generate just the palette `DEFB` table with comments, or the CLUT loader and palette together. Here we're using the latter. The Download palette assembly option follows the selected hexadecimal notation. The loader preserves `AF`, `BC`, `DE`, and `HL`. It doesn't change the video mode or HMPR group.
+
+![Sprite Editor palette export panel showing the generated CLUT loader and the palette used in this example](images/blog6-palette-export.png)
+
+This is the output from the editor for the palette used in this example:
 
 ```z80
-Palette:        DEFB    &00, &7F, &6E, &6A, &2A, &39, &1D, &00
-                DEFB    &6C, &42, &24, &7E, &59, &77, &70, &07
+; CALL LoadPalette; preserves AF, BC, DE and HL
+; B is the CLUT index; C is the port low byte.
+; Writes all 16 entries; does not change the screen mode or HMPR.
+; Not interrupt-atomic: manage interrupts in the caller if required.
+LoadPalette:
+    PUSH AF
+    PUSH BC
+    PUSH DE
+    PUSH HL
+    LD HL,SAM_Palette
+    LD C,&F8
+    LD B,0
+    LD D,16
+LoadPalette_Loop:
+    LD A,(HL)
+    OUT (C),A
+    INC HL
+    INC B
+    DEC D
+    JR NZ,LoadPalette_Loop
+    POP HL
+    POP DE
+    POP BC
+    POP AF
+    RET
+
+; SAM CLUT entries 0-15 (7-bit hardware colours)
+SAM_Palette:
+    DEFB &5D ; Index 0: colour 93 ($5D), RGB #24ffff
+    DEFB &7F ; Index 1: colour 127 ($7F), RGB #ffffff
+    DEFB &6E ; Index 2: colour 110 ($6E), RGB #ffff24
+    DEFB &6A ; Index 3: colour 106 ($6A), RGB #ffb624
+    DEFB &2A ; Index 4: colour 42 ($2A), RGB #ff2424
+    DEFB &39 ; Index 5: colour 57 ($39), RGB #b624ff
+    DEFB &1D ; Index 6: colour 29 ($1D), RGB #246dff
+    DEFB &00 ; Index 7: colour 0 ($00), RGB #000000
+    DEFB &6C ; Index 8: colour 108 ($6C), RGB #b6ff24
+    DEFB &42 ; Index 9: colour 66 ($42), RGB #499200
+    DEFB &24 ; Index 10: colour 36 ($24), RGB #924900
+    DEFB &7E ; Index 11: colour 126 ($7E), RGB #ffffb6
+    DEFB &59 ; Index 12: colour 89 ($59), RGB #24b6ff
+    DEFB &77 ; Index 13: colour 119 ($77), RGB #dbdbdb
+    DEFB &70 ; Index 14: colour 112 ($70), RGB #929292
+    DEFB &07 ; Index 15: colour 7 ($07), RGB #494949
 ```
 
-### Writing the Palette
-
-We start with `BC` set to the CLUT port, which means that `B` is palette entry 0. Then we loop through the table, writing a value, and moving on to the next entry by incrementing `B`;
+The sprite bytes still hold indices, not these hardware colour values. Include the exported palette code in the program and call `LoadPalette` before the first sprite is drawn:
 
 ```z80
-CLUT:           EQU     248             ; Colour Look Up Table port
-```
-
-```z80
-Set_Palette:    LD      HL,Palette      ; Point to our 16 colour values
-                LD      BC,CLUT         ; B is palette entry 0, C is the CLUT port
-                LD      E,16            ; Sixteen entries to write
-;
-Palette_Loop:   LD      A,(HL)          ; Read the next colour value
-                OUT     (C),A           ; Write it to the palette entry in B
-                INC     HL              ; Next colour value
-                INC     B               ; Next palette entry
-                DEC     E               ; Count down the entries
-                JR      NZ,Palette_Loop ; Continue until all 16 are set
-                RET                     ; Return to the caller
+                CALL    LoadPalette    ; Apply the editor palette before drawing
+                LD      HL,Idle_Animation
+                CALL    Set_Animation  ; Draw the first sprite frame
 ```
 
 ### The ROM Resets the Palette
 
-You might expect to call `Set_Palette` once at the start of the program. If we do, the colours appear for a moment and then go back to the default palette!
+Calling the loader once at startup isn't enough. Our main loop uses `HALT` to wait for the 50 Hz interrupt, and the ROM interrupt routine restores its own palette. So we load our palette again after every `HALT`, before drawing the next frame.
 
-The reason is that our main loop calls `HALT` to wait for the 50Hz interrupt, and so the ROM's interrupt routine runs fifty times a second. It puts the palette back to how the ROM wants it. We could write our own interrupt handler, but that is a topic for another day. The simple answer is to set our palette again immediately after every `HALT`;
+The generated routine isn't interrupt-atomic. This example briefly disables interrupts around the loader so an interrupt can't leave only part of the CLUT updated. The routine restores the registers it uses; the caller controls interrupts.
 
 ```z80
 Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
-                CALL    Set_Palette     ; The ROM interrupt resets the palette, so set ours again
+                DI                      ; Keep the 16 CLUT writes together
+                CALL    LoadPalette    ; The ROM interrupt reset the palette
+                EI                      ; Re-enable interrupts after the complete palette is loaded
                 CALL    Show_Pending_Frame ; Swap pages if a new frame is ready
                 CALL    Choose_Animation ; Idle, walk or jump, depending on the keyboard
                 CALL    Update_Animation ; Change frame when the delay expires
                 JR      Animation_Loop  ; Repeat forever
 ```
 
-Sixteen `OUT` instructions is nothing compared to the time we have in each frame.
+The palette data is a separate include from the sprite data. Keep the generated routine and table together in `sam_palette.asm`; the sprite include supplies only the indexed sprite pixels. The raw assembly importer assumes the default palette, so load the custom palette separately when opening those sprite files in the editor.
 
 ### The Full Assembly
 
@@ -114,7 +158,7 @@ You can download the disk image for 8-1.asm to run in SimCoupe or on your real S
 
 ![](https://www.petecodes.co.uk/wp-content/uploads/2026/10/TODO-blog6-step1.gif)
 
-Dizzy is now white with red hands and boots, the colours he was drawn with. Everything else works just as before, with Space to roll, and Z and X to walk.
+Dizzy is now drawn with the hardware colours selected for the sprite's indices. Index 0 is cyan in this palette, so the cleared background is cyan too. Everything else works just as before, with Space to roll, and Z and X to walk.
 
 ### See the result in the SAM Coupe Web Emulator
 
@@ -124,14 +168,14 @@ Dizzy is now white with red hands and boots, the colours he was drawn with. Ever
 
 Now for the fun part. The whole background is colour 0, because that is what we clear the screen to. So if we change palette entry 0, the whole background changes colour without us drawing anything.
 
-We'll let keys 1 to 5 choose the background. We add a table with a colour for each key;
+We'll let keys 1 to 5 choose the background. The editor supplies the palette values used for the sprite; this small extra table is program-specific and gives the keys their runtime choices. Choose the five hardware colours in the editor's master picker and put their 7-bit values here. The editor exports the static palette and loader, not this keyboard-selection logic;
 
 ```z80
 Background_Colours:
                 DEFB    &00, &11, &22, &44, &7F
 ```
 
-These are black, blue, red, green and white. The number keys are on the keyboard row `0xF7FE`, and bit 0 is key 1, through to bit 4 which is key 5. A key which is down reads as zero.
+These example values are black, blue, red, green and white. The number keys are on the keyboard row `0xF7FE`, and bit 0 is key 1, through to bit 4 which is key 5. A key which is down reads as zero.
 
 We shift each bit out in turn with `RRA` into the carry flag, and when we find a key that is down, we use its colour. Otherwise we move on to the next entry in the table;
 
@@ -149,12 +193,12 @@ Background_Key: RRA                     ; Move the next key bit into the carry f
                 RET                     ; No key was down
 ```
 
-We don't write to the CLUT here. Remember the ROM resets it every frame, so instead we replace the first entry of our own `Palette` table, and `Set_Palette` will write it for us on the next frame;
+We don't write to the CLUT here. The ROM resets it every frame, so instead we replace the first entry of the generated `SAM_Palette` table. The next call to `LoadPalette` writes the updated value;
 
 ```z80
 Set_Background: LD      A,(HL)          ; Read the chosen colour value
-                LD      (Palette),A     ; Replace entry 0 in our palette table
-                RET                     ; Set_Palette writes it to the CLUT next frame
+                LD      (SAM_Palette),A ; Replace entry 0 in the generated palette table
+                RET                     ; LoadPalette writes it to the CLUT next frame
 ```
 
 Then we call it from the main loop;

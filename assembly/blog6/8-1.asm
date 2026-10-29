@@ -18,7 +18,6 @@
 ;
 LMPR:           EQU     250             ; Lower Memory Page Register
 VMPR:           EQU     252             ; Video Memory Page Register
-CLUT:           EQU     248             ; Colour Look Up Table port
 JCLSBL:         EQU     334             ; ROM clear-screen routine
 ;
 Frame_Delay:    EQU     5               ; Hold each frame for five 50 Hz interrupts
@@ -37,11 +36,14 @@ Start:          DI                      ; Disable interrupts
                 LD      SP,0xFF00       ; Use a safe stack above the program and its 24 frames
                 CALL    Clear_Hidden_Page ; Blank the page we will draw on
 ;
+                CALL    LoadPalette    ; Apply the editor palette before drawing
                 LD      HL,Idle_Animation ; Start with the idle sequence
                 CALL    Set_Animation   ; Draw the first frame on the hidden page
 ;
 Animation_Loop: HALT                    ; Wait for the next 50 Hz interrupt
-                CALL    Set_Palette     ; The ROM interrupt resets the palette, so set ours again
+                DI                      ; Keep the 16 CLUT writes together
+                CALL    LoadPalette    ; The ROM interrupt resets the palette, so set ours again
+                EI                      ; Re-enable interrupts after the palette is loaded
                 CALL    Show_Pending_Frame ; Swap pages if a new frame is ready
                 CALL    Choose_Animation ; Idle, walk or jump, depending on the keyboard
                 CALL    Update_Animation ; Change frame when the delay expires
@@ -51,24 +53,6 @@ Exit:           DI                      ; Not reached while the loop runs, kept 
 System_SP:      LD      SP,0            ; Restore BASIC's original stack pointer
                 EI                      ; Enable interrupts
                 RET                     ; Return to BASIC
-;
-; ***********************************************************************************
-; *                                 Set the Palette                                 *
-; ***********************************************************************************
-; The CLUT port is 248. The colour number goes in the top byte of the port address,
-; so B holds the palette entry and the colour value is written with OUT (C),A.
-;
-Set_Palette:    LD      HL,Palette      ; Point to our 16 colour values
-                LD      BC,CLUT         ; B is palette entry 0, C is the CLUT port
-                LD      E,16            ; Sixteen entries to write
-;
-Palette_Loop:  LD      A,(HL)          ; Read the next colour value
-                OUT     (C),A           ; Write it to the palette entry in B
-                INC     HL              ; Next colour value
-                INC     B               ; Next palette entry
-                DEC     E               ; Count down the entries
-                JR      NZ,Palette_Loop ; Continue until all 16 are set
-                RET                     ; Return to the caller
 ;
 Clear_Screen:   XOR     A               ; Clear the A register to clear the full screen
                 CALL    JCLSBL          ; Call the system clear-screen routine
@@ -261,12 +245,6 @@ Current_Delay:  DEFB    0               ; Interrupts left before the next frame
 Display_Page:   DEFB    0               ; Screen page currently being displayed
 Frame_Pending:  DEFB    0               ; Set when the hidden page holds a finished frame
 ;
-; The 16 colours Dizzy was drawn with. Each value is 7 bits of colour.
-; Entry 0 is the blank background, so we make it black.
-;
-Palette:        DEFB    &00, &7F, &6E, &6A, &2A, &39, &1D, &00
-                DEFB    &6C, &42, &24, &7E, &59, &77, &70, &07
-;
 ; Each sequence starts with its frame count, followed by the frame addresses.
 ;
 Idle_Animation: DEFB    2
@@ -293,3 +271,4 @@ Walk_Right_Animation: DEFB 7
 ; The 24 interleaved frames come from the Sprite Editor output, and keep the colour numbers they were drawn with.
 ;
                 INCLUDE "tidizzy_interleaved.asm"
+                INCLUDE "sam_palette.asm"

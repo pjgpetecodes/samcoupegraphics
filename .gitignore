@@ -1,6 +1,8 @@
 .*
 !.gitignore
 !.travis.yml
+!.github/
+!.github/**
 *-release/
 *.tgz
 __pycache__/
