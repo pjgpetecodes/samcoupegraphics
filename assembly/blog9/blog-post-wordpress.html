@@ -57,11 +57,73 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:heading -->
+<h2 class="wp-block-heading">Packed MODE 4 Pixels</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Until now we have been able to treat the screen as a grid of bytes. Pixel positioning means looking inside those bytes, so it's worth looking at the layout properly first.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>A MODE 4 screen is 256 pixels across and 192 rows down, with 16 colours available. Sixteen colours need four bits per pixel (2⁴ = 16), and a byte has eight bits, so the SAM <strong>packs</strong> two pixels into every screen byte;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":" bit:   7   6   5   4   3   2   1   0\n      +\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\n      |  left pixel   |  right pixel  |\n      |  (high nibble)|  (low nibble) |\n      +\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e bit:   7   6   5   4   3   2   1   0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      +\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      |  left pixel   |  right pixel  |\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      |  (high nibble)|  (low nibble) |\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      +\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d\u002d-+\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"plaintext","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly> bit:   7   6   5   4   3   2   1   0
+      +---------------+---------------+
+      |  left pixel   |  right pixel  |
+      |  (high nibble)|  (low nibble) |
+      +---------------+---------------+</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4"> bit:   7   6   5   4   3   2   1   0</span></span>
+<span class="line"><span style="color: #F6F6F4">      +---------------+---------------+</span></span>
+<span class="line"><span style="color: #F6F6F4">      |  left pixel   |  right pixel  |</span></span>
+<span class="line"><span style="color: #F6F6F4">      |  (high nibble)|  (low nibble) |</span></span>
+<span class="line"><span style="color: #F6F6F4">      +---------------+---------------+</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Four bits is called a <strong>nibble</strong>. The <strong>high nibble</strong> (bits 7-4) is the left-hand pixel on screen, and the <strong>low nibble</strong> (bits 3-0) is the pixel to its right. Written in hex, each digit is one pixel, in the same left-to-right order you see on screen, so <code>&amp;F0</code> is “pixel <code>F</code>, then pixel <code>0</code>”.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>A nibble is not a colour as such; it is a <strong>palette index</strong> from 0 to 15. As we saw in the palette post, the SAM looks that number up in its colour look-up table (CLUT), and changing one entry recolours every pixel holding that index at once.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Packing two pixels per byte gives the screen its shape in memory;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"256 pixels / 2 pixels per byte = 128 bytes per row\n192 rows * 128 bytes           = 24,576 bytes (24 KB)\nbyte offset for pixel (x, y)   = y * 128 + x / 2\npixel is in the high nibble if x is even, the low nibble if x is odd","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e256 pixels / 2 pixels per byte = 128 bytes per row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e192 rows * 128 bytes           = 24,576 bytes (24 KB)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003ebyte offset for pixel (x, y)   = y * 128 + x / 2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epixel is in the high nibble if x is even, the low nibble if x is odd\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"plaintext","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>256 pixels / 2 pixels per byte = 128 bytes per row
+192 rows * 128 bytes           = 24,576 bytes (24 KB)
+byte offset for pixel (x, y)   = y * 128 + x / 2
+pixel is in the high nibble if x is even, the low nibble if x is odd</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">256 pixels / 2 pixels per byte = 128 bytes per row</span></span>
+<span class="line"><span style="color: #F6F6F4">192 rows * 128 bytes           = 24,576 bytes (24 KB)</span></span>
+<span class="line"><span style="color: #F6F6F4">byte offset for pixel (x, y)   = y * 128 + x / 2</span></span>
+<span class="line"><span style="color: #F6F6F4">pixel is in the high nibble if x is even, the low nibble if x is odd</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>That is why our drawing loops add 128 to move down a row, and why each screen fills one and a half 16 KB pages.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For example, here are three bytes decoded into the six pixels they hold;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Byte</th><th>0</th><th></th><th>1</th><th></th><th>2</th><th></th></tr></thead><tbody><tr><td>Value</td><td><code>&amp;FF</code></td><td></td><td><code>&amp;F0</code></td><td></td><td><code>&amp;0A</code></td><td></td></tr><tr><td>Pixel X</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr><td>Index</td><td><code>F</code></td><td><code>F</code></td><td><code>F</code></td><td><code>0</code></td><td><code>0</code></td><td><code>A</code></td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Notice that the run of <code>0</code> pixels starts halfway through byte 1. That is the catch with packed pixels: <strong>the smallest thing the Z80 can write is a byte, which is two pixels</strong>. Writing one pixel without disturbing its neighbour means reading the screen byte, keeping the neighbour's nibble, replacing our own and writing the result back. Our interleaved masks already do exactly that, one nibble at a time. A sprite whose first pixel lands on an odd X, though, no longer lines up with the bytes it was drawn in, and that is the problem this post solves.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
 <h2 class="wp-block-heading">Pixels and Bytes</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>MODE 4 stores two four-bit pixels in each screen byte. The cropped Dizzy frame is 13 bytes wide, or 26 pixels. We now store X as a pixel coordinate instead of a byte offset;</p>
+<p>The cropped Dizzy frame is 13 bytes wide, or 26 pixels. We now store X as a pixel coordinate instead of a byte offset;</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:kevinbatdorf/code-block-pro {"code":"Sprite_X:       DEFB    1               ; Current horizontal position measured in pixels\nPrevious_X_10:  DEFB    1               ; Pixel position last drawn on physical screen 10\nPrevious_X_14:  DEFB    1               ; Pixel position last drawn on physical screen 14","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite_X:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Current horizontal position measured in pixels\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_X_10:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Pixel position last drawn on physical screen 10\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_X_14:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Pixel position last drawn on physical screen 14\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
