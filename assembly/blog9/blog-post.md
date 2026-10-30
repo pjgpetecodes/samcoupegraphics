@@ -16,9 +16,48 @@ Now we will position him at pixel resolution while keeping a similar movement sp
 
 Thank you to Adrian Brown for supplying the sprites and helping with the series.
 
+## Packed MODE 4 Pixels
+
+Until now we have been able to treat the screen as a grid of bytes. Pixel positioning means looking inside those bytes, so it's worth looking at the layout properly first.
+
+A MODE 4 screen is 256 pixels across and 192 rows down, with 16 colours available. Sixteen colours need four bits per pixel (2⁴ = 16), and a byte has eight bits, so the SAM **packs** two pixels into every screen byte;
+
+```
+ bit:   7   6   5   4   3   2   1   0
+      +---------------+---------------+
+      |  left pixel   |  right pixel  |
+      |  (high nibble)|  (low nibble) |
+      +---------------+---------------+
+```
+
+Four bits is called a **nibble**. The **high nibble** (bits 7-4) is the left-hand pixel on screen, and the **low nibble** (bits 3-0) is the pixel to its right. Written in hex, each digit is one pixel, in the same left-to-right order you see on screen, so `&F0` is “pixel `F`, then pixel `0`”.
+
+A nibble is not a colour as such; it is a **palette index** from 0 to 15. As we saw in the palette post, the SAM looks that number up in its colour look-up table (CLUT), and changing one entry recolours every pixel holding that index at once.
+
+Packing two pixels per byte gives the screen its shape in memory;
+
+```
+256 pixels / 2 pixels per byte = 128 bytes per row
+192 rows * 128 bytes           = 24,576 bytes (24 KB)
+byte offset for pixel (x, y)   = y * 128 + x / 2
+pixel is in the high nibble if x is even, the low nibble if x is odd
+```
+
+That is why our drawing loops add 128 to move down a row, and why each screen fills one and a half 16 KB pages.
+
+For example, here are three bytes decoded into the six pixels they hold;
+
+| Byte | 0 | | 1 | | 2 | |
+|---|---|---|---|---|---|---|
+| Value | `&FF` | | `&F0` | | `&0A` | |
+| Pixel X | 0 | 1 | 2 | 3 | 4 | 5 |
+| Index | `F` | `F` | `F` | `0` | `0` | `A` |
+
+Notice that the run of `0` pixels starts halfway through byte 1. That is the catch with packed pixels: **the smallest thing the Z80 can write is a byte, which is two pixels**. Writing one pixel without disturbing its neighbour means reading the screen byte, keeping the neighbour's nibble, replacing our own and writing the result back. Our interleaved masks already do exactly that, one nibble at a time. A sprite whose first pixel lands on an odd X, though, no longer lines up with the bytes it was drawn in, and that is the problem this post solves.
+
 ## Pixels and Bytes
 
-MODE 4 stores two four-bit pixels in each screen byte. The cropped Dizzy frame is 13 bytes wide, or 26 pixels. We now store X as a pixel coordinate instead of a byte offset;
+The cropped Dizzy frame is 13 bytes wide, or 26 pixels. We now store X as a pixel coordinate instead of a byte offset;
 
 ```z80
 Sprite_X:       DEFB    1               ; Current horizontal position measured in pixels
