@@ -1,0 +1,229 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/" target="_blank" rel="noreferrer noopener">Sam Coupe Assembly Language Programming</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/" target="_blank" rel="noreferrer noopener">Graphics in Assembly for the SAM Coupé</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/" target="_blank" rel="noreferrer noopener">Making SAM Coupé Sprites Transparent</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-animation/" target="_blank" rel="noreferrer noopener">Animating SAM Coupé Sprites</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-keyboard-input/" target="_blank" rel="noreferrer noopener">Controlling SAM Coupé Sprites with the Keyboard</a></li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Moving Dizzy at Pixel Resolution</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog7/blog-post.md" target="_blank" rel="noreferrer noopener">memory paging post</a>, we moved the cropped sprite frames into their own RAM pages. In the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog8/blog-post.md" target="_blank" rel="noreferrer noopener">previous post</a>, we moved Dizzy horizontally, one screen byte at a time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Now we will position him at pixel resolution while keeping a similar movement speed. This post is still only about horizontal position and drawing the old and new rectangles correctly. There is no scenery, gravity, collision detection or new sprite set.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the sprites and helping with the series.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Pixels and Bytes</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>MODE 4 stores two four-bit pixels in each screen byte. The cropped Dizzy frame is 13 bytes wide, or 26 pixels. We now store X as a pixel coordinate instead of a byte offset;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Sprite_X:       DEFB    1               ; Current horizontal position measured in pixels\nPrevious_X_10:  DEFB    1               ; Pixel position last drawn on physical screen 10\nPrevious_X_14:  DEFB    1               ; Pixel position last drawn on physical screen 14","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite_X:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Current horizontal position measured in pixels\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_X_10:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Pixel position last drawn on physical screen 10\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_X_14:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Pixel position last drawn on physical screen 14\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Sprite_X:       DEFB    1               ; Current horizontal position measured in pixels
+Previous_X_10:  DEFB    1               ; Pixel position last drawn on physical screen 10
+Previous_X_14:  DEFB    1               ; Pixel position last drawn on physical screen 14</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Sprite_X:</span><span style="color: #F6F6F4">       DEFB    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Current horizontal position measured in pixels</span></span>
+<span class="line"><span style="color: #62E884">Previous_X_10:</span><span style="color: #F6F6F4">  DEFB    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Pixel position last drawn on physical screen 10</span></span>
+<span class="line"><span style="color: #62E884">Previous_X_14:</span><span style="color: #F6F6F4">  DEFB    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Pixel position last drawn on physical screen 14</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>X is a pixel coordinate, and its low bit tells us whether the sprite starts on the first or second pixel in a screen byte. The movement alternates one- and three-pixel steps, so every update changes the alignment while keeping Blog 8's average movement speed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For an <strong>even</strong> X, the first sprite pixel occupies the high nibble of the first destination byte. We can use the original 13-byte row unchanged. For an <strong>odd</strong> X, the first sprite pixel occupies the low nibble; every source pixel must shift into the next nibble position. That row then spans 14 destination bytes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Pixel X</th><th>First destination byte</th><th>Row width</th></tr></thead><tbody><tr><td>0, 2, 4, …</td><td><code>X / 2</code></td><td>13 bytes</td></tr><tr><td>1, 3, 5, …</td><td><code>floor(X / 2)</code></td><td>14 bytes</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 1: Move at Pixel Resolution</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Z and X are still read from the same active-low keyboard row. Z takes priority if both are held, and movement remains independent of the animation frame. Blog 8 requested two pixels on each update. A fixed one-pixel step would halve that requested pace, while a fixed three-pixel step would increase it by 50%. We alternate one- and three-pixel steps to keep the same two-pixel average, with every step changing between even and odd alignment. This is pixel-resolution positioning, not a claim that every movement step is exactly one pixel.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      A,(Move_Phase)  ; Alternate one- and three-pixel steps\n                OR      A               ; Set Z for a one-pixel step\n                JR      NZ,Move_Right_Three ; Use the three-pixel step on the alternate update\n                LD      A,(Sprite_X)    ; Read the current pixel position\n                INC     A               ; Move one pixel and switch packed-nibble alignment\n                JR      Store_X         ; Save the new position and redraw\nMove_Right_Three: LD    A,(Sprite_X)    ; Read the current pixel position\n                ADD     A,3             ; Move three pixels and switch packed-nibble alignment\n                CP      Maximum_X+1     ; Check whether the sprite would pass the right boundary\n                JR      C,Store_X       ; Keep the proposed position when it still fits\n                LD      A,Maximum_X     ; Clamp the final step to the last complete position\n                JR      Store_X         ; Save the bounded position and redraw","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Move_Phase)  \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Alternate one- and three-pixel steps\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Set Z for a one-pixel step\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      NZ,Move_Right_Three \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Use the three-pixel step on the alternate update\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Sprite_X)    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the current pixel position\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Move one pixel and switch packed-nibble alignment\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Store_X         \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Save the new position and redraw\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eMove_Right_Three:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e LD    A,(Sprite_X)    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the current pixel position\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eADD\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e3\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Move three pixels and switch packed-nibble alignment\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                CP      Maximum_X+\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Check whether the sprite would pass the right boundary\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      C,Store_X       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keep the proposed position when it still fits\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,Maximum_X     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clamp the final step to the last complete position\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Store_X         \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Save the bounded position and redraw\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      A,(Move_Phase)  ; Alternate one- and three-pixel steps
+                OR      A               ; Set Z for a one-pixel step
+                JR      NZ,Move_Right_Three ; Use the three-pixel step on the alternate update
+                LD      A,(Sprite_X)    ; Read the current pixel position
+                INC     A               ; Move one pixel and switch packed-nibble alignment
+                JR      Store_X         ; Save the new position and redraw
+Move_Right_Three: LD    A,(Sprite_X)    ; Read the current pixel position
+                ADD     A,3             ; Move three pixels and switch packed-nibble alignment
+                CP      Maximum_X+1     ; Check whether the sprite would pass the right boundary
+                JR      C,Store_X       ; Keep the proposed position when it still fits
+                LD      A,Maximum_X     ; Clamp the final step to the last complete position
+                JR      Store_X         ; Save the bounded position and redraw</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      A,(Move_Phase)  </span><span style="color: #7B7F8B">; Alternate one- and three-pixel steps</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A               </span><span style="color: #7B7F8B">; Set Z for a one-pixel step</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      NZ,Move_Right_Three </span><span style="color: #7B7F8B">; Use the three-pixel step on the alternate update</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Sprite_X)    </span><span style="color: #7B7F8B">; Read the current pixel position</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     A               </span><span style="color: #7B7F8B">; Move one pixel and switch packed-nibble alignment</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Store_X         </span><span style="color: #7B7F8B">; Save the new position and redraw</span></span>
+<span class="line"><span style="color: #62E884">Move_Right_Three:</span><span style="color: #F6F6F4"> LD    A,(Sprite_X)    </span><span style="color: #7B7F8B">; Read the current pixel position</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">ADD</span><span style="color: #F6F6F4">     A,</span><span style="color: #BF9EEE">3</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Move three pixels and switch packed-nibble alignment</span></span>
+<span class="line"><span style="color: #F6F6F4">                CP      Maximum_X+</span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">     </span><span style="color: #7B7F8B">; Check whether the sprite would pass the right boundary</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      C,Store_X       </span><span style="color: #7B7F8B">; Keep the proposed position when it still fits</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,Maximum_X     </span><span style="color: #7B7F8B">; Clamp the final step to the last complete position</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Store_X         </span><span style="color: #7B7F8B">; Save the bounded position and redraw</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The new maximum is pixel 230. At X=230 the sprite starts at byte 115 and uses bytes 115–127, exactly the final 13 bytes in the screen row. At X=229 it starts at byte 114 and the odd-aligned image uses 14 bytes, also ending at byte 127. A further step would run off the right edge, so movement stops at 230.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>At the left edge, the position is zero. As before, the bounds are screen limits only: they do not represent walls or collision.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 2: Prepare the Odd-Aligned Frame</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The original banked frames stay unchanged. When the animation selects a new 572-byte frame, we copy it into resident RAM and build a second form for odd positions. Each of its 22 rows has 14 mask/pixel pairs, so this staging buffer takes 616 bytes. The selected frame address is cached: movement redraws reuse both resident forms instead of rebuilding the shifted image on every pixel step.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Consider two adjacent source bytes, written as nibbles <code>A B</code> and <code>C D</code>. For the shifted row, the byte between them is <code>B C</code>. The routine rotates the previous byte left by four bits, rotates the next byte right by four bits, masks off the unused nibbles and joins the results.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The first output byte needs a transparent high nibble before the first sprite pixel. The final output byte needs a transparent low nibble after the last sprite pixel. In the mask buffer those padding nibbles are <code>F</code>; in the pixel buffer they are <code>0</code>. That preserves the destination outside Dizzy's 26 pixels.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The interleaving is retained throughout: each shifted mask byte is followed by its shifted pixel byte. The ordinary draw routine can therefore continue to combine them as <code>(screen AND mask) OR pixel</code>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 3: Draw and Erase the Correct Width</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The pixel coordinate becomes a destination byte address by dividing it by two. Its low bit separately chooses the original or shifted frame and the matching 13- or 14-byte width.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Double buffering still has a separate previous X for each physical screen. We also use the <strong>old</strong> X's low bit when clearing that screen: if the previous drawing was odd, clear 14 bytes; if it was even, clear only 13. The next row address uses the corresponding width too. This matters when an even position moves to an odd one (or back again); using the new width to erase the old rectangle could leave a pixel trail or clear a neighboring byte.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The loop waits for the 50 Hz interrupt, but that is not a guarantee of 50 completed movement updates per second: drawing takes time and interrupts are disabled during banked work. Two pixels per update would nominally give 100 pixels per second. Wall-clock measurements from the normal-speed SimCoupe recordings instead showed approximately 80 pixels per second in both Blogs 8 and 9; missed interrupts were not counted individually. The animation delay remains five loop updates, nominally ten frames per second, and the stationary roll showed pose changes roughly every 0.1 seconds. These are measured observations, not a cycle-budget guarantee.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The frame delay and animation tables are unchanged. Caching avoids repeating the odd-frame conversion during movement redraws; it does not deliberately shorten the animation delay. This example runs at SimCoupe's normal speed, not turbo. Space, directional jumps and palette keys 1–5 keep their previous behavior. The roll and sideways-jump sequences are animations, not physical jumps: there is still no velocity or gravity, and releasing Z or X stops horizontal movement.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Full Assembly</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The complete example, with every source line commented, is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog9/11-1.asm" target="_blank" rel="noreferrer noopener">11-1.asm</a>. It reuses the unchanged palette loader and the same 38 cropped frames from Blog 6.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Download the Disk Image</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/11-1.dsk" target="_blank" rel="noreferrer noopener">the 11-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog9/gifs/blog9-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog9/gifs/blog9-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Hold X to move right and Z to move back. The demonstration passes through both even and odd pixel positions, stops at both edges, releases each direction, and retains the original jump controls.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">See the Result in the SAM Coupe Web Emulator</h2>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F11-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 11-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>This embed needs the new disk uploaded to the site's disk-hosting location before publication. The repository download and the hosted web-emulator disk are separate destinations.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog9\\11-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 11-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog9\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e11\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e11\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog9\11-1.asm --build-only
+python .\.vscode\capture_gifs.py 11-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog9\</span><span style="color: #BF9EEE">11</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">11</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB memory layout is unchanged: the executing program, stack, raw frame buffer and shifted frame buffer remain resident in pages 1–2; the 38 source frames are in pages 4–5; and the two display pairs begin at pages 10 and 14. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We can now position Dizzy at every horizontal pixel, but the background is still black and every old rectangle is erased to colour zero. The next post introduces static scenery without a moving player. Restoring that scenery behind a moving sprite follows in its own post.</p>
+<!-- /wp:paragraph -->

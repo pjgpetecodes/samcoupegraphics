@@ -1,0 +1,27 @@
+{
+  "source_sha256": "76d31404b5f11605c0054aaf519f536dc3d7c78dbfffbf8a9bdaefc082a72512",
+  "graphics_table_offset": 49152,
+  "graphics": {
+    "327": {
+      "offset": 219170,
+      "width_bytes": 11,
+      "height": 22
+    },
+    "328": {
+      "offset": 219414,
+      "width_bytes": 11,
+      "height": 22
+    },
+    "329": {
+      "offset": 219658,
+      "width_bytes": 11,
+      "height": 22
+    },
+    "330": {
+      "offset": 219902,
+      "width_bytes": 11,
+      "height": 22
+    }
+  },
+  "scope": "Selected graphics only; no original game code."
+}

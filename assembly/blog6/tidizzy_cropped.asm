@@ -1,5 +1,12 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorials - Cropped Dizzy Frames                  |
+; | Filename:   tidizzy_cropped.asm                                                 |
+; -----------------------------------------------------------------------------------
+;
 ; Sprites 1-24 and 26-39 from the Sprite Editor export, cropped to the area Dizzy uses:
 ; screen bytes 1 to 13 and rows 5 to 26 of the 32x32 frame (13 bytes x 22 rows, mask/pixel pairs)
+;
 
 ; Sprite 1
 TIDizzy_1_Interleaved:

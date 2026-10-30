@@ -1,6 +1,6 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 8 - Part 1: A Colour Palette                |
+; | Program:    SAM Coupe Sprites Tutorial 8 - Part 1: A Colour Palette             |
 ; | Filename:   blog6\8-1.asm                                                       |
 ; | Based on:   Tutorial 7 part 3 (blog5\7-3.asm)                                   |
 ; -----------------------------------------------------------------------------------

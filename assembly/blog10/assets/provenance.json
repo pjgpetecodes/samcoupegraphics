@@ -1,0 +1,1826 @@
+{
+  "source_sha256": "76d31404b5f11605c0054aaf519f536dc3d7c78dbfffbf8a9bdaefc082a72512",
+  "file_name": "AUTOmain.O",
+  "palette_offset": 28066,
+  "palette": [
+    93,
+    127,
+    110,
+    106,
+    42,
+    57,
+    29,
+    0,
+    108,
+    66,
+    36,
+    126,
+    89,
+    119,
+    112,
+    7
+  ],
+  "room_table_offset": 245760,
+  "graphics_table_offset": 49152,
+  "rooms": [
+    {
+      "screen": 1,
+      "native_room": 77,
+      "list_offset": 255418,
+      "entries": [
+        {
+          "image": 1,
+          "collision": false,
+          "x_bytes": 57,
+          "y": 109,
+          "water": false
+        },
+        {
+          "image": 1,
+          "collision": false,
+          "x_bytes": 21,
+          "y": 104,
+          "water": false
+        },
+        {
+          "image": 1,
+          "collision": false,
+          "x_bytes": -1,
+          "y": 100,
+          "water": false
+        },
+        {
+          "image": 130,
+          "collision": false,
+          "x_bytes": 54,
+          "y": 114,
+          "water": false
+        },
+        {
+          "image": 130,
+          "collision": false,
+          "x_bytes": 30,
+          "y": 114,
+          "water": false
+        },
+        {
+          "image": 130,
+          "collision": false,
+          "x_bytes": 80,
+          "y": 115,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": -11,
+          "y": 124,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 20,
+          "y": 132,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 52,
+          "y": 132,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 65,
+          "y": 146,
+          "water": false
+        },
+        {
+          "image": 6,
+          "collision": false,
+          "x_bytes": 15,
+          "y": 57,
+          "water": false
+        },
+        {
+          "image": 6,
+          "collision": false,
+          "x_bytes": -28,
+          "y": 53,
+          "water": false
+        },
+        {
+          "image": 7,
+          "collision": false,
+          "x_bytes": 84,
+          "y": 91,
+          "water": false
+        },
+        {
+          "image": 7,
+          "collision": false,
+          "x_bytes": -1,
+          "y": 77,
+          "water": false
+        },
+        {
+          "image": 7,
+          "collision": false,
+          "x_bytes": 36,
+          "y": 84,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 27,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 5,
+          "collision": true,
+          "x_bytes": 42,
+          "y": 127,
+          "water": false
+        },
+        {
+          "image": 5,
+          "collision": true,
+          "x_bytes": 57,
+          "y": 127,
+          "water": false
+        },
+        {
+          "image": 4,
+          "collision": true,
+          "x_bytes": 72,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 14,
+          "y": 122,
+          "water": false
+        },
+        {
+          "image": 5,
+          "collision": true,
+          "x_bytes": 0,
+          "y": 119,
+          "water": false
+        },
+        {
+          "image": 5,
+          "collision": true,
+          "x_bytes": -16,
+          "y": 119,
+          "water": false
+        },
+        {
+          "image": 54,
+          "collision": false,
+          "x_bytes": 120,
+          "y": 142,
+          "water": false
+        },
+        {
+          "image": 54,
+          "collision": false,
+          "x_bytes": 92,
+          "y": 142,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 92,
+          "y": 160,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 92,
+          "y": 172,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 92,
+          "y": 184,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 93,
+          "y": 184,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 104,
+          "y": 170,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 104,
+          "y": 182,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 115,
+          "y": 182,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 127,
+          "y": 182,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 86,
+          "y": 162,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 77,
+          "y": 156,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 86,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": -5,
+          "y": 123,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 1,
+          "y": 124,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 16,
+          "y": 127,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 27,
+          "y": 130,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 39,
+          "y": 131,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": false,
+          "x_bytes": 70,
+          "y": 131,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": false,
+          "x_bytes": -32,
+          "y": 124,
+          "water": false
+        },
+        {
+          "image": 28,
+          "collision": true,
+          "x_bytes": 80,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 25,
+          "collision": true,
+          "x_bytes": 96,
+          "y": 132,
+          "water": false
+        },
+        {
+          "image": 4,
+          "collision": true,
+          "x_bytes": 85,
+          "y": 128,
+          "water": false
+        },
+        {
+          "image": 26,
+          "collision": true,
+          "x_bytes": 97,
+          "y": 142,
+          "water": false
+        },
+        {
+          "image": 28,
+          "collision": true,
+          "x_bytes": 107,
+          "y": 158,
+          "water": false
+        },
+        {
+          "image": 28,
+          "collision": true,
+          "x_bytes": 117,
+          "y": 166,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 127,
+          "y": 174,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 84,
+          "y": 133,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 80,
+          "y": 135,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 85,
+          "y": 144,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 91,
+          "y": 154,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 95,
+          "y": 159,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 105,
+          "y": 166,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 115,
+          "y": 174,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 116,
+          "y": 175,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 125,
+          "y": 179,
+          "water": false
+        },
+        {
+          "image": 3,
+          "collision": true,
+          "x_bytes": 109,
+          "y": 70,
+          "water": false
+        },
+        {
+          "image": 2,
+          "collision": false,
+          "x_bytes": 112,
+          "y": 49,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": false,
+          "x_bytes": 36,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 15,
+          "collision": true,
+          "x_bytes": -19,
+          "y": 118,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 117,
+          "y": 166,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": -25,
+          "y": 163,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": -2,
+          "y": 166,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 19,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": 38,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": 56,
+          "y": 180,
+          "water": false
+        },
+        {
+          "image": 10,
+          "collision": true,
+          "x_bytes": 65,
+          "y": 184,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": 63,
+          "y": 171,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": 3,
+          "y": 151,
+          "water": false
+        },
+        {
+          "image": 16,
+          "collision": true,
+          "x_bytes": 88,
+          "y": 183,
+          "water": false
+        },
+        {
+          "image": 16,
+          "collision": true,
+          "x_bytes": 31,
+          "y": 149,
+          "water": false
+        },
+        {
+          "image": 16,
+          "collision": true,
+          "x_bytes": 30,
+          "y": 148,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 48,
+          "y": 164,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 22,
+          "y": 163,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 13,
+          "y": 153,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 80,
+          "y": 169,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 84,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 78,
+          "y": 180,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 40,
+          "y": 169,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 9,
+          "y": 159,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 103,
+          "y": 187,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 64,
+          "y": 155,
+          "water": false
+        },
+        {
+          "image": 55,
+          "collision": false,
+          "x_bytes": 118,
+          "y": 139,
+          "water": true
+        },
+        {
+          "image": 55,
+          "collision": false,
+          "x_bytes": 98,
+          "y": 139,
+          "water": true
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 81,
+          "y": 132,
+          "water": false
+        }
+      ]
+    },
+    {
+      "screen": 2,
+      "native_room": 76,
+      "list_offset": 254871,
+      "entries": [
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 91,
+          "y": 128,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 59,
+          "y": 129,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 28,
+          "y": 129,
+          "water": false
+        },
+        {
+          "image": 18,
+          "collision": true,
+          "x_bytes": 122,
+          "y": 128,
+          "water": false
+        },
+        {
+          "image": 6,
+          "collision": false,
+          "x_bytes": 41,
+          "y": 56,
+          "water": false
+        },
+        {
+          "image": 6,
+          "collision": false,
+          "x_bytes": 98,
+          "y": 59,
+          "water": false
+        },
+        {
+          "image": 7,
+          "collision": false,
+          "x_bytes": 29,
+          "y": 72,
+          "water": false
+        },
+        {
+          "image": 7,
+          "collision": false,
+          "x_bytes": 63,
+          "y": 79,
+          "water": false
+        },
+        {
+          "image": 95,
+          "collision": false,
+          "x_bytes": 74,
+          "y": 103,
+          "water": false
+        },
+        {
+          "image": 95,
+          "collision": false,
+          "x_bytes": 122,
+          "y": 105,
+          "water": false
+        },
+        {
+          "image": 28,
+          "collision": true,
+          "x_bytes": 60,
+          "y": 115,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 66,
+          "y": 121,
+          "water": false
+        },
+        {
+          "image": 24,
+          "collision": true,
+          "x_bytes": 80,
+          "y": 121,
+          "water": false
+        },
+        {
+          "image": 5,
+          "collision": true,
+          "x_bytes": 95,
+          "y": 117,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 110,
+          "y": 120,
+          "water": false
+        },
+        {
+          "image": 24,
+          "collision": true,
+          "x_bytes": 124,
+          "y": 120,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 6,
+          "y": 113,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 25,
+          "y": 120,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 94,
+          "y": 122,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 110,
+          "y": 125,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 42,
+          "y": 118,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 55,
+          "y": 124,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 74,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 91,
+          "y": 127,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": -20,
+          "y": 73,
+          "water": false
+        },
+        {
+          "image": 15,
+          "collision": true,
+          "x_bytes": 110,
+          "y": 117,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 14,
+          "y": 101,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 18,
+          "y": 108,
+          "water": false
+        },
+        {
+          "image": 5,
+          "collision": true,
+          "x_bytes": 32,
+          "y": 109,
+          "water": false
+        },
+        {
+          "image": 29,
+          "collision": true,
+          "x_bytes": 45,
+          "y": 111,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 23,
+          "y": 113,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 41,
+          "y": 116,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 32,
+          "y": 115,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 33,
+          "y": 114,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": 16,
+          "y": 108,
+          "water": false
+        },
+        {
+          "image": 16,
+          "collision": true,
+          "x_bytes": 21,
+          "y": 137,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 16,
+          "y": 93,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 16,
+          "y": 101,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 91,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 49,
+          "y": 116,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 98,
+          "y": 122,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 83,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 36,
+          "y": 119,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 39,
+          "y": 113,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 50,
+          "y": 125,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 64,
+          "y": 125,
+          "water": false
+        },
+        {
+          "image": 19,
+          "collision": true,
+          "x_bytes": 120,
+          "y": 125,
+          "water": false
+        },
+        {
+          "image": 1,
+          "collision": false,
+          "x_bytes": 103,
+          "y": 97,
+          "water": false
+        },
+        {
+          "image": 130,
+          "collision": false,
+          "x_bytes": 99,
+          "y": 101,
+          "water": false
+        },
+        {
+          "image": 130,
+          "collision": false,
+          "x_bytes": 89,
+          "y": 105,
+          "water": false
+        },
+        {
+          "image": 104,
+          "collision": false,
+          "x_bytes": -33,
+          "y": 135,
+          "water": false
+        },
+        {
+          "image": 104,
+          "collision": false,
+          "x_bytes": -9,
+          "y": 135,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": 0,
+          "y": 101,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": false,
+          "x_bytes": 14,
+          "y": 134,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": false,
+          "x_bytes": -1,
+          "y": 126,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": false,
+          "x_bytes": 33,
+          "y": 135,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": false,
+          "x_bytes": 42,
+          "y": 159,
+          "water": false
+        },
+        {
+          "image": 16,
+          "collision": true,
+          "x_bytes": 48,
+          "y": 170,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 38,
+          "y": 139,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 41,
+          "y": 127,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 57,
+          "y": 183,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": 0,
+          "y": 70,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": -19,
+          "y": 107,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 5,
+          "y": 127,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 25,
+          "y": 148,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 49,
+          "y": 160,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 72,
+          "y": 165,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 97,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": 120,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": 17,
+          "y": 168,
+          "water": false
+        },
+        {
+          "image": 10,
+          "collision": true,
+          "x_bytes": 35,
+          "y": 184,
+          "water": false
+        },
+        {
+          "image": 10,
+          "collision": true,
+          "x_bytes": 46,
+          "y": 148,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": 73,
+          "y": 150,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": 116,
+          "y": 158,
+          "water": false
+        },
+        {
+          "image": 16,
+          "collision": true,
+          "x_bytes": 64,
+          "y": 144,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 97,
+          "y": 160,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 110,
+          "y": 148,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 91,
+          "y": 156,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 30,
+          "y": 142,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 51,
+          "y": 143,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 28,
+          "y": 145,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 81,
+          "y": 158,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 112,
+          "y": 161,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 4,
+          "y": 153,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 15,
+          "y": 174,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": -21,
+          "y": 42,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": -4,
+          "y": 66,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": -1,
+          "y": 70,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 11,
+          "y": 68,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 15,
+          "y": 68,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": -14,
+          "y": 46,
+          "water": false
+        }
+      ]
+    },
+    {
+      "screen": 3,
+      "native_room": 108,
+      "list_offset": 263139,
+      "entries": [
+        {
+          "image": 8,
+          "collision": true,
+          "x_bytes": -27,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": -4,
+          "y": 179,
+          "water": false
+        },
+        {
+          "image": 3,
+          "collision": true,
+          "x_bytes": -23,
+          "y": 84,
+          "water": false
+        },
+        {
+          "image": 3,
+          "collision": true,
+          "x_bytes": 58,
+          "y": 111,
+          "water": false
+        },
+        {
+          "image": 2,
+          "collision": false,
+          "x_bytes": 61,
+          "y": 90,
+          "water": false
+        },
+        {
+          "image": 2,
+          "collision": false,
+          "x_bytes": -20,
+          "y": 63,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 0,
+          "y": 172,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": -4,
+          "y": 172,
+          "water": false
+        }
+      ]
+    },
+    {
+      "screen": 4,
+      "native_room": 107,
+      "list_offset": 262886,
+      "entries": [
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": -23,
+          "y": 134,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 13,
+          "y": 134,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 25,
+          "y": 119,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 36,
+          "y": 138,
+          "water": false
+        },
+        {
+          "image": 136,
+          "collision": false,
+          "x_bytes": 72,
+          "y": 145,
+          "water": false
+        },
+        {
+          "image": 136,
+          "collision": false,
+          "x_bytes": 75,
+          "y": 156,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 111,
+          "y": 136,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 112,
+          "y": 150,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": -32,
+          "y": 150,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 9,
+          "y": 154,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 53,
+          "y": 151,
+          "water": false
+        },
+        {
+          "image": 135,
+          "collision": false,
+          "x_bytes": 79,
+          "y": 159,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 69,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 76,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 84,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 90,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 96,
+          "y": 167,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 89,
+          "y": 170,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 82,
+          "y": 170,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 75,
+          "y": 171,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 67,
+          "y": 171,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 97,
+          "y": 171,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 122,
+          "y": 168,
+          "water": false
+        },
+        {
+          "image": 86,
+          "collision": false,
+          "x_bytes": 121,
+          "y": 171,
+          "water": false
+        },
+        {
+          "image": 88,
+          "collision": true,
+          "x_bytes": 67,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 88,
+          "collision": true,
+          "x_bytes": 108,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 88,
+          "collision": true,
+          "x_bytes": 26,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 88,
+          "collision": true,
+          "x_bytes": -15,
+          "y": 173,
+          "water": false
+        },
+        {
+          "image": 12,
+          "collision": true,
+          "x_bytes": 106,
+          "y": 162,
+          "water": false
+        },
+        {
+          "image": 10,
+          "collision": true,
+          "x_bytes": 46,
+          "y": 151,
+          "water": false
+        },
+        {
+          "image": 10,
+          "collision": true,
+          "x_bytes": 51,
+          "y": 161,
+          "water": false
+        },
+        {
+          "image": 9,
+          "collision": true,
+          "x_bytes": 35,
+          "y": 158,
+          "water": false
+        },
+        {
+          "image": 14,
+          "collision": true,
+          "x_bytes": 34,
+          "y": 180,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 27,
+          "y": 186,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 34,
+          "y": 178,
+          "water": false
+        },
+        {
+          "image": 91,
+          "collision": false,
+          "x_bytes": -21,
+          "y": 47,
+          "water": false
+        },
+        {
+          "image": 11,
+          "collision": true,
+          "x_bytes": 122,
+          "y": 174,
+          "water": false
+        },
+        {
+          "image": 3,
+          "collision": true,
+          "x_bytes": 99,
+          "y": 83,
+          "water": false
+        },
+        {
+          "image": 2,
+          "collision": false,
+          "x_bytes": 102,
+          "y": 62,
+          "water": false
+        },
+        {
+          "image": 93,
+          "collision": false,
+          "x_bytes": 75,
+          "y": 145,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 54,
+          "y": 171,
+          "water": false
+        },
+        {
+          "image": 17,
+          "collision": true,
+          "x_bytes": 113,
+          "y": 169,
+          "water": false
+        }
+      ]
+    }
+  ],
+  "graphics": {
+    "1": {
+      "offset": 50337,
+      "width_bytes": 11,
+      "height": 21
+    },
+    "2": {
+      "offset": 50570,
+      "width_bytes": 38,
+      "height": 21
+    },
+    "3": {
+      "offset": 51370,
+      "width_bytes": 44,
+      "height": 10
+    },
+    "4": {
+      "offset": 51812,
+      "width_bytes": 13,
+      "height": 5
+    },
+    "5": {
+      "offset": 51879,
+      "width_bytes": 17,
+      "height": 5
+    },
+    "6": {
+      "offset": 51966,
+      "width_bytes": 41,
+      "height": 77
+    },
+    "7": {
+      "offset": 55125,
+      "width_bytes": 25,
+      "height": 51
+    },
+    "8": {
+      "offset": 56402,
+      "width_bytes": 29,
+      "height": 49
+    },
+    "9": {
+      "offset": 57825,
+      "width_bytes": 21,
+      "height": 36
+    },
+    "10": {
+      "offset": 58583,
+      "width_bytes": 16,
+      "height": 15
+    },
+    "11": {
+      "offset": 58825,
+      "width_bytes": 10,
+      "height": 26
+    },
+    "12": {
+      "offset": 59087,
+      "width_bytes": 9,
+      "height": 16
+    },
+    "14": {
+      "offset": 59417,
+      "width_bytes": 10,
+      "height": 16
+    },
+    "15": {
+      "offset": 59579,
+      "width_bytes": 19,
+      "height": 9
+    },
+    "16": {
+      "offset": 59752,
+      "width_bytes": 6,
+      "height": 16
+    },
+    "17": {
+      "offset": 59850,
+      "width_bytes": 5,
+      "height": 8
+    },
+    "18": {
+      "offset": 59892,
+      "width_bytes": 32,
+      "height": 79
+    },
+    "19": {
+      "offset": 62422,
+      "width_bytes": 12,
+      "height": 12
+    },
+    "24": {
+      "offset": 63067,
+      "width_bytes": 15,
+      "height": 5
+    },
+    "25": {
+      "offset": 63144,
+      "width_bytes": 7,
+      "height": 25
+    },
+    "26": {
+      "offset": 63321,
+      "width_bytes": 13,
+      "height": 18
+    },
+    "28": {
+      "offset": 63631,
+      "width_bytes": 14,
+      "height": 10
+    },
+    "29": {
+      "offset": 63773,
+      "width_bytes": 15,
+      "height": 5
+    },
+    "54": {
+      "offset": 73446,
+      "width_bytes": 33,
+      "height": 61
+    },
+    "55": {
+      "offset": 75461,
+      "width_bytes": 20,
+      "height": 4
+    },
+    "86": {
+      "offset": 94866,
+      "width_bytes": 10,
+      "height": 8
+    },
+    "88": {
+      "offset": 95328,
+      "width_bytes": 41,
+      "height": 26
+    },
+    "91": {
+      "offset": 103126,
+      "width_bytes": 59,
+      "height": 135
+    },
+    "93": {
+      "offset": 111445,
+      "width_bytes": 13,
+      "height": 31
+    },
+    "95": {
+      "offset": 112127,
+      "width_bytes": 11,
+      "height": 22
+    },
+    "104": {
+      "offset": 129324,
+      "width_bytes": 35,
+      "height": 57
+    },
+    "130": {
+      "offset": 141311,
+      "width_bytes": 8,
+      "height": 16
+    },
+    "135": {
+      "offset": 145549,
+      "width_bytes": 48,
+      "height": 42
+    },
+    "136": {
+      "offset": 147567,
+      "width_bytes": 49,
+      "height": 25
+    }
+  },
+  "scope": "Four-room scenery and static collision only; no original game code.",
+  "rendering": "MODE 4; 128-byte stride; rows 48-191; colour-zero transparency; water uses its first animation frame. HUD, player, items and actors excluded.",
+  "collision": "Each nonzero source nibble in a collision-flagged draw entry sets that nibble to 15. Dynamic support and hazards are separate."
+}

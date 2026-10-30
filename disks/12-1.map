@@ -1,0 +1,16 @@
+0000=Asset_Start
+0C57=Asset_End
+8000=Start
+802E=Copy_Row
+8076=Static_Loop
+807E=Map_Lower
+808A=Clear_Page
+8098=Saved_LMPR
+8099=Source_Pointer
+809B=Screen_Pointer
+809D=Rows_Left
+809E=Row_Buffer
+811E=LoadPalette
+812B=LoadPalette_Loop
+8138=SAM_Palette
+8148=Resident_End

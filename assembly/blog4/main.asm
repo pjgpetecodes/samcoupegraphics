@@ -1,8 +1,12 @@
-;-=-=-=-=-=-=-=-	=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-;-  PROJECT: Animation Test For Peter
-;-  AUTHOR:  Adrian Brown
-;-  DATE:    26/11/2017
-;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorial 6 - Animation Test                       |
+; | Filename:   blog4\main.asm                                                      |
+; -----------------------------------------------------------------------------------
+;
+; Animation Test For Peter, by Adrian Brown (26/11/2017).
+; An earlier, independent animation experiment.
+;
 
 				ORG		&8000
 				DUMP	1, &0000

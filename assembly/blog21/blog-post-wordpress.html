@@ -1,0 +1,165 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Completing the Four-Screen Route</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog20/blog-post.md" target="_blank" rel="noreferrer noopener">chest escape lesson</a> dropped the chest at the cliff, jumped onto it and leapt left over the wall into the sparse third screen. That screen's left edge has been a dead end until now.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This post adds just one concept: <strong>linking the fourth room</strong> in both directions, keeping the player at a matching height on each side. There are no new mechanics, hazards or moving actors yet.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">room provenance</a> identifies the permitted source graphics and collision masks. Original engine analysis remains private; this is independently written tutorial code.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Recovered Route</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The four selected screens are not four consecutive leftward rooms:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Tutorial screen</th><th>Scenery</th><th>Links in this post</th></tr></thead><tbody><tr><td>1</td><td>Starting beach</td><td>Left to screen 2</td></tr><tr><td>2</td><td>Cliff beach</td><td>Right to 1; up to 3 once the chest is placed</td></tr><tr><td>3</td><td>Sparse sky</td><td>Down to 2; <strong>left to 4</strong></td></tr><tr><td>4</td><td>Grassy ground and tree</td><td><strong>Right to 3</strong>; left is the bridge, outside this slice</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Screen 4's left boundary leads to the bridge, which is screen 5. It stays a solid boundary rather than an invented link.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">One Room Identifier, Four Rooms</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Build_Room</code> and <code>Load_Collision</code> now select explicitly between all four room descriptions from <code>Current_Room</code>. Scenery and solidity therefore can never disagree about which room is active.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>All four compact collision streams were already generated and verified in the earlier room-composition work, so the whole slice still fits a 256 KB SAM.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Height-Matched Horizontal Links</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Both screen 3 and screen 4 have two very different elevations at their shared edge: clouds high up and ground low down. Spawning at a single fixed row would teleport Dizzy between them.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Instead, each link checks which half of the playfield Dizzy is in:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"screen 3 left  -\u003e screen 4 at X=230, Y=62 if Y \u003c 100, otherwise Y=152\nscreen 4 right -\u003e screen 3 at X=0,   Y=63 if Y \u003c 100, otherwise Y=155","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003escreen 3 left  -\u0026gt; screen 4 at X=230, Y=62 if Y \u0026lt; 100, otherwise Y=152\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003escreen 4 right -\u0026gt; screen 3 at X=0,   Y=63 if Y \u0026lt; 100, otherwise Y=155\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>screen 3 left  -&gt; screen 4 at X=230, Y=62 if Y &lt; 100, otherwise Y=152
+screen 4 right -&gt; screen 3 at X=0,   Y=63 if Y &lt; 100, otherwise Y=155</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">screen 3 left  -&gt; screen 4 at X=230, Y=62 if Y &lt; 100, otherwise Y=152</span></span>
+<span class="line"><span style="color: #F6F6F4">screen 4 right -&gt; screen 3 at X=0,   Y=63 if Y &lt; 100, otherwise Y=155</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Every entry row was checked against the real collision masks: the upper rows rest on the clouds and the lower rows rest on the grass and the tiny rock at screen 3's lower-left edge. These are explicit, safe tutorial entries rather than the original game's exact coordinate arithmetic.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>As before, horizontal links are grounded-only. An airborne player touching the edge stays in the current room until landing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Persistent State Across the Whole Route</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Nothing new is needed to keep the puzzle solved. <code>Chest_Placed</code> and the chest's dropped coordinates already live in resident memory. Falling out of the bottom of screen 3 still subtracts 100 rows, preserves downward speed and returns to the clear stance remembered when the chest was dropped, so Dizzy lands back on the same chest.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The second source coin now becomes reachable because its record already belonged to screen 4. The existing Enter pickup and LIFO inventory handle it without changes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog20" target="_blank" rel="noreferrer noopener">blog20 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog21/23-1.asm" target="_blank" rel="noreferrer noopener"><code>23-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog21/collision.asm" target="_blank" rel="noreferrer noopener"><code>collision.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog21/rooms.asm" target="_blank" rel="noreferrer noopener"><code>rooms.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog21/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog21/23-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 23-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/23-1.dsk" target="_blank" rel="noreferrer noopener">the 23-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog21/gifs/blog21-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog21/gifs/blog21-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows the chest puzzle, the leftward escape onto screen 3's lower rock, a walk left into screen 4's grassy ground, a walk back right to screen 3, a fall down onto the still-placed chest in screen 2, then a walk back through to screen 1. The upper cloud links are present in the source but are not part of this recorded route.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0xA150</code>, below the asserted resident limit and the <code>0xFF00</code> stack.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F23-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 23-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog21\\23-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 23-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog21\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e23\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e23\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog21\23-1.asm --build-only
+python .\.vscode\capture_gifs.py 23-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog21\</span><span style="color: #BF9EEE">23</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">23</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps on a fresh grounded press, and Enter collects or drops while stopped on the ground. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next we bring the scenery to life by animating the starting beach's waves.</p>
+<!-- /wp:paragraph -->

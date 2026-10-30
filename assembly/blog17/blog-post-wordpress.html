@@ -1,0 +1,183 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Connecting the First Two Screens</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/blog-post.md" target="_blank" rel="noreferrer noopener">jumping lesson</a> finished our initial movement and collision work. Now we connect the starting beach to the cliff-side beach.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This post adds <strong>room transitions</strong>, not collectables or the chest escape. Only the first two screens are connected. Screen 2's cliff remains solid, and there is no upward exit yet.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">asset provenance</a> records the verified scenery and collision masks. Our transition code is independently written.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Explicit Links and Safe Entries</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Do not assume four rooms are consecutive numbers. The recovered route eventually goes left from native room 77 to 76, then up to 108; this lesson only uses the first link and its return.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The tutorial stores screen IDs 1 and 2 in <code>Current_Room</code>. Holding Z at screen 1's left edge selects screen 2. Holding X at screen 2's right edge selects screen 1.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Destination</th><th>Entry X</th><th>Entry Y</th></tr></thead><tbody><tr><td>Screen 2, cliff beach</td><td>230</td><td>97</td></tr><tr><td>Screen 1, starting beach</td><td>0</td><td>98</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Both entry boxes were checked against their matching masks: the body is clear and the feet have support.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>These first links are deliberately <strong>walking-only</strong>. The player must be grounded at the boundary. An airborne player stays in the current room until landing; we do not silently teleport a jump onto a new floor. Unlinked edges remain bounded.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Replace Scenery and Collision Together</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Current_Room</code> selects both the existing compact draw list and the matching static collision stream. Mixing one room's visible scenery with another room's solidity would make decorative locations block movement or allow walking through rock.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The source graphics remain in pages 8-9, authoritative scenery in 6-7 and active collision in 12-13. Both rooms reuse those buffers.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>There is not enough spare space in a 256 KB design to keep every full 24 KB mask resident alongside our graphics and screens. The extractor therefore also emits <code>room-collision.asm</code>: runs of a little-endian word count and one repeated packed solidity byte, followed by a zero count.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For example, a long stretch of empty sky needs only a count and a zero byte, rather than thousands of zeros. The four masks use 2,810 bytes including terminators. Only two are selected in this lesson; preparing data for later rooms does not connect them.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Load_Collision</code> expands the selected stream into pages 12-13. Generated streams each expand to exactly <code>0x6000</code> bytes; round-trip checks compare every expanded byte with its raw mask. This small loader is room-storage plumbing, not a new collision rule.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Keep the Old Room Visible Until the New One Is Ready</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>During entry, disable interrupts before mapping banks. Discard the old pending-frame flag and reset downward speed for the supported entry.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Compose the new authoritative scenery, then decode its collision mask. The old displayed room stays untouched during both operations.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next, copy complete new scenery to the hidden display pair. Only after that copy finishes do we change VMPR to reveal it. Then initialize the no-longer-visible other screen too. There is no scrolling effect and no intentional display of a partially composed room.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The transition is a loading pause, not an ordinary movement update. Palette interrupt handling resumes after ROM is restored.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Reset Per-Page Restoration State</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Both fresh screens contain scenery, not the old room's player. Reset both saved X values and both saved Y values to the new entry. Subsequent physics and animation draw on the hidden page using the established restoration path.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The sprite frame cache remains valid because frame graphics do not change between rooms. The Space edge latch is also retained: holding Space during entry must not manufacture a fresh press.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0x9D16</code>, below the existing <code>0xC000</code> assertion and <code>0xFF00</code> stack. The entire design still runs on a 256 KB SAM.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog16" target="_blank" rel="noreferrer noopener">blog16 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/19-1.asm" target="_blank" rel="noreferrer noopener"><code>19-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/collision.asm" target="_blank" rel="noreferrer noopener"><code>collision.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/paged_data.asm" target="_blank" rel="noreferrer noopener"><code>paged_data.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/rooms.asm" target="_blank" rel="noreferrer noopener"><code>rooms.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/walking.asm" target="_blank" rel="noreferrer noopener"><code>walking.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>New assets:</strong> <code>assets/room-collision.asm</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/19-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 19-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/19-1.dsk" target="_blank" rel="noreferrer noopener">the 19-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog17/gifs/blog17-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog17/gifs/blog17-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows travelling left into screen 2 and returning right into screen 1, with grounded movement continuing after the scenery changes. The cliff remains part of screen 2's solid mask.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F19-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 19-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog17\\19-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 19-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog17\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e19\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e19\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog17\19-1.asm --build-only
+python .\.vscode\capture_gifs.py 19-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog17\</span><span style="color: #BF9EEE">19</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">19</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move and Space performs a fresh-press grounded jump. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The next post adds the chest to screen 1 and handles Enter pickup. Collection state comes first; visible inventory and physically dropping the chest to escape follow in separate lessons.</p>
+<!-- /wp:paragraph -->

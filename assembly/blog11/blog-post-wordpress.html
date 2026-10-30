@@ -1,0 +1,361 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Restoring Scenery Behind Dizzy</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/blog-post.md" target="_blank" rel="noreferrer noopener">previous post</a> drew a palm tree and then the starting beach from Treasure Island Dizzy. We kept both examples static. Now we will put the moving, pixel-positioned Dizzy back into the picture without rubbing out the scenery.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with the series. The background assets retain their <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">extraction provenance</a> and the rights-holder permission described in the previous post. The drawing program is our tutorial code, not the original game's engine.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This lesson adds <strong>background restoration only</strong>. There are still no walls, ground support, gravity, collectables, hazards or room changes. Dizzy moves along a fixed row, including across water and through decorative objects. Those are intentional limits of this drawing demonstration, not claims about the source game's collision.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>It also changes how the source is organised. From this post onwards the program is <strong>split into several files, one per feature</strong>. We explain why, and how, near the end of the post, after the restoration code.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Why Clearing to Zero Stops Working</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Previously we erased the old sprite rectangle by filling it with palette index zero. That was sufficient on a plain background. Over a beach it would remove sand, tree trunks and rocks, replacing them with cyan rectangles.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We need a source of truth for the pixels underneath the player. A screen that already contains Dizzy is not that source: copying from it can copy the old sprite back into the scene.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Our solution is an immutable, screen-sized background bitmap in its own bank pair. Before drawing the next sprite, we copy the old rectangle from that bitmap to the hidden display screen.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"restore this hidden page's OLD rectangle from the background\ndraw the sprite at its NEW pixel position\nrestore ROM mapping\nflip only after the frame is complete","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003erestore this hidden page's OLD rectangle from the background\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003edraw the sprite at its NEW pixel position\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003erestore ROM mapping\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eflip only after the frame is complete\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>restore this hidden page's OLD rectangle from the background
+draw the sprite at its NEW pixel position
+restore ROM mapping
+flip only after the frame is complete</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">restore this hidden page's OLD rectangle from the background</span></span>
+<span class="line"><span style="color: #F6F6F4">draw the sprite at its NEW pixel position</span></span>
+<span class="line"><span style="color: #F6F6F4">restore ROM mapping</span></span>
+<span class="line"><span style="color: #F6F6F4">flip only after the frame is complete</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>We do not redraw all 24 KB of scenery on every movement update.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Keep the Three Memory Roles Separate</h2>
+<!-- /wp:heading -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Physical pages</th><th>Contents</th></tr></thead><tbody><tr><td>1-2</td><td>Resident program, animation tables, frame buffers, row buffer and stack</td></tr><tr><td>4-5</td><td>The unchanged banked Dizzy frames</td></tr><tr><td>6-7</td><td>Authoritative 24 KB starting-room background</td></tr><tr><td>10-11</td><td>First display screen</td></tr><tr><td>14-15</td><td>Second display screen</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>This still fits a 256 KB SAM. Neither HMPR nor the resident code mapping changes. The new background source does not overlap the executing program, stack, sprites or display pages.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The program ends its resident allocation at <code>0x88AC</code>; the stack starts at <code>0xFF00</code>. The background occupies lower-window addresses <code>0x0000</code> through <code>0x5FFF</code> when pages 6-7 are mapped.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Initialize Both Display Screens</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Both screens must begin with the complete scenery. Otherwise the first flip would reveal an uninitialized screen and restoring one small sprite rectangle would not repair the rest of it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>At startup we call the same background copier twice, once with page 10 as the target and once with page 14. For these calls the rectangle starts at zero, is 128 bytes wide and has 192 rows. These full-screen copies happen only during initialization.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We retain the original cyan palette entry zero and black border at index seven. The earlier palette keys are no longer active: changing the sky entry as a demonstration would recolour scenery. The ROM interrupt still requires the palette to be reloaded after <code>HALT</code>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Restore the Old Physical Page Position</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The per-page previous positions from Blog 9 are still essential. The hidden page may contain a sprite from two display updates ago; erasing the single globally previous position would leave trails.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We also preserve the old position's parity. An even X used 13 destination bytes, while an odd X used 14. We must restore the width of the <strong>old</strong> drawing, not select its width from the new X.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      (Restore_Pointer),HL ; Restore this physical page's old rectangle\n                LD      A,(Old_Width)   ; Use old parity, not the new position's parity\n                LD      (Restore_Width),A ; Copy all 13 or 14 previous destination bytes\n                LD      A,Sprite_Rows   ; Restore the complete cropped height\n                LD      (Restore_Rows),A ; Retain the count outside the banked window\n                JP      Restore_Background ; Replace old pixels before drawing the new frame","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Restore_Pointer),HL \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Restore this physical page's old rectangle\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Old_Width)   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Use old parity, not the new position's parity\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Restore_Width),A \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Copy all 13 or 14 previous destination bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,Sprite_Rows   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Restore the complete cropped height\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Restore_Rows),A \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Retain the count outside the banked window\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eJP\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      Restore_Background \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Replace old pixels before drawing the new frame\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      (Restore_Pointer),HL ; Restore this physical page's old rectangle
+                LD      A,(Old_Width)   ; Use old parity, not the new position's parity
+                LD      (Restore_Width),A ; Copy all 13 or 14 previous destination bytes
+                LD      A,Sprite_Rows   ; Restore the complete cropped height
+                LD      (Restore_Rows),A ; Retain the count outside the banked window
+                JP      Restore_Background ; Replace old pixels before drawing the new frame</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      (Restore_Pointer),HL </span><span style="color: #7B7F8B">; Restore this physical page's old rectangle</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Old_Width)   </span><span style="color: #7B7F8B">; Use old parity, not the new position's parity</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Restore_Width),A </span><span style="color: #7B7F8B">; Copy all 13 or 14 previous destination bytes</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,Sprite_Rows   </span><span style="color: #7B7F8B">; Restore the complete cropped height</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Restore_Rows),A </span><span style="color: #7B7F8B">; Retain the count outside the banked window</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">JP</span><span style="color: #F6F6F4">      Restore_Background </span><span style="color: #7B7F8B">; Replace old pixels before drawing the new frame</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Restoring full packed bytes is safe here: the source supplies both original background nibbles, then the new masked sprite is drawn over them. There are no other independently moving objects to erase accidentally. Multiple moving actors will need an explicit composition order later.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Stage a Row Across the Mapping Change</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>As in the static lesson, source scenery and destination screen both use the lower CPU window. We cannot simply use <code>LDIR</code> between two addresses there and assume they refer to different physical pages.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For each old rectangle row:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Map background pages 6-7 and copy 13 or 14 bytes into the resident <code>Background_Row</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Map the selected hidden display pair and copy those bytes to the identical screen offset.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Advance the offset by the 128-byte screen stride and repeat.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p><code>Target_Page</code> retains the physical hidden screen while the source is mapped. <code>Restore_Pointer</code>, width and row count are resident too. The buffer is 128 bytes because the initialization calls also use this copier for a full-width screen.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Restore_Background:\n                LD      A,Background_Page ; Read authoritative scenery, not another display\n                CALL    Map_Lower       ; Make the source rectangle row visible\n                LD      HL,(Restore_Pointer) ; Locate its packed byte offset\n                LD      DE,Background_Row ; Preserve the row above the banked window\n                LD      A,(Restore_Width) ; Read the rectangle width\n                LD      C,A             ; Set the low byte of the copy count\n                LD      B,0             ; Width is at most 128 bytes\n                LDIR                    ; Stage the source before paging it away","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eRestore_Background:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,Background_Page \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read authoritative scenery, not another display\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Map_Lower       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Make the source rectangle row visible\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Restore_Pointer) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Locate its packed byte offset\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Background_Row \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Preserve the row above the banked window\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Restore_Width) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the rectangle width\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      C,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Set the low byte of the copy count\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      B,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Width is at most 128 bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LDIR                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Stage the source before paging it away\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Restore_Background:
+                LD      A,Background_Page ; Read authoritative scenery, not another display
+                CALL    Map_Lower       ; Make the source rectangle row visible
+                LD      HL,(Restore_Pointer) ; Locate its packed byte offset
+                LD      DE,Background_Row ; Preserve the row above the banked window
+                LD      A,(Restore_Width) ; Read the rectangle width
+                LD      C,A             ; Set the low byte of the copy count
+                LD      B,0             ; Width is at most 128 bytes
+                LDIR                    ; Stage the source before paging it away</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Restore_Background:</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,Background_Page </span><span style="color: #7B7F8B">; Read authoritative scenery, not another display</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Map_Lower       </span><span style="color: #7B7F8B">; Make the source rectangle row visible</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Restore_Pointer) </span><span style="color: #7B7F8B">; Locate its packed byte offset</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Background_Row </span><span style="color: #7B7F8B">; Preserve the row above the banked window</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Restore_Width) </span><span style="color: #7B7F8B">; Read the rectangle width</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      C,A             </span><span style="color: #7B7F8B">; Set the low byte of the copy count</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      B,</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Width is at most 128 bytes</span></span>
+<span class="line"><span style="color: #F6F6F4">                LDIR                    </span><span style="color: #7B7F8B">; Stage the source before paging it away</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Interrupts are disabled while source or screen RAM occupies the lower address space. The full original LMPR value is restored before interrupts are enabled again. Scenery is restored and the new masked frame is drawn before VMPR changes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">What Has Not Changed</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The original and odd-shifted sprite forms remain cached in resident memory. X remains a pixel coordinate, with the one-/three-pixel step demonstration retained from Blog 9. Z/X select direction, Z wins if both are held, and Space retains the existing roll and directional-jump animations.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Those jump sequences are not physical jumps. The sprite's top row remains 115 throughout the example. Keeping Y fixed lets us inspect scenery restoration independently of ground collision or gravity.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The loop is interrupt-paced, not a guarantee of 50 completed renders each second. Banked restoration adds work; we do not claim a new measured movement rate or shorten the animation delay to conceal it. The next engine stages should continue to budget their rendering work rather than treating <code>HALT</code> as a performance guarantee.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Splitting the Program into Files</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Up to now each example has been one long <code>.asm</code> file. That made sense while the program was small: you could read it top to bottom and build it with one command. From here, though, every post adds another feature: rooms, collision, gravity, jumping, items, an inventory, animated water, hazards and a bee. Kept in one file, the program would grow to almost 2,000 lines.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Finding things gets hard.</strong> Gravity would sit between room exits and the hazard test, and a feature's variables would be hundreds of lines away from its code.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Spotting what changed gets hard.</strong> A post that adds a twenty-line rule would still ship another complete, huge file, and you would have to hunt for the twenty lines.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changes get risky.</strong> With everything in one place it is easy to edit a routine you did not mean to touch.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>So we split the program now, while it is still small, and every later post builds on the split.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">How INCLUDE works</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We have used pyz80's <code>INCLUDE</code> since the early posts to pull in the palette loader and the sprite frames. It is purely textual: the assembler reads the named file at that point as if its lines had been typed there. The files are not separately compiled modules. There is still one program, one set of labels and one run of addresses from <code>ORG 0x8000</code> onwards.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Labels are global.</strong> <code>walking.asm</code> can <code>JP Draw_Frame</code> in <code>dizzy_sprite.asm</code> without any imports or exports.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Include order decides addresses.</strong> Whatever is included first is assembled first. Moving a routine to another file changes where it lands in memory, but not what it does.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Paths are relative to the including file.</strong> <code>INCLUDE "constants.asm"</code> finds the file next to <code>13-1.asm</code>.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">The new layout</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>13-1.asm</code> is now short enough to read in one sitting. It sets the origin, runs <code>Start</code> and the main loop, then includes each feature:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>File</th><th>Lines</th><th>What it does</th></tr></thead><tbody><tr><td><code>13-1.asm</code></td><td>52</td><td>Program origin, start-up and the main loop</td></tr><tr><td><code>constants.asm</code></td><td>17</td><td>Ports, memory pages and tuning values; only <code>EQU</code>s, so it produces no bytes</td></tr><tr><td><code>walking.asm</code></td><td>44</td><td>Z/X input and the horizontal pixel steps</td></tr><tr><td><code>screen_paging.asm</code></td><td>62</td><td>Lower-memory paging, background restoration and page flips</td></tr><tr><td><code>dizzy_sprite.asm</code></td><td>298</td><td>Dizzy's animations, odd-pixel shifting and drawing</td></tr><tr><td><code>variables.asm</code></td><td>26</td><td>Variables shared between the files</td></tr><tr><td><code>sam_palette.asm</code></td><td>44</td><td>The unchanged palette loader</td></tr><tr><td><code>paged_data.asm</code></td><td>17</td><td>Sprite frames and scenery assembled into other memory pages</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Each file starts with a short header describing its job, and every line keeps its comment. The data files (<code>assets\tidizzy_cropped.asm</code> for the sprite frames and <code>assets\screen-1.bin</code> for the beach) sit in an <code>assets</code> folder.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Every post's folder stands on its own</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Each post's folder holds a <strong>complete copy</strong> of every file it needs, including the palette loader and the graphics. Nothing reaches back into an earlier post's folder. You can download one folder, build it, and change it without breaking any other example.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>To write the next post we copy this folder, change only the files the new feature touches, and add new, logically named files for new features, such as <code>rooms.asm</code> next time and <code>collision.asm</code> after that. Each post lists which files are new and which have changed, so you can go straight to the interesting part.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Rules for a safe split</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Moving assembly code around is not as innocent as moving functions in a high-level language. We follow four rules from here on:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Never cut through a fall-through.</strong> A routine without a final <code>RET</code> or jump simply runs on into whatever follows it in memory. Every split point comes after an unconditional <code>RET</code>, <code>JP</code> or <code>JR</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Keep block data together.</strong> Variables that are used as a group stay side by side in one file. For example, the previous positions for each display page are chosen by page.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Let each feature own its data.</strong> Data used by only one feature lives in that feature's file, next to the code that uses it.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Keep the memory layout rules.</strong> All the resident files are included before <code>Frame_Buffer</code> and <code>Resident_End</code>, so the <code>ASSERT</code> still covers everything. <code>paged_data.asm</code> comes last because it switches to <code>ORG 0</code> and <code>DUMP</code> to place data into other physical pages.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>The split changes the shape of the source, not the program. The resident program still ends at <code>0x88AC</code>, and the assembled bytes are the same instructions and data as the single-file version, just in a different order.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Start with the line-by-line commented <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog11/13-1.asm" target="_blank" rel="noreferrer noopener">13-1.asm</a>, then follow its <code>INCLUDE</code> lines into the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog11" target="_blank" rel="noreferrer noopener">other files in the blog11 folder</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/13-1.dsk" target="_blank" rel="noreferrer noopener">the 13-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog11/gifs/blog11-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog11/gifs/blog11-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The recording crosses the scenery in both directions, reaches the screen edges, stops, rolls, and exercises simultaneous direction keys. The palm trunks, sand and rocks remain intact behind him. The program was run with 256 KB configured in SimCoupe; the captured frames were inspected for trails and parity-width errors.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F13-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 13-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The embed still needs this disk uploaded to the site's separate disk-hosting location before publication. Generating this draft or its WordPress export does not upload it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog11\\13-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 13-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog11\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e13\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e13\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog11\13-1.asm --build-only
+python .\.vscode\capture_gifs.py 13-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog11\</span><span style="color: #BF9EEE">13</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">13</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The folder contains its own copies of the unchanged Blog 6 palette loader and sprite frames, and Blog 10's verified packed background. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We can now move over a faithful static scene without destroying it. Next we will build that scene from reusable graphic blocks and a compact room description instead of loading a whole precomposed screen. Collision will remain separate from visual composition.</p>
+<!-- /wp:paragraph -->

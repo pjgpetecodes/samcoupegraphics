@@ -1,0 +1,329 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/" target="_blank" rel="noreferrer noopener">Sam Coupe Assembly Language Programming</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/" target="_blank" rel="noreferrer noopener">Graphics in Assembly for the SAM Coupé</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/" target="_blank" rel="noreferrer noopener">Making SAM Coupé Sprites Transparent</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-animation/" target="_blank" rel="noreferrer noopener">Animating SAM Coupé Sprites</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-keyboard-input/" target="_blank" rel="noreferrer noopener">Controlling SAM Coupé Sprites with the Keyboard</a></li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Moving Dizzy Across the Screen</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog7/blog-post.md" target="_blank" rel="noreferrer noopener">memory paging post</a>, we moved the sprite frames into their own RAM pages. Now it is time to move Dizzy himself!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We will do just that in this post. There is no scenery, gravity or collision detection yet. We keep the black background so we can concentrate on position and on removing the old image correctly.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the sprites and helping with the series.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">A Position Is Not an Animation Frame</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Until now, holding Z selected the walking-left animation, but the drawing routine always used the same screen address. A sideways jump also changed the image without moving its position through the world.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We now need two independent pieces of information: which frame to draw, and where to draw it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Our first position is measured in screen bytes;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Sprite_X:       DEFB    1               ; Current horizontal position in screen bytes\nPrevious_X_10:  DEFB    1               ; Position last drawn on physical screen 10\nPrevious_X_14:  DEFB    1               ; Position last drawn on physical screen 14","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSprite_X:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Current horizontal position in screen bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_X_10:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Position last drawn on physical screen 10\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_X_14:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Position last drawn on physical screen 14\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Sprite_X:       DEFB    1               ; Current horizontal position in screen bytes
+Previous_X_10:  DEFB    1               ; Position last drawn on physical screen 10
+Previous_X_14:  DEFB    1               ; Position last drawn on physical screen 14</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Sprite_X:</span><span style="color: #F6F6F4">       DEFB    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Current horizontal position in screen bytes</span></span>
+<span class="line"><span style="color: #62E884">Previous_X_10:</span><span style="color: #F6F6F4">  DEFB    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Position last drawn on physical screen 10</span></span>
+<span class="line"><span style="color: #62E884">Previous_X_14:</span><span style="color: #F6F6F4">  DEFB    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Position last drawn on physical screen 14</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>In MODE 4, one byte contains two pixels. Moving by one byte therefore moves Dizzy by two pixels. This deliberately avoids shifting masks and pixel nibbles until the next post.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The vertical position stays at row 5.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 1: Move Independently of Animation</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The animation still holds each frame for five interrupts. If we only moved when that frame changed, position updates would be tied to the animation's playback speed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Instead, we call <code>Move_Sprite</code> in every main-loop iteration, after waiting for the frame interrupt;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                CALL    Show_Pending_Frame ; Display the completed hidden-page drawing\n                CALL    Choose_Background ; Retain the previous palette demonstration\n                CALL    Move_Sprite     ; Update position on every interrupt, not every frame\n                CALL    Choose_Animation ; Choose which existing animation should play\n                CALL    Update_Animation ; Advance its frame only when the delay expires","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Show_Pending_Frame \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Display the completed hidden-page drawing\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Choose_Background \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Retain the previous palette demonstration\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Move_Sprite     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Update position on every interrupt, not every frame\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Choose_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Choose which existing animation should play\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Update_Animation \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Advance its frame only when the delay expires\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                CALL    Show_Pending_Frame ; Display the completed hidden-page drawing
+                CALL    Choose_Background ; Retain the previous palette demonstration
+                CALL    Move_Sprite     ; Update position on every interrupt, not every frame
+                CALL    Choose_Animation ; Choose which existing animation should play
+                CALL    Update_Animation ; Advance its frame only when the delay expires</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Show_Pending_Frame </span><span style="color: #7B7F8B">; Display the completed hidden-page drawing</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Choose_Background </span><span style="color: #7B7F8B">; Retain the previous palette demonstration</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Move_Sprite     </span><span style="color: #7B7F8B">; Update position on every interrupt, not every frame</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Choose_Animation </span><span style="color: #7B7F8B">; Choose which existing animation should play</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Update_Animation </span><span style="color: #7B7F8B">; Advance its frame only when the delay expires</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Movement updates at 50 Hz. The animation advances at its existing five-interrupt cadence.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The keyboard reads are the same active-low Z and X bits as before;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Move_Sprite:    LD      BC,0xFEFE       ; Select the Shift/Z/X/C/V keyboard row\n                IN      A,(C)           ; Read the active-low direction bits\n                BIT     1,A             ; Z is bit 1 and takes priority over X\n                JR      Z,Move_Left     ; A zero bit means Z is held\n                BIT     2,A             ; X is bit 2 of the same row\n                RET     NZ              ; With neither key held, keep the current position","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eMove_Sprite:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    LD      BC,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0xFEFE\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Select the Shift/Z/X/C/V keyboard row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(C)           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the active-low direction bits\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                BIT     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Z is bit 1 and takes priority over X\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Z,Move_Left     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; A zero bit means Z is held\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                BIT     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; X is bit 2 of the same row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     NZ              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; With neither key held, keep the current position\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Move_Sprite:    LD      BC,0xFEFE       ; Select the Shift/Z/X/C/V keyboard row
+                IN      A,(C)           ; Read the active-low direction bits
+                BIT     1,A             ; Z is bit 1 and takes priority over X
+                JR      Z,Move_Left     ; A zero bit means Z is held
+                BIT     2,A             ; X is bit 2 of the same row
+                RET     NZ              ; With neither key held, keep the current position</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Move_Sprite:</span><span style="color: #F6F6F4">    LD      BC,</span><span style="color: #BF9EEE">0xFEFE</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Select the Shift/Z/X/C/V keyboard row</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(C)           </span><span style="color: #7B7F8B">; Read the active-low direction bits</span></span>
+<span class="line"><span style="color: #F6F6F4">                BIT     </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">,A             </span><span style="color: #7B7F8B">; Z is bit 1 and takes priority over X</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Z,Move_Left     </span><span style="color: #7B7F8B">; A zero bit means Z is held</span></span>
+<span class="line"><span style="color: #F6F6F4">                BIT     </span><span style="color: #BF9EEE">2</span><span style="color: #F6F6F4">,A             </span><span style="color: #7B7F8B">; X is bit 2 of the same row</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     NZ              </span><span style="color: #7B7F8B">; With neither key held, keep the current position</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z wins if both directions are held, matching our animation selection. We do not add another keyboard convention for movement.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 2: Stay Inside the Screen</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>There are 128 bytes across a MODE 4 row. Our cropped sprite occupies 13 of them, so its furthest starting position is <code>128 - 13</code>, or 115.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That is a screen boundary check, not collision detection against the world. We have no walls or platforms yet.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For rightward movement we test the limit before incrementing;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      A,(Sprite_X)   ; Read the horizontal position in screen bytes\n                CP      Maximum_X       ; Check whether the sprite already meets the right edge\n                RET     Z               ; Do not advance beyond the last complete rectangle\n                INC     A               ; One screen byte moves two MODE 4 pixels\n                JR      Store_X         ; Save the new position and redraw","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Sprite_X)   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the horizontal position in screen bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                CP      Maximum_X       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Check whether the sprite already meets the right edge\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Z               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Do not advance beyond the last complete rectangle\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; One screen byte moves two MODE 4 pixels\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      Store_X         \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Save the new position and redraw\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      A,(Sprite_X)   ; Read the horizontal position in screen bytes
+                CP      Maximum_X       ; Check whether the sprite already meets the right edge
+                RET     Z               ; Do not advance beyond the last complete rectangle
+                INC     A               ; One screen byte moves two MODE 4 pixels
+                JR      Store_X         ; Save the new position and redraw</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      A,(Sprite_X)   </span><span style="color: #7B7F8B">; Read the horizontal position in screen bytes</span></span>
+<span class="line"><span style="color: #F6F6F4">                CP      Maximum_X       </span><span style="color: #7B7F8B">; Check whether the sprite already meets the right edge</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     Z               </span><span style="color: #7B7F8B">; Do not advance beyond the last complete rectangle</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     A               </span><span style="color: #7B7F8B">; One screen byte moves two MODE 4 pixels</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      Store_X         </span><span style="color: #7B7F8B">; Save the new position and redraw</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>For leftward movement we test zero before decrementing. Otherwise an unsigned byte would wrap from zero to 255;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Move_Left:      LD      A,(Sprite_X)   ; Read the position before moving left\n                OR      A               ; Set Z if the leftmost byte is already zero\n                RET     Z               ; Prevent unsigned underflow at the left edge\n                DEC     A               ; Move left by one screen byte\nStore_X:        LD      (Sprite_X),A   ; Store the new world-space horizontal position\n                JP      Draw_Frame      ; Redraw even when the animation frame has not changed","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eMove_Left:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      LD      A,(Sprite_X)   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the position before moving left\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Set Z if the leftmost byte is already zero\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Z               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Prevent unsigned underflow at the left edge\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eDEC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     A               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Move left by one screen byte\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eStore_X:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e        LD      (Sprite_X),A   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Store the new world-space horizontal position\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eJP\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      Draw_Frame      \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Redraw even when the animation frame has not changed\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Move_Left:      LD      A,(Sprite_X)   ; Read the position before moving left
+                OR      A               ; Set Z if the leftmost byte is already zero
+                RET     Z               ; Prevent unsigned underflow at the left edge
+                DEC     A               ; Move left by one screen byte
+Store_X:        LD      (Sprite_X),A   ; Store the new world-space horizontal position
+                JP      Draw_Frame      ; Redraw even when the animation frame has not changed</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Move_Left:</span><span style="color: #F6F6F4">      LD      A,(Sprite_X)   </span><span style="color: #7B7F8B">; Read the position before moving left</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      A               </span><span style="color: #7B7F8B">; Set Z if the leftmost byte is already zero</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span><span style="color: #F6F6F4">     Z               </span><span style="color: #7B7F8B">; Prevent unsigned underflow at the left edge</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">DEC</span><span style="color: #F6F6F4">     A               </span><span style="color: #7B7F8B">; Move left by one screen byte</span></span>
+<span class="line"><span style="color: #62E884">Store_X:</span><span style="color: #F6F6F4">        LD      (Sprite_X),A   </span><span style="color: #7B7F8B">; Store the new world-space horizontal position</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">JP</span><span style="color: #F6F6F4">      Draw_Frame      </span><span style="color: #7B7F8B">; Redraw even when the animation frame has not changed</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Notice the final redraw. An unchanged animation frame can still need drawing at a new position.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We retain the existing rolls and sideways-jump animations. Position follows held Z/X independently, including while those sequences play. These are still not physical jumps: there is no vertical velocity or gravity yet, and releasing a direction stops translation even if the animation continues.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 3: Turn the Position into a Screen Address</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We begin with the fixed row's address and add our horizontal byte offset;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      HL,Sprite_Row*128 ; Begin at the fixed screen row\n                LD      A,(Sprite_X)   ; Read the current horizontal byte offset\n                LD      E,A             ; Put that offset in DE\n                LD      D,0             ; Clear its high byte\n                ADD     HL,DE           ; Add X to get the screen destination address\n                LD      DE,Frame_Buffer ; Read the staged frame from resident RAM\n                CALL    Draw_Sprite     ; Draw the sprite at its new position","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Sprite_Row*\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e128\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Begin at the fixed screen row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Sprite_X)   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the current horizontal byte offset\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      E,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Put that offset in DE\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      D,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Clear its high byte\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eADD\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL,DE           \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Add X to get the screen destination address\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Frame_Buffer \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read the staged frame from resident RAM\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Draw_Sprite     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Draw the sprite at its new position\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      HL,Sprite_Row*128 ; Begin at the fixed screen row
+                LD      A,(Sprite_X)   ; Read the current horizontal byte offset
+                LD      E,A             ; Put that offset in DE
+                LD      D,0             ; Clear its high byte
+                ADD     HL,DE           ; Add X to get the screen destination address
+                LD      DE,Frame_Buffer ; Read the staged frame from resident RAM
+                CALL    Draw_Sprite     ; Draw the sprite at its new position</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      HL,Sprite_Row*</span><span style="color: #BF9EEE">128</span><span style="color: #F6F6F4"> </span><span style="color: #7B7F8B">; Begin at the fixed screen row</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Sprite_X)   </span><span style="color: #7B7F8B">; Read the current horizontal byte offset</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      E,A             </span><span style="color: #7B7F8B">; Put that offset in DE</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      D,</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Clear its high byte</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">ADD</span><span style="color: #F6F6F4">     HL,DE           </span><span style="color: #7B7F8B">; Add X to get the screen destination address</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Frame_Buffer </span><span style="color: #7B7F8B">; Read the staged frame from resident RAM</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Draw_Sprite     </span><span style="color: #7B7F8B">; Draw the sprite at its new position</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The drawing loop still advances 128 bytes between screen rows. Our 572-byte staging buffer and banked sprite frames work exactly as in the paging example.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 4: Remember Where Each Page Was Drawn</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Double buffering gives us two different old pictures. The screen hidden now may have last been drawn two updates ago, not one.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Clearing only the immediately previous position would leave a trail. Instead we keep <code>Previous_X_10</code> and <code>Previous_X_14</code>, one for each physical screen.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Clear_Sprite</code> selects the saved position for the page it is actually drawing on;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Clear_Sprite:   LD      HL,Previous_X_10 ; Start with the old position for physical screen 10\n                LD      A,(Display_Page) ; Infer which other page is currently hidden\n                CP      Screen_Page     ; If 10 is displayed, we must erase screen 14\n                JR      NZ,Old_Position ; Otherwise the first saved position is correct\n                INC     HL              ; Select screen 14's saved horizontal position\nOld_Position:   LD      B,(HL)          ; Keep the position last drawn on this hidden page\n                LD      A,(Sprite_X)   ; Fetch the position we are about to draw\n                LD      (HL),A          ; Remember it for this page's next erase","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eClear_Sprite:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   LD      HL,Previous_X_10 \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Start with the old position for physical screen 10\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Display_Page) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Infer which other page is currently hidden\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                CP      Screen_Page     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; If 10 is displayed, we must erase screen 14\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                JR      NZ,Old_Position \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Otherwise the first saved position is correct\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eINC\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     HL              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Select screen 14's saved horizontal position\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eOld_Position:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   LD      B,(HL)          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Keep the position last drawn on this hidden page\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Sprite_X)   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Fetch the position we are about to draw\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (HL),A          \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Remember it for this page's next erase\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Clear_Sprite:   LD      HL,Previous_X_10 ; Start with the old position for physical screen 10
+                LD      A,(Display_Page) ; Infer which other page is currently hidden
+                CP      Screen_Page     ; If 10 is displayed, we must erase screen 14
+                JR      NZ,Old_Position ; Otherwise the first saved position is correct
+                INC     HL              ; Select screen 14's saved horizontal position
+Old_Position:   LD      B,(HL)          ; Keep the position last drawn on this hidden page
+                LD      A,(Sprite_X)   ; Fetch the position we are about to draw
+                LD      (HL),A          ; Remember it for this page's next erase</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Clear_Sprite:</span><span style="color: #F6F6F4">   LD      HL,Previous_X_10 </span><span style="color: #7B7F8B">; Start with the old position for physical screen 10</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Display_Page) </span><span style="color: #7B7F8B">; Infer which other page is currently hidden</span></span>
+<span class="line"><span style="color: #F6F6F4">                CP      Screen_Page     </span><span style="color: #7B7F8B">; If 10 is displayed, we must erase screen 14</span></span>
+<span class="line"><span style="color: #F6F6F4">                JR      NZ,Old_Position </span><span style="color: #7B7F8B">; Otherwise the first saved position is correct</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">INC</span><span style="color: #F6F6F4">     HL              </span><span style="color: #7B7F8B">; Select screen 14's saved horizontal position</span></span>
+<span class="line"><span style="color: #62E884">Old_Position:</span><span style="color: #F6F6F4">   LD      B,(HL)          </span><span style="color: #7B7F8B">; Keep the position last drawn on this hidden page</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Sprite_X)   </span><span style="color: #7B7F8B">; Fetch the position we are about to draw</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (HL),A          </span><span style="color: #7B7F8B">; Remember it for this page's next erase</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>We preserve the old X in B, calculate that old rectangle's screen address, and clear it to colour zero. Only then do we draw at the current position.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This also handles two redraws before a page flip: after the first drawing, that page's saved position already points at the image the second drawing must erase.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Clearing to zero is correct for this plain background. It will not be correct once scenery is behind Dizzy; restoring scenery will get its own post.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Full Assembly</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The complete, line-by-line commented example is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog8/10-1.asm" target="_blank" rel="noreferrer noopener">10-1.asm</a>. Its palette and cropped sprites remain the existing Blog 6 includes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Download the Disk Image</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/10-1.dsk" target="_blank" rel="noreferrer noopener">the 10-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog8/gifs/blog8-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog8/gifs/blog8-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Hold X to move right, then Z to move back. Dizzy stops at either screen boundary. The capture also releases a direction during a jump animation and tries both direction keys together.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">See the Result in the SAM Coupe Web Emulator</h2>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F10-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 10-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>This embed needs the new disk uploaded to the site's disk-hosting location before publication. The repository download and the hosted web-emulator disk are separate destinations.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog8\\10-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 10-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog8\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e10\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e10\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog8\10-1.asm --build-only
+python .\.vscode\capture_gifs.py 10-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog8\</span><span style="color: #BF9EEE">10</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">10</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The memory layout still fits a 256 KB SAM. Keys 1-5 retain the palette demonstration, and Space retains the roll/jump animations. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We can move across the screen, but only two pixels at a time. Next we will handle odd and even pixel positions, including what happens when a mask has to cover part of an extra destination byte. We will not add scenery or collision in the same step.</p>
+<!-- /wp:paragraph -->

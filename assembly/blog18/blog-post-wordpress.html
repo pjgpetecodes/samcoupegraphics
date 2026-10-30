@@ -1,0 +1,175 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Collecting the Chest</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog17/blog-post.md" target="_blank" rel="noreferrer noopener">previous post</a> connected the first two screens. Now we introduce one persistent world item: the chest on the starting beach.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This post teaches <strong>Enter pickup and collection state</strong>. A visible three-slot inventory comes next; dropping the chest and using it to escape screen 2 follow afterward. Carrying the chest does not unlock anything in this example.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/assets/provenance.json" target="_blank" rel="noreferrer noopener">chest asset provenance</a> records source graphic 215, extracted independently from its graphics-table pointer. Only its dimensions and pixels are exported, not original game code.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">An Item Is Not Part of the Static Room</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The chest starts at source byte X=24, row Y=111. Its drawing is twenty pixels wide and sixteen rows high. We place it after static scenery using the existing transparent compositor.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Chest_Collected</code> is a resident byte, initially zero. <code>Build_Chest</code> draws the item only when the current room is screen 1 and that byte is still zero.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The chest is not added to the collision mask. This is a collectable world image, not the solid support created by the later placement puzzle.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Enter Is a Separate Action</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Enter is read from bit zero of keyboard row <code>0xBFFE</code>, active low. <code>Enter_Previous</code> remembers the preceding update's bit, just as the jump lesson remembers Space.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Collection requires a fresh released-to-pressed edge, a grounded player, and both Z and X released. An invalid press is consumed rather than queued. Holding Enter cannot repeatedly collect the same item.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The SimCoupe test exercises the actual Enter mapping, not a substituted action key.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Require Nearby Rectangle Overlap</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The stable player box must overlap the chest rectangle: pixels 48-67 and rows 111-126. We compare inclusive player edges against the item's exclusive far limits.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>An Enter press from the initial position does nothing. Releasing the key, walking over the chest, stopping and pressing again can collect it. A distant or airborne press cannot grant the item.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This overlap rule is deliberately explicit tutorial behaviour, rather than a claim to reproduce every proximity rule in the original game.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Store State Before Rebuilding</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>On collection, set <code>Chest_Collected</code> to one before rebuilding the current room at the same supported position. Both display pages receive scenery without the chest, and their previous X/Y state is reset using the established room-refresh path.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Erasing the chest on one screen alone would let it reappear when the other screen flips into view. Erasing pixels without changing state would let a later room rebuild recreate it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The resident byte persists while travelling between screens. Revisiting screen 1 therefore keeps the chest absent, and a second collection attempt cannot duplicate it. Resetting the program restores the initial state.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For now this byte is the entire single-item carried state. It is not a general inventory and it does not solve the cliff puzzle.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog17" target="_blank" rel="noreferrer noopener">blog17 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/20-1.asm" target="_blank" rel="noreferrer noopener"><code>20-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>New:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/items_inventory.asm" target="_blank" rel="noreferrer noopener"><code>items_inventory.asm</code></a>: collecting and dropping items.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/paged_data.asm" target="_blank" rel="noreferrer noopener"><code>paged_data.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/rooms.asm" target="_blank" rel="noreferrer noopener"><code>rooms.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>New assets:</strong> <code>assets/image-215.bin</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/20-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 20-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/20-1.dsk" target="_blank" rel="noreferrer noopener">the 20-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog18/gifs/blog18-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog18/gifs/blog18-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording first presses Enter too far away, then collects while overlapping the chest, holds the key, visits screen 2 and returns. The chest stays absent on the starting beach.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0x9D9E</code>; graphics including the chest end at <code>0x75C9</code> in pages 8-9. Both remain within their asserted bounds.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F20-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 20-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog18\\20-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 20-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog18\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e20\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e20\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog18\20-1.asm --build-only
+python .\.vscode\capture_gifs.py 20-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog18\</span><span style="color: #BF9EEE">20</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">20</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps on a fresh grounded press, and Enter collects while stopped on the ground. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next we replace this single collected byte with the requested three-item LIFO stack and show all three inventory slots at the top of the screen.</p>
+<!-- /wp:paragraph -->

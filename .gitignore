@@ -3,6 +3,11 @@
 !.travis.yml
 !.github/
 !.github/**
+!.vscode/
+.vscode/*
+!.vscode/extract_tidizzy.py
+!.vscode/capture_gifs.py
+!.vscode/sam_build.py
 *-release/
 *.tgz
 __pycache__/

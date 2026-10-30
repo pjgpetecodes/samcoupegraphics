@@ -1,0 +1,263 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Building a Room from Reusable Graphics</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog11/blog-post.md" target="_blank" rel="noreferrer noopener">previous post</a> restored a moving sprite's old rectangle from an authoritative background. We will keep that drawing behaviour, but change how the background is created.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Instead of loading a precomposed screen, we will build the starting beach from reusable graphics and a compact room description. This is <strong>data-driven composition</strong>, not room transitions, collision or a tile-map engine.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The assets retain the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">source provenance and extraction metadata</a> introduced in Blog 10. Our renderer is independently written tutorial code.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Same Scene, a Different Representation</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The starting beach uses repeated sand, rock, palm and vegetation graphics. Storing another complete 24 KB bitmap for every room would duplicate those pixels.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The source game's room records identify a graphic, a signed byte X and a signed row Y. Some graphics deliberately extend off screen; others overlap. We retain their draw order and transparent colour-zero nibbles.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The extraction tool resolves clipping offline and produces a simpler tutorial-owned record:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Bytes</th><th>Meaning</th></tr></thead><tbody><tr><td>0-1</td><td>Source address of the first visible packed pixel byte</td></tr><tr><td>2-3</td><td>Destination offset in the background bitmap</td></tr><tr><td>4</td><td>Visible width in packed bytes</td></tr><tr><td>5</td><td>Visible height in rows</td></tr><tr><td>6</td><td>Original source-row stride</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Each room starts with a one-byte block count. The starting room has 85 visible records after clipping; two original records are completely outside the playfield. This list is a drawing description, not executable original game code.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>All four verified room descriptions are prepared in the generated include, but this program selects <strong>only <code>Room_1</code></strong>. There is no input for changing rooms. We retain the planned two-room introduction and later four-room expansion as separate lessons.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Clip Without Changing the Source Stride</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Suppose a graphic starts two bytes beyond the left edge. We skip its first two source bytes, reduce its visible width and begin at screen byte zero.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The following source row still begins one <strong>original graphic width</strong> later, not one clipped width later. This is why the record stores both visible width and original source stride.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The converter also clips above row 48, preserving the original HUD reservation, and below row 191 or beyond byte 127. Fully off-screen blocks are omitted. Focused extraction tests cover negative coordinates, the HUD boundary, the bottom-right corner and unchanged source strides.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This offline clipping keeps the new SAM lesson focused on reading room data. It does not introduce a general runtime sprite-clipping system or change the player's existing screen bounds.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Memory for Reusable Graphics</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We retain the established pages and add one bank pair:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Physical pages</th><th>Contents</th></tr></thead><tbody><tr><td>1-2</td><td>Resident renderer, state, draw records, row/frame buffers and stack</td></tr><tr><td>4-5</td><td>Dizzy's unchanged source animation frames</td></tr><tr><td>6-7</td><td>Authoritative background, now composed at startup</td></tr><tr><td>8-9</td><td>Reusable source graphics</td></tr><tr><td>10-11, 14-15</td><td>The two display screens</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>The 34 graphics needed by the selected four rooms occupy 29,991 bytes, ending at lower-window address <code>0x7527</code>. They fit in pages 8-9 without touching display page 10. The program and its resident tables end at <code>0x8F94</code>, below the <code>0xFF00</code> stack and the asserted <code>0xC000</code> resident limit.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We still need the authoritative 24 KB working background for restoration. Reusable assets reduce duplication between room descriptions; they do not eliminate that working buffer.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Compose the Background Once</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>At startup <code>Build_Room</code> clears pages 6-7 to colour zero, selects <code>Room_1</code>, and reads each seven-byte draw record. <code>Compose_Block</code> stages one visible graphics row from pages 8-9 into the existing resident row buffer, maps pages 6-7, and overlays that row.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      HL,(Block_Source) ; Read this graphic's source row\n                LD      DE,Background_Row ; Stage bytes outside the banked window\n                LD      A,(Block_Width) ; Read only the visible packed width\n                LD      C,A             ; Prepare the copy count\n                LD      B,0             ; Width does not exceed 128 bytes\n                LDIR                    ; Retain the row before mapping the target","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Block_Source) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read this graphic's source row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Background_Row \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Stage bytes outside the banked window\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Block_Width) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Read only the visible packed width\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      C,A             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Prepare the copy count\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      B,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Width does not exceed 128 bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LDIR                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Retain the row before mapping the target\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      HL,(Block_Source) ; Read this graphic's source row
+                LD      DE,Background_Row ; Stage bytes outside the banked window
+                LD      A,(Block_Width) ; Read only the visible packed width
+                LD      C,A             ; Prepare the copy count
+                LD      B,0             ; Width does not exceed 128 bytes
+                LDIR                    ; Retain the row before mapping the target</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      HL,(Block_Source) </span><span style="color: #7B7F8B">; Read this graphic's source row</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Background_Row </span><span style="color: #7B7F8B">; Stage bytes outside the banked window</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Block_Width) </span><span style="color: #7B7F8B">; Read only the visible packed width</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      C,A             </span><span style="color: #7B7F8B">; Prepare the copy count</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      B,</span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Width does not exceed 128 bytes</span></span>
+<span class="line"><span style="color: #F6F6F4">                LDIR                    </span><span style="color: #7B7F8B">; Retain the row before mapping the target</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The source advances by <code>Block_Stride</code>; the destination advances by the MODE 4 screen stride of 128 bytes. The two increments are deliberately independent.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The generated <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/assets/room-graphics.asm" target="_blank" rel="noreferrer noopener">room-graphics.asm</a> uses <code>MDAT</code> to include only graphics files. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/assets/room-data.asm" target="_blank" rel="noreferrer noopener">room-data.asm</a> include holds the source pointers, clipped destination offsets and dimensions. Both are generated by the existing extractor, not hand-transcribed from game bytes, and copied into this post's <code>assets</code> folder.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Transparency and Draw Order</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>These source graphics contain packed pixels, not the interleaved masks used by Dizzy. A zero nibble is transparent. We test each half of a source byte separately, retaining the existing background nibble when that source half is zero.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For example:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"background: A B\nsource:     0 C\nresult:     A C","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003ebackground: A B\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003esource:     0 C\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eresult:     A C\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>background: A B
+source:     0 C
+result:     A C</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">background: A B</span></span>
+<span class="line"><span style="color: #F6F6F4">source:     0 C</span></span>
+<span class="line"><span style="color: #F6F6F4">result:     A C</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>A whole-byte zero check would not handle that partial transparency correctly.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The block list is processed in order, so later opaque pixels cover earlier ones. Water records are placed last and use their first animation image. The tutorial does not animate water yet.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Static collision masks remain separate extraction outputs. They are <strong>not</strong> consulted by this renderer and do not determine visual transparency. A decorative palm can be visible without being solid.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Preserve the Established Movement Renderer</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Once the authoritative scene is complete, we initialize both display screens from it. Moving Dizzy uses exactly the established old-rectangle restoration, masked drawing and hidden-page flip.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We do not rebuild the room every update. We do not change movement speed, animation delay, controls or sprite data. Z/X move horizontally, Space retains the existing animations, and Y remains fixed. Passing through scenery is still expected because collision has not been introduced.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Interrupts stay disabled during initialization and banked rendering. The complete original LMPR mapping is restored before the ROM interrupt or <code>HALT</code> can execute. No new HMPR assumption is introduced.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog11" target="_blank" rel="noreferrer noopener">blog11 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/14-1.asm" target="_blank" rel="noreferrer noopener"><code>14-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>New:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/rooms.asm" target="_blank" rel="noreferrer noopener"><code>rooms.asm</code></a>: composing a room's scenery from its draw records.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/constants.asm" target="_blank" rel="noreferrer noopener"><code>constants.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/paged_data.asm" target="_blank" rel="noreferrer noopener"><code>paged_data.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/screen_paging.asm" target="_blank" rel="noreferrer noopener"><code>screen_paging.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>New assets:</strong> <code>assets/room-data.asm</code>, <code>assets/room-graphics.asm</code>, <code>assets/graphics/</code> (34 images).</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The full line-by-line commented example is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog12/14-1.asm" target="_blank" rel="noreferrer noopener">14-1.asm</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/14-1.dsk" target="_blank" rel="noreferrer noopener">the 14-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog12/gifs/blog12-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog12/gifs/blog12-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The example was run with 256 KB configured in SimCoupe. Its captured scenery was compared with the precomposed version from Blog 11: the background matches, while the moving sprite naturally differs between recordings. Both movement directions and screen edges retain the same restoration behaviour.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F14-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 14-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>This embed requires the new disk to be uploaded to the site's separate disk-hosting location before publication. The article and WordPress export are drafts, not publication actions.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Reproducing the Data</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog12\\14-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 14-1\npython .\\.vscode\\extract_tidizzy.py \u002d\u002drooms \u002d\u002ddisk \u0022C:\\path\\to\\TIDizzy.dsk\u0022 \u002d\u002doutput \u0022C:\\path\\to\\new-room-output\u0022","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog12\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e14\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e14\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\extract_tidizzy.py \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003erooms \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003edisk \u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003cspan style=\u0022color: #E7EE98\u0022\u003eC:\\path\\to\\TIDizzy.dsk\u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eoutput \u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003cspan style=\u0022color: #E7EE98\u0022\u003eC:\\path\\to\\new-room-output\u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog12\14-1.asm --build-only
+python .\.vscode\capture_gifs.py 14-1
+python .\.vscode\extract_tidizzy.py --rooms --disk "C:\path\to\TIDizzy.dsk" --output "C:\path\to\new-room-output"</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog12\</span><span style="color: #BF9EEE">14</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">14</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\extract_tidizzy.py </span><span style="color: #F286C4">--</span><span style="color: #F6F6F4">rooms </span><span style="color: #F286C4">--</span><span style="color: #F6F6F4">disk </span><span style="color: #DEE492">"</span><span style="color: #E7EE98">C:\path\to\TIDizzy.dsk</span><span style="color: #DEE492">"</span><span style="color: #F6F6F4"> </span><span style="color: #F286C4">--</span><span style="color: #F6F6F4">output </span><span style="color: #DEE492">"</span><span style="color: #E7EE98">C:\path\to\new-room-output</span><span style="color: #DEE492">"</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The extraction output must be a new directory. Its generated assembly records and binary graphics can be compared with the committed assets without overwriting them. Reset SimCoupe to stop the example.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We now have reusable scenery and reliable restoration. Next we will add a separate collision representation and use it to stop horizontal movement against solid surfaces. Drawing a rock and deciding whether it blocks Dizzy remain two different jobs.</p>
+<!-- /wp:paragraph -->

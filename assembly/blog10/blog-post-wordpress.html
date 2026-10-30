@@ -1,0 +1,249 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Drawing Treasure Island Dizzy's First Background</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog9/blog-post.md" target="_blank" rel="noreferrer noopener">previous post</a> positioned Dizzy at pixel resolution. This time we will deliberately put the moving player aside and concentrate on one new concept: a background.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We will first display one palm tree, then the starting beach taken from the supplied Treasure Island Dizzy game. Neither example has a moving player, collision, gravity, collectables or room transitions. Moving over scenery without erasing it is the next lesson.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The supplied game's title artwork credits Codemasters, 1989. The graphics are reproduced with the rights-holder permission provided for this project; the tutorial program is independently written, not the original game engine.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">What Was Recovered?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The starting beach is native room 77 in the supplied SAM game. Its scenery was reconstructed from the game's graphics pointers and draw records, then compared with the user-confirmed starting-screen capture. This is not a hand-drawn approximation or an intro screenshot relabelled as gameplay.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For this lesson we use only a packed static bitmap. The palm trees, sand, rocks, cloud and first water frame are included. Dizzy, the chest, coin, moving actors and original decorative HUD are not baked into it. These have their own state and will be introduced separately. The top 48 rows are reserved for a later HUD and are currently cyan.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The four intended rooms have now been identified: starting beach 77, cliff beach 76, mostly empty sky 108, then grassy/tree room 107. The route goes left, <strong>up</strong>, then left; it is not four consecutive rooms to the left. The bridge beyond them is room 106, screen 5, and remains outside our slice. We do not add those transitions in this post.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">MODE 4 Is Still a Packed Screen</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>A MODE 4 screen is 256 pixels wide and 192 rows high. Two four-bit palette indices occupy each byte, giving a 128-byte row stride:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"192 rows * 128 bytes = 24,576 bytes = 0x6000\naddress = row * 128 + pixel_x / 2","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e192 rows * 128 bytes = 24,576 bytes = 0x6000\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eaddress = row * 128 + pixel_x / 2\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>192 rows * 128 bytes = 24,576 bytes = 0x6000
+address = row * 128 + pixel_x / 2</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">192 rows * 128 bytes = 24,576 bytes = 0x6000</span></span>
+<span class="line"><span style="color: #F6F6F4">address = row * 128 + pixel_x / 2</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>In the previous examples colour zero was deliberately black. Here it is deliberately the source game's cyan sky. The actual black entry is palette index seven, which we use for the border. Recolouring zero with keys 1-5 would recolour scenery, so that earlier palette demonstration is no longer active in these static examples.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We retain the existing palette loader and reapply the palette after every <code>HALT</code>, because the ROM interrupt restores system palette values. The CLUT bytes themselves are unchanged.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 1: One Palm</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/12-1.asm" target="_blank" rel="noreferrer noopener">12-1.asm</a> displays source graphic 6. Its first two bytes contain its width in screen bytes and height in rows; the following data is packed MODE 4 pixels.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Copy_Width:     EQU     41              ; Image 6 stores 82 MODE 4 pixels per row\nCopy_Rows:      EQU     77              ; Copy all 77 rows of the source palm\nSource_Start:   EQU     2               ; Skip the image's width and height header\nDestination:    EQU     70*128+40       ; Place the palm at byte X=40, row Y=70","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCopy_Width:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e41\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Image 6 stores 82 MODE 4 pixels per row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCopy_Rows:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e77\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Copy all 77 rows of the source palm\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSource_Start:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Skip the image's width and height header\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eDestination:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e70\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e*\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e128\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e+\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e40\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Place the palm at byte X=40, row Y=70\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Copy_Width:     EQU     41              ; Image 6 stores 82 MODE 4 pixels per row
+Copy_Rows:      EQU     77              ; Copy all 77 rows of the source palm
+Source_Start:   EQU     2               ; Skip the image's width and height header
+Destination:    EQU     70*128+40       ; Place the palm at byte X=40, row Y=70</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Copy_Width:</span><span style="color: #F6F6F4">     </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">41</span><span style="color: #F6F6F4">              </span><span style="color: #7B7F8B">; Image 6 stores 82 MODE 4 pixels per row</span></span>
+<span class="line"><span style="color: #62E884">Copy_Rows:</span><span style="color: #F6F6F4">      </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">77</span><span style="color: #F6F6F4">              </span><span style="color: #7B7F8B">; Copy all 77 rows of the source palm</span></span>
+<span class="line"><span style="color: #62E884">Source_Start:</span><span style="color: #F6F6F4">   </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">2</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Skip the image's width and height header</span></span>
+<span class="line"><span style="color: #62E884">Destination:</span><span style="color: #F6F6F4">    </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">70</span><span style="color: #F6F6F4">*</span><span style="color: #BF9EEE">128</span><span style="color: #F6F6F4">+</span><span style="color: #BF9EEE">40</span><span style="color: #F6F6F4">       </span><span style="color: #7B7F8B">; Place the palm at byte X=40, row Y=70</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>We copy 41 bytes across each destination row, but advance <strong>128 bytes</strong> to find the start of the next row. Advancing by the graphic width instead would squash the image into consecutive screen bytes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is a rectangular copy onto an empty cyan screen. Colour-zero pixels in the image therefore produce the same cyan as the surrounding screen. We are not yet teaching transparent composition of several independently placed objects at runtime.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog10/gifs/blog10-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog10/gifs/blog10-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/12-1.dsk" target="_blank" rel="noreferrer noopener">the 12-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F12-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 12-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 2: The Starting Beach</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/12-2.asm" target="_blank" rel="noreferrer noopener">12-2.asm</a> uses exactly the same copier, this time with a complete screen:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Copy_Width:     EQU     128             ; Each full MODE 4 row occupies 128 bytes\nCopy_Rows:      EQU     192             ; Copy the complete 192-row screen\nSource_Start:   EQU     0               ; The packed screen has no dimensions header\nDestination:    EQU     0               ; Begin at the top-left display byte","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCopy_Width:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e128\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Each full MODE 4 row occupies 128 bytes\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCopy_Rows:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e192\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Copy the complete 192-row screen\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eSource_Start:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; The packed screen has no dimensions header\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eDestination:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Begin at the top-left display byte\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Copy_Width:     EQU     128             ; Each full MODE 4 row occupies 128 bytes
+Copy_Rows:      EQU     192             ; Copy the complete 192-row screen
+Source_Start:   EQU     0               ; The packed screen has no dimensions header
+Destination:    EQU     0               ; Begin at the top-left display byte</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Copy_Width:</span><span style="color: #F6F6F4">     </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">128</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Each full MODE 4 row occupies 128 bytes</span></span>
+<span class="line"><span style="color: #62E884">Copy_Rows:</span><span style="color: #F6F6F4">      </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">192</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Copy the complete 192-row screen</span></span>
+<span class="line"><span style="color: #62E884">Source_Start:</span><span style="color: #F6F6F4">   </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; The packed screen has no dimensions header</span></span>
+<span class="line"><span style="color: #62E884">Destination:</span><span style="color: #F6F6F4">    </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Begin at the top-left display byte</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The room composition has already been resolved by the extraction tool. Our SAM program just copies pixels. A later post will replace this precomposed screen with reusable graphics and room data; doing that here would introduce another concept too soon.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog10/gifs/blog10-step2.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog10/gifs/blog10-step2.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/12-2.dsk" target="_blank" rel="noreferrer noopener">the 12-2 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F12-2.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 12-2.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>These are static demonstrations, so the GIFs can contain a single retained image even though they were captured over several seconds. There is intentionally no moving water or player.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Copying Between Banked Memory Areas</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The source bitmap occupies physical pages 4-5. We build the visible result in hidden display pages 14-15, while pages 10-11 remain displayed. Code, palette, state, a 128-byte row buffer and the stack stay in resident pages 1-2.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The source and destination cannot both occupy the lower CPU window. Instead:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Map source pages 4-5 and copy one row into the resident buffer.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Map hidden screen pages 14-15 and copy the buffer to the destination.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Advance the source by its packed width and the screen by 128 bytes.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Copy_Row:       LD      A,4             ; Select the source bank pair\n                CALL    Map_Lower       ; Make the source row visible\n                LD      HL,(Source_Pointer) ; Recover its address\n                LD      DE,Row_Buffer   ; Use storage that survives paging\n                LD      BC,Copy_Width   ; Copy one packed source row\n                LDIR                    ; Stage pixels before changing mappings","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eCopy_Row:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       LD      A,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e4\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Select the source bank pair\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Map_Lower       \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Make the source row visible\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,(Source_Pointer) \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Recover its address\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Row_Buffer   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Use storage that survives paging\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,Copy_Width   \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Copy one packed source row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LDIR                    \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Stage pixels before changing mappings\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Copy_Row:       LD      A,4             ; Select the source bank pair
+                CALL    Map_Lower       ; Make the source row visible
+                LD      HL,(Source_Pointer) ; Recover its address
+                LD      DE,Row_Buffer   ; Use storage that survives paging
+                LD      BC,Copy_Width   ; Copy one packed source row
+                LDIR                    ; Stage pixels before changing mappings</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Copy_Row:</span><span style="color: #F6F6F4">       LD      A,</span><span style="color: #BF9EEE">4</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Select the source bank pair</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Map_Lower       </span><span style="color: #7B7F8B">; Make the source row visible</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,(Source_Pointer) </span><span style="color: #7B7F8B">; Recover its address</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Row_Buffer   </span><span style="color: #7B7F8B">; Use storage that survives paging</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      BC,Copy_Width   </span><span style="color: #7B7F8B">; Copy one packed source row</span></span>
+<span class="line"><span style="color: #F6F6F4">                LDIR                    </span><span style="color: #7B7F8B">; Stage pixels before changing mappings</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Interrupts remain disabled throughout this one-off initialization. We restore the original lower mapping before enabling interrupts or executing <code>HALT</code>. Once every row is ready, we switch VMPR to display page 14. We do not repeatedly copy 24 KB every frame.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Both entry points include the same <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/static-background.asm" target="_blank" rel="noreferrer noopener">static-background.asm</a> runtime. Each instruction and directive is commented. <code>MDAT</code> is pyz80's binary-data inclusion directive; it puts graphics bytes into the chosen <code>DUMP</code> page, not into the executing program's address range.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The resident end is <code>0x8148</code>, safely below the <code>0xFF00</code> stack. The complete screen ends at lower-window address <code>0x6000</code>, inside its 32 KB source pair. Assertions check screen dimensions, row bounds and the resident limit. The layout fits a 256 KB SAM.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Reproducible Graphics, Not Original Game Code</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">asset provenance</a> records the source-disk hash, file offsets, palette, graphics dimensions and room draw records. It also distinguishes static collision data from the image. Collision files are preparation for later posts and are not consumed by either example here.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The existing extractor now supports the four selected rooms:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\extract_tidizzy.py \u002d\u002drooms \u002d\u002ddisk \u0022C:\\path\\to\\TIDizzy.dsk\u0022 \u002d\u002doutput \u0022C:\\path\\to\\new-room-output\u0022","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\extract_tidizzy.py \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003erooms \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003edisk \u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003cspan style=\u0022color: #E7EE98\u0022\u003eC:\\path\\to\\TIDizzy.dsk\u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eoutput \u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003cspan style=\u0022color: #E7EE98\u0022\u003eC:\\path\\to\\new-room-output\u003c/span\u003e\u003cspan style=\u0022color: #DEE492\u0022\u003e\u0022\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\extract_tidizzy.py --rooms --disk "C:\path\to\TIDizzy.dsk" --output "C:\path\to\new-room-output"</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\extract_tidizzy.py </span><span style="color: #F286C4">--</span><span style="color: #F6F6F4">rooms </span><span style="color: #F286C4">--</span><span style="color: #F6F6F4">disk </span><span style="color: #DEE492">"</span><span style="color: #E7EE98">C:\path\to\TIDizzy.dsk</span><span style="color: #DEE492">"</span><span style="color: #F6F6F4"> </span><span style="color: #F286C4">--</span><span style="color: #F6F6F4">output </span><span style="color: #DEE492">"</span><span style="color: #E7EE98">C:\path\to\new-room-output</span><span style="color: #DEE492">"</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The destination must not already exist. The tool checks the known disk hash and data boundaries; it exports only selected graphics, layout data, static collision and previews. It does not emit original game code, disassembly or another copy of the disk. Its RGB previews use the SAM CLUT's correct channel bit weighting; assembly continues to use the original hardware palette bytes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog10\\12-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\sam_build.py .\\assembly\\blog10\\12-2.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 12-1 12-2","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog10\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e12\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog10\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e12\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e12\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e12\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog10\12-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog10\12-2.asm --build-only
+python .\.vscode\capture_gifs.py 12-1 12-2</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog10\</span><span style="color: #BF9EEE">12</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog10\</span><span style="color: #BF9EEE">12</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">12</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4"> </span><span style="color: #BF9EEE">12</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Both examples were run in SimCoupe with 256 KB configured, and the captured palm and beach were inspected. Reset to stop; there are no controls in this static lesson. The WordPress emulator embeds still require uploading these new disks to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Our old erase routine fills Dizzy's previous rectangle with colour zero. Over this beach it would remove palm trunks, sand and rocks. The next post will restore those pixels from the authoritative background before drawing the moving sprite.</p>
+<!-- /wp:paragraph -->

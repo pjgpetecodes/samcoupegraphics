@@ -1,0 +1,118 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorials - Walking                               |
+; | Filename:   walking.asm                                                         |
+; -----------------------------------------------------------------------------------
+;
+; Reading Z and X, stepping Dizzy left and right and following the ground.
+;
+Move_Sprite:    LD      BC,0xFEFE       ; Select the Shift/Z/X/C/V keyboard row
+                IN      A,(C)           ; Read the active-low direction bits
+                BIT     1,A             ; Z is bit 1 and takes priority over X
+                JR      Z,Move_Left     ; A zero bit means Z is held
+                BIT     2,A             ; X is bit 2 of the same row
+                RET     NZ              ; With neither key held, keep the current position
+                LD      A,(Sprite_X)    ; Read the horizontal position in MODE 4 pixels
+                CP      Maximum_X       ; Check whether the sprite already meets the right edge
+                RET     Z               ; Do not advance beyond the last complete rectangle
+                LD      A,(Move_Phase)  ; Alternate one- and three-pixel steps for Blog 8's average
+                OR      A               ; Set Z for a one-pixel step
+                JR      NZ,Move_Right_Three ; Use the three-pixel step on the alternate update
+                LD      A,(Sprite_X)    ; Read the current pixel position
+                INC     A               ; Move one pixel and switch packed-nibble alignment
+                JR      Store_X         ; Save the new position and redraw
+Move_Right_Three: LD    A,(Sprite_X)    ; Read the current pixel position
+                ADD     A,3             ; Move three pixels and switch packed-nibble alignment
+                CP      Maximum_X+1     ; Check whether the sprite would pass the right boundary
+                JR      C,Store_X       ; Keep the proposed position when it still fits
+                LD      A,Maximum_X     ; Clamp the final step to the last complete position
+                JR      Store_X         ; Save the bounded position and redraw
+Move_Left:      LD      A,(Sprite_X)   ; Read the position before moving left
+                OR      A               ; Set Z if the leftmost byte is already zero
+                RET     Z               ; Prevent unsigned underflow at the left edge
+                LD      A,(Move_Phase)  ; Use the same one-/three-pixel cadence moving left
+                OR      A               ; Set Z for a one-pixel step
+                JR      NZ,Move_Left_Three ; Use the three-pixel step on the alternate update
+                LD      A,(Sprite_X)    ; Read the current pixel position
+                DEC     A               ; Move one pixel and switch packed-nibble alignment
+                JR      Store_X         ; Save the new position and redraw
+Move_Left_Three: LD     A,(Sprite_X)    ; Read the current pixel position
+                CP      3               ; Check whether subtracting three would cross zero
+                JR      C,Clamp_Left    ; Clamp small positions rather than wrapping unsigned X
+                SUB     3               ; Move three pixels and switch packed-nibble alignment
+                JR      Store_X         ; Save the new position and redraw
+Clamp_Left:     XOR     A               ; Clamp a one- or two-pixel position to the left edge
+Store_X:        CALL    Constrain_X      ; Test each requested pixel before changing world position
+                LD      (Sprite_X),A   ; Store only the movement allowed by separate solidity data
+                LD      A,(Move_Phase)  ; Read the step size just used
+                XOR     1               ; Alternate between one- and three-pixel steps
+                LD      (Move_Phase),A ; Keep a two-pixel average over each pair of updates
+                JP      Draw_Frame      ; Redraw even when the animation frame has not changed
+;
+Constrain_X:    LD      (Desired_X),A    ; Retain the requested bounded destination
+                LD      A,(Sprite_X)    ; Begin with the current accepted position
+                LD      (Accepted_X),A ; Advance from here one pixel at a time
+                DI                      ; Collision RAM will temporarily replace the ROM mapping
+                LD      A,Collision_Page ; Select the immutable solidity-mask bank pair
+                CALL    Map_Lower       ; Keep code and state resident above this mapping
+Collision_Step: LD      A,(Desired_X)   ; Read the requested destination
+                LD      B,A             ; Retain it while comparing the accepted position
+                LD      A,(Accepted_X) ; Read the last collision-free origin
+                CP      B               ; Test whether the request has been fully satisfied
+                JR      Z,Collision_Done ; No more candidate pixels remain
+                JR      C,Probe_Right   ; An increasing destination moves right
+                DEC     A               ; Test one pixel left, never the entire step at once
+                JR      Ground_Candidate ; Resolve support and body clearance for this candidate
+Probe_Right:    INC     A               ; Test one pixel right
+Ground_Candidate: LD    (Candidate_X),A ; Keep the one-pixel candidate origin
+                LD      A,(Sprite_Y)    ; Search a bounded neighbourhood of the current feet
+                ADD     A,Step_Height   ; Include a small downward step
+                CP      192-Sprite_Rows+1 ; Never let the complete drawing leave the bitmap
+                JR      C,Ground_Lower_Ready ; Retain a legal lower search limit
+                LD      A,192-Sprite_Rows ; Clamp the candidate origin to the last complete row
+Ground_Lower_Ready: LD  (Ground_Last_Y),A ; Keep the inclusive lower search limit
+                LD      A,(Sprite_Y)    ; Read the current origin again for the upper limit
+                SUB     Step_Height     ; Include only a small upward step
+                CP      48              ; Keep the player below the reserved HUD region
+                JR      NC,Ground_Upper_Ready ; Retain a legal upper search limit
+                LD      A,48            ; Clamp the origin at the playfield's first row
+Ground_Upper_Ready: LD  (Candidate_Y),A ; Start with the highest nearby candidate
+Ground_Search:  CALL    Has_Support      ; Test the row immediately beneath the footprint first
+                JR      Z,Ground_Next    ; Empty space below is not a grounded position
+                CALL    Box_Clear        ; Support is useful only when the entire body fits above it
+                JR      Z,Ground_Accept  ; Accept the highest supported, unobstructed candidate
+Ground_Next:    LD      A,(Ground_Last_Y) ; Read the inclusive last candidate row
+                LD      B,A             ; Keep it while comparing the current candidate
+                LD      A,(Candidate_Y) ; Read the row just tested
+                CP      B               ; Check whether all nearby surfaces were considered
+                JR      Z,Ground_Unsupported ; Do not search farther down or up this frame
+                INC     A               ; Inspect the next row within the limited step range
+                LD      (Candidate_Y),A ; Retain the new candidate origin
+                JR      Ground_Search   ; Retry support before the more expensive whole-body test
+Ground_Unsupported: LD A,(Sprite_Y)     ; A ledge must not teleport the player to remote ground
+                LD      (Candidate_Y),A ; Test horizontal clearance at the unchanged height
+                CALL    Box_Clear        ; A tall wall still blocks movement without nearby support
+                JR      NZ,Collision_Done ; Keep the last safe X and Y when the body cannot fit
+                XOR     A               ; Mark the absence of reachable ground
+                LD      (Grounded),A    ; The later gravity lesson will act on this state
+                JR      Ground_Accept_X ; Allow clear horizontal movement without inventing a fall
+Ground_Accept:  LD      A,(Candidate_Y) ; Use the supported origin, not animation-frame bounds
+                LD      (Sprite_Y),A    ; Follow the surface by the accepted small vertical change
+                LD      A,1             ; The row beneath the footprint contains solid ground
+                LD      (Grounded),A    ; Keep support state separate from animation
+Ground_Accept_X:                        ; Both supported and unsupported candidates have a clear body
+                LD      A,(Candidate_X) ; The complete candidate body was empty
+                LD      (Accepted_X),A ; Accept this one-pixel movement
+                JP      Collision_Step  ; Test another pixel and its ground if the request was larger
+Collision_Done: CALL    Restore_Lower    ; Restore ROM before interrupts or another HALT
+                EI                      ; The original lower mapping is accessible again
+                LD      A,(Accepted_X) ; Return the last safe origin, even for a blocked request
+                RET                     ; Drawing and animation proceed independently of collision
+;
+Show_Support:   LD      A,(Grounded)    ; Support is a world-state property, not an animation frame
+                OR      A               ; Set Z when the feet have no nearby supporting surface
+                LD      A,7             ; A supported player keeps the established black border
+                JR      NZ,Support_Border ; Do not change the scenery palette for debugging
+                LD      A,2             ; A coloured border marks an unsupported player
+Support_Border: OUT     (254),A         ; Reapply the status after the ROM interrupt
+                RET                     ; Falling remains a separate future behaviour

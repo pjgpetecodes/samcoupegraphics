@@ -1,6 +1,6 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 4 - Separate Sprite Data                  |
+; | Program:    SAM Coupe Sprites Tutorial 4 - Separate Sprite Data                 |
 ; | Filename:   blog3\4.asm                                                         |
 ; -----------------------------------------------------------------------------------
 ;

@@ -1,13 +1,10 @@
 ;
 ; -----------------------------------------------------------------------------------
-; |                                                                                 |
 ; | Program:    SAM Coupe Sprites Tutorial 1 - Part 0                               |
-; | Filename:   Sprites0.asm                                                        |
-; | Version:    1.0                                                                 |
-; | Date:       12/10/2017                                                          |
-; | Author:     Pete Gallagher - PJG Creations Ltd                                  |
-; |                                                                                 |
+; | Filename:   blog2\2.asm                                                         |
 ; -----------------------------------------------------------------------------------
+;
+; Written by Pete Gallagher - PJG Creations Ltd. Version 1.0, 12/10/2017.
 ;
                 autoexec		        ; Automatically Execute the Program
 		        ORG 	32768		    ; Store the program in User Address Space

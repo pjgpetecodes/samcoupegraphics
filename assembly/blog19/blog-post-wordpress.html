@@ -1,0 +1,213 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>A Visible Three-Item Stack</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/blog-post.md" target="_blank" rel="noreferrer noopener">chest-pickup lesson</a> stored a single collected byte. Now we replace it with the requested <strong>three-item LIFO inventory</strong>, visible at the top of the screen.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This lesson covers inventory order, capacity and safe dropping. The chest placement puzzle remains separate: dropping a chest here does not create a platform or unlock an exit.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/assets/provenance.json" target="_blank" rel="noreferrer noopener">additional asset provenance</a> records the coin, axe and scroll graphics. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog18/assets/provenance.json" target="_blank" rel="noreferrer noopener">chest provenance</a> remains unchanged.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>Intentional adaptation:</strong> the original game's item routine rotates slots and drops an older item. This tutorial follows the requested stack instead: first in, last out. Do not describe that LIFO rule as an exact reproduction of the original.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Separate World Records from Carried Identifiers</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Four eight-byte records contain a tutorial item identifier, graphics pointer, byte X, Y, packed width, height and room ID. Room 255 means carried; rooms 1 and 2 mean physically present in the world.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The chest retains its recovered placement. The coin, axe and scroll positions are <strong>teaching fixtures</strong>, not original placements or puzzle prerequisites. Four available items let us exercise a capacity of three.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Inventory_Slots</code> holds three identifiers, initially 255 for empty. <code>Inventory_Count</code> ranges from zero to three. Slots fill left to right, oldest to newest, so the rightmost occupied slot is the top.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Picking up an item appends its identifier and marks its world record carried. Dropping uses slot <code>count - 1</code>, never slot zero. Thus collecting axe, coin, chest produces removals in the order chest, coin, axe.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Enter Keeps One Clear Meaning</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Enter remains a fresh-press, grounded, stationary action. Invalid airborne or moving presses are consumed, not queued.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Search nearby world items first using rectangle overlap and stable record order. If an item is nearby, try to pick it up. A full inventory rejects that pickup; it does not discard an older item or unexpectedly drop the current top.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Only when no item is nearby does Enter try to drop the stack top. An empty stack rejects the action. Rejections produce a short amber border pulse; normal black/yellow support feedback resumes afterward.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This precedence means pressing Enter again over an item just dropped normally picks it back up. Move to a clear position before trying to drop the next carried item.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Commit a Pop Only After Safe Placement</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>A drop aligns the drawing to a screen byte near the player's centre and searches a small vertical neighbourhood near the feet. It requires the complete item rectangle to fit above solid support in the existing static mask.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The check uses that item's own width and height, not the player's narrower body box. It conservatively requires even transparent drawing margins to be clear. That can reject a close placement that appears visually possible, but it never silently embeds the item in terrain.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The proposed rectangle and its support row must remain inside the bitmap. If every nearby candidate fails, leave the count, slots and world record unchanged.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Only a successful placement updates the world X/Y and room, decreases the count and clears the vacated slot. This ordering prevents a failed drop from losing an item. Ordinary dropped items remain non-solid; becoming a supporting chest is the next puzzle lesson.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Draw Every Slot at the Screen Top</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The reserved HUD area occupies rows 0-47. We draw three black-outlined frames there, including empty frames. Occupied slots show the corresponding source graphic, not an anonymous flag. The playfield and its collision coordinates remain unchanged.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The HUD and world items are composed into authoritative scenery. A successful push or pop refreshes both physical display pages through the existing room-refresh path. Empty slots cannot retain stale icons on alternating frames.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Records, slots and count remain resident across room transitions. Reset restores the authored initial item placements and empties the inventory.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog18" target="_blank" rel="noreferrer noopener">blog18 folder</a>, so it builds on its own without reaching into any other folder. The main files are <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/21-1.asm" target="_blank" rel="noreferrer noopener"><code>21-1.asm</code></a> and <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/21-2.asm" target="_blank" rel="noreferrer noopener"><code>21-2.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/items_inventory.asm" target="_blank" rel="noreferrer noopener"><code>items_inventory.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/paged_data.asm" target="_blank" rel="noreferrer noopener"><code>paged_data.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/rooms.asm" target="_blank" rel="noreferrer noopener"><code>rooms.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/walking.asm" target="_blank" rel="noreferrer noopener"><code>walking.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Only for 21-2:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/constants_drop_test.asm" target="_blank" rel="noreferrer noopener"><code>constants_drop_test.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/variables_drop_test.asm" target="_blank" rel="noreferrer noopener"><code>variables_drop_test.asm</code></a>. Each is a copy of the shared file of the same name, with the small change that example needs.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>New assets:</strong> <code>assets/image-211.bin</code>, <code>assets/image-216.bin</code>, <code>assets/image-231.bin</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Example 1: Push, Fill, Reject and Pop</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/21-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 21-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/21-1.dsk" target="_blank" rel="noreferrer noopener">the 21-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog19/gifs/blog19-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog19/gifs/blog19-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows axe, coin and chest pushed in that order. Trying to collect the fourth item while full produces rejection feedback without changing the slots. Moving to clear positions then drops chest, coin and axe, leaving three visibly empty frames. A later empty-stack action is rejected.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F21-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 21-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Example 2: An Unsafe Drop Must Retain the Item</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog19/21-2.asm" target="_blank" rel="noreferrer noopener">21-2.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/21-2.dsk" target="_blank" rel="noreferrer noopener">the 21-2 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is an isolated fixture using the <strong>same inventory engine</strong>. It starts at the cliff with one preloaded axe, explicitly rather than pretending a pickup has occurred. The narrower player body fits there, but the wider proposed axe rectangle intersects rock.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog19/gifs/blog19-step2.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog19/gifs/blog19-step2.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The live recording shows the rejection pulse with the axe still in its slot, then a successful drop after moving away from the cliff. The seeded axe is marked carried from startup, so it is not also duplicated in the world.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F21-2.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 21-2.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0x9F7B</code>; banked graphics end at <code>0x77CA</code>. Both examples fit the existing 256 KB layout and keep the stack at <code>0xFF00</code>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Both web-emulator placeholders need their disks uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog19\\21-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\sam_build.py .\\assembly\\blog19\\21-2.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 21-1 21-2","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog19\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e21\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog19\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e21\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e21\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e21\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog19\21-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog19\21-2.asm --build-only
+python .\.vscode\capture_gifs.py 21-1 21-2</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog19\</span><span style="color: #BF9EEE">21</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog19\</span><span style="color: #BF9EEE">21</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">21</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4"> </span><span style="color: #BF9EEE">21</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps, and Enter picks up nearby items or drops the newest carried item while stopped on the ground. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next we remove the extra inventory-demo placements from the faithful route and connect a physical chest placement on screen 2 to its supporting platform. Merely carrying the chest will still not solve that puzzle.</p>
+<!-- /wp:paragraph -->

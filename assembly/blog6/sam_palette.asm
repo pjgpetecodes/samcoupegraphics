@@ -1,7 +1,14 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorials - Palette Loader                        |
+; | Filename:   sam_palette.asm                                                     |
+; -----------------------------------------------------------------------------------
+;
 ; CALL LoadPalette; preserves AF, BC, DE and HL
 ; B is the CLUT index; C is the port low byte.
 ; Writes all 16 entries; does not change the screen mode or HMPR.
 ; Not interrupt-atomic: manage interrupts in the caller if required.
+;
 LoadPalette:
     PUSH AF
     PUSH BC

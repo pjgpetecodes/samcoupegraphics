@@ -1,7 +1,8 @@
 ;
 ; -----------------------------------------------------------------------------------
 ; | Program:    SAM Coupe Sprites Tutorial 5-2 - Interleaved Sprite with Stripes    |
-; | Filename:   blog3\5-2.asm                                                         |
+; | Filename:   blog3\5-2.asm                                                       |
+; | Based on:   Tutorial 5 (blog3\5.asm)                                            |
 ; -----------------------------------------------------------------------------------
 ;
 ; Tutorial 4 builds mask/pixel pairs from separate blocks at runtime. This version

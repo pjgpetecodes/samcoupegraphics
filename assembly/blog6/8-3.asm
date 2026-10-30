@@ -1,6 +1,6 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 8 - Part 3: Sideways Jumps                   |
+; | Program:    SAM Coupe Sprites Tutorial 8 - Part 3: Sideways Jumps               |
 ; | Filename:   blog6\8-3.asm                                                       |
 ; | Based on:   Tutorial 8 part 2 (blog6\8-2.asm)                                   |
 ; -----------------------------------------------------------------------------------

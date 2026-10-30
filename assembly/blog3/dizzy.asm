@@ -1,3 +1,12 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorials - Dizzy Source Frames                   |
+; | Filename:   dizzy.asm                                                           |
+; -----------------------------------------------------------------------------------
+;
+; The source Dizzy frames and palette. Each ImageN starts with its width in
+; screen bytes and its height in rows.
+;
 Palette:
 		db	&5D, &7F, &6E, &6A, &2A, &39, &1D, &00, &6C, &42, &24, &7E, &59, &77, &70, &07
 

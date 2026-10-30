@@ -1,0 +1,183 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Detecting Hazards</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog22/blog-post.md" target="_blank" rel="noreferrer noopener">last post</a> the starting beach's sea came to life. It still cannot hurt Dizzy: he can wade straight in and walk along the seabed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This post adds one concept: <strong>hazard detection</strong>. We decide <em>when</em> Dizzy is touching something dangerous, and show that as a red border. What happens next, losing a life and restarting, is a separate decision and the subject of the next lesson. Keeping "did we touch it?" apart from "what does touching it do?" makes both easier to test.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. This is independently written tutorial code.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Hazards Are Not Walls</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Solid scenery lives in the collision mask: a pixel is either something Dizzy can stand on and bump into, or it is not. A hazard is different. Dizzy must be able to move <em>into</em> it, otherwise he could never touch it. So hazards do not go in the collision mask at all; they get their own small table of rectangles.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That also suits the beach. The collision mask already continues under the water as a seabed, which is why Dizzy can wade in. The sea itself only needs one rectangle on top.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Hazard Table</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Each hazard is five bytes:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Byte</th><th>Meaning</th></tr></thead><tbody><tr><td>0</td><td>Room number, with 0 ending the table</td></tr><tr><td>1</td><td>Left edge in pixels (inclusive)</td></tr><tr><td>2</td><td>Right edge in pixels (inclusive)</td></tr><tr><td>3</td><td>Top row (inclusive)</td></tr><tr><td>4</td><td>Bottom row (inclusive)</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>The table has one entry for now:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"room 1, X 200-255, Y 144-191","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eroom 1, X 200-255, Y 144-191\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>room 1, X 200-255, Y 144-191</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">room 1, X 200-255, Y 144-191</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>This rectangle is a <strong>tutorial adaptation</strong>, traced from the visible blue water on screen 1 rather than copied from the original game's own water handling. Starting a few pixels inside the shoreline means the very tip of Dizzy's foot on the wet sand does not count; he has to actually step into the sea.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Testing for Overlap</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Check_Hazards</code> runs once per update, straight after gravity has settled Dizzy's position for that update. It uses exactly the same body box as solid collision, so "touching" means the same thing everywhere.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Two rectangles overlap unless one lies entirely to one side of the other. That gives four quick rejections:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Hazard_Contact = 0\nfor each hazard record in this room:\n    if body right  \u003c hazard left:   next\n    if body left   \u003e hazard right:  next\n    if body bottom \u003c hazard top:    next\n    if body top    \u003e hazard bottom: next\n    Hazard_Contact = 1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eHazard_Contact = 0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003efor each hazard record in this room:\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    if body right  \u0026lt; hazard left:   next\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    if body left   \u0026gt; hazard right:  next\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    if body bottom \u0026lt; hazard top:    next\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    if body top    \u0026gt; hazard bottom: next\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Hazard_Contact = 1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Hazard_Contact = 0
+for each hazard record in this room:
+    if body right  &lt; hazard left:   next
+    if body left   &gt; hazard right:  next
+    if body bottom &lt; hazard top:    next
+    if body top    &gt; hazard bottom: next
+    Hazard_Contact = 1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">Hazard_Contact = 0</span></span>
+<span class="line"><span style="color: #F6F6F4">for each hazard record in this room:</span></span>
+<span class="line"><span style="color: #F6F6F4">    if body right  &lt; hazard left:   next</span></span>
+<span class="line"><span style="color: #F6F6F4">    if body left   &gt; hazard right:  next</span></span>
+<span class="line"><span style="color: #F6F6F4">    if body bottom &lt; hazard top:    next</span></span>
+<span class="line"><span style="color: #F6F6F4">    if body top    &gt; hazard bottom: next</span></span>
+<span class="line"><span style="color: #F6F6F4">    Hazard_Contact = 1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>On the Z80 each test is a load, an <code>ADD</code> of the box offset, and a <code>CP</code> against the record through <code>IX</code>. <code>CP</code> sets carry when <code>A</code> is smaller, so "body right is less than hazard left" is simply <code>JR C</code>. The opposite test swaps the operands by loading the hazard edge into <code>A</code> and comparing it with the body edge held in another register, so the same <code>JR C</code> still means "no overlap".</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The flag is recomputed from zero every update. Nothing has to remember to clear it when Dizzy walks back out.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Showing the Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Show_Ground</code> already uses the border as a debug view: black when supported, yellow while airborne. Hazard contact now takes priority and turns it red (palette index 4). It is deliberately only a display; no other state changes yet.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog22" target="_blank" rel="noreferrer noopener">blog22 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog23/25-1.asm" target="_blank" rel="noreferrer noopener"><code>25-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>New:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog23/hazards.asm" target="_blank" rel="noreferrer noopener"><code>hazards.asm</code></a>: rectangles that are deadly to touch, tested against Dizzy's body box.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog23/walking.asm" target="_blank" rel="noreferrer noopener"><code>walking.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog23/25-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 25-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/25-1.dsk" target="_blank" rel="noreferrer noopener">the 25-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog23/gifs/blog23-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog23/gifs/blog23-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows Dizzy walking down the beach. As he steps off the sand there is a single yellow airborne frame while he drops onto the seabed, then the border turns red for as long as he is in the water. When he walks back up the beach it returns to black.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0xA40E</code>, below the asserted resident limit and the <code>0xFF00</code> stack.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F25-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 25-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog23\\25-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 25-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog23\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e25\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e25\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog23\25-1.asm --build-only
+python .\.vscode\capture_gifs.py 25-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog23\</span><span style="color: #BF9EEE">25</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">25</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps on a fresh grounded press, and Enter collects or drops while stopped on the ground. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next we give the hazard its consequence: Dizzy loses his only life and the game restarts.</p>
+<!-- /wp:paragraph -->

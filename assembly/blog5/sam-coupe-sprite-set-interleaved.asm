@@ -1,4 +1,11 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorials - Full Sprite Set                       |
+; | Filename:   sam-coupe-sprite-set-interleaved.asm                                |
+; -----------------------------------------------------------------------------------
+;
 ; Full SAM sprite set: 64 sprites, 32x32, interleaved
+;
 
 ; Sprite 1: TIDizzy 1
 TIDizzy_1_Interleaved:

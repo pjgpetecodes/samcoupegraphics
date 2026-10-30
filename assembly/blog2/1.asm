@@ -1,3 +1,9 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorial 1 - Printing Text                        |
+; | Filename:   blog2\1.asm                                                         |
+; -----------------------------------------------------------------------------------
+;
                			autoexec					; Automatically Execute the Program
 				ORG 		32768				; Store the program in User Address Space
 ;

@@ -111,6 +111,363 @@ The editor-generated CLUT loader and palette table are shared in
 `assembly\blog6\sam_palette.asm`. Sequences now carry a loop flag, so rolls and
 jumps always play to the end.
 
+## Blog 7: memory paging
+
+Draft post: [`assembly\blog7\blog-post.md`](assembly/blog7/blog-post.md).
+
+`assembly\blog7\9-1.asm` moves the existing 38 cropped Dizzy frames into physical
+pages 4-5, leaving code, tables and a 572-byte staging buffer resident in pages
+1-2. It uses display pairs 10-11 and 14-15, so it runs on a 256 KB SAM. The
+animation controls and palette demonstration stay unchanged; this post does not
+add world-space movement or scenery. Build with:
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog7\9-1.asm --build-only
+```
+
+The new WordPress export is a draft for manual publication. Its web-emulator
+embed needs the disk uploaded to the site's disk-hosting location first.
+
+## Blog 8: horizontal movement
+
+Draft post: [`assembly\blog8\blog-post.md`](assembly/blog8/blog-post.md).
+
+`assembly\blog8\10-1.asm` adds a byte-aligned X position, updated independently
+of animation at 50 Hz. It clamps the 13-byte sprite rectangle to the screen and
+remembers the previous X separately for each display page, preventing trails.
+There is no scenery, gravity or world collision yet.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog8\10-1.asm --build-only
+```
+
+## Blog 9: pixel positioning
+
+Draft post: [`assembly\blog9\blog-post.md`](assembly/blog9/blog-post.md).
+
+`assembly\blog9\11-1.asm` continues from Blog 8 and positions the same
+26-pixel-wide sprite at pixel resolution, with alternating one- and three-pixel
+steps to retain Blog 8's two-pixel average per update while switching parity.
+Even positions draw the original 13-byte rows; odd positions use a resident
+14-byte-per-row buffer with transparent padding. Page-specific previous
+positions retain their old alignment and width when erased. The examples still
+have no scenery or collision.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog9\11-1.asm --build-only
+```
+
+The new WordPress export is a draft for manual publication. Its web-emulator
+embed needs the disk uploaded to the site's disk-hosting location first.
+
+## Blog 10: static backgrounds
+
+Draft post: [`assembly\blog10\blog-post.md`](assembly/blog10/blog-post.md).
+
+`12-1.asm` copies one recovered palm; `12-2.asm` copies the source-derived
+starting beach. Both use `static-background.asm`, staging one packed row between
+banked source and hidden display RAM. Cyan colour zero is intentional here.
+There is no moving player, scenery restoration or collision in this lesson.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog10\12-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog10\12-2.asm --build-only
+```
+
+## Blog 11: scenery restoration
+
+Draft post: [`assembly\blog11\blog-post.md`](assembly/blog11/blog-post.md).
+
+`13-1.asm` restores each hidden screen's old sprite rectangle from an immutable
+background in pages 6-7, preserving the old X parity and its 13/14-byte width.
+It stages rows between source and destination mappings before drawing the new
+sprite. Y is intentionally fixed; no collision or gravity is introduced.
+
+From this post onwards the program is split into logically named `INCLUDE`d
+files: the short `13-1.asm` main file plus `constants`, `walking`,
+`screen_paging`, `dizzy_sprite`, `variables`, `paged_data` and `sam_palette`.
+Every cut follows an unconditional `RET`/`JP`/`JR`, so behaviour and
+`Resident_End` (`0x88AC`) are unchanged. Each later blog folder is a complete,
+self-contained copy of the previous one (with its own `assets` folder) that
+changes only the files it needs and adds new files for new features.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog11\13-1.asm --build-only
+```
+
+## Blog 12: data-driven room composition
+
+Draft post: [`assembly\blog12\blog-post.md`](assembly/blog12/blog-post.md).
+
+`14-1.asm` builds the same starting beach from reusable graphics in pages 8-9
+and generated seven-byte draw records. Source clipping is resolved offline;
+packed-nibble transparency and original draw order are preserved. The composed
+background still feeds Blog 11's restoration. No room transitions or collision
+are introduced.
+
+New file: `rooms.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog12\14-1.asm --build-only
+```
+
+## Blog 13: horizontal collision
+
+Draft post: [`assembly\blog13\blog-post.md`](assembly/blog13/blog-post.md).
+
+`15-1.asm` adds a stable inset collision box and reads separate static solidity
+from pages 12-13. Each requested horizontal step is resolved pixel by pixel,
+testing the full leading column to prevent crossing thin obstacles. A static
+preview of the cliff room demonstrates blocking; there are no room transitions,
+ground support or gravity yet.
+
+New file: `collision.asm` (the horizontal resolver, `Constrain_X`).
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog13\15-1.asm --build-only
+```
+
+## Blog 14: ground contact and walking
+
+Draft post: [`assembly\blog14\blog-post.md`](assembly/blog14/blog-post.md).
+
+`16-1.asm` follows the uneven beach with a stable footprint, bounded small
+vertical adjustments and whole-body clearance, while still blocking the cliff.
+`16-2.asm` uses the same resolver at the starting beach's real ledge: a yellow
+border marks lost support and black marks recovered support. These are static
+room previews, not room transitions. Gravity and physical jumping remain later
+lessons. Both display pages now retain their previous X and Y for restoration.
+
+`Constrain_X` gains ground following and moves into `walking.asm`, while
+`collision.asm` now holds the shared solidity tests; `16-1` uses `_cliff` variants of `constants`, `paged_data` and `rooms`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog14\16-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog14\16-2.asm --build-only
+```
+
+## Blog 15: gravity and landing
+
+Draft post: [`assembly\blog15\blog-post.md`](assembly/blog15/blog-post.md).
+
+`17-1.asm` accelerates an unsupported player downward and resolves every pixel
+before accepting a landing. Airborne movement cannot snap onto nearby platforms.
+Water is not a hazard yet; lower solid beach terrain remains landable.
+
+New file: `jump_gravity.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog15\17-1.asm --build-only
+```
+
+## Blog 16: physical jumping
+
+Draft post: [`assembly\blog16\blog-post.md`](assembly/blog16/blog-post.md).
+
+`18-1.asm` adds a signed upward impulse on a fresh grounded Space press, with
+ceiling collision and no held-key or airborne-press retrigger. `18-2.asm` uses
+the identical resolver beneath a clearly artificial ceiling bar; that fixture
+is not part of the faithful game scenery. Neither example connects rooms yet.
+
+`18-2` adds `test_ceiling.asm` for its fixture.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog16\18-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog16\18-2.asm --build-only
+```
+
+## Blog 17: connecting the first two rooms
+
+Draft post: [`assembly\blog17\blog-post.md`](assembly/blog17/blog-post.md).
+
+`19-1.asm` adds explicit grounded walking exits between screens 1 and 2,
+matching scenery/collision loading, and safe supported entry positions. The
+extractor also emits compact collision runs so active masks can reuse pages
+12-13 on a 256 KB SAM. The cliff remains solid; there is no upward escape yet.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog17\19-1.asm --build-only
+```
+
+## Blog 18: collecting the chest
+
+Draft post: [`assembly\blog18\blog-post.md`](assembly/blog18/blog-post.md).
+
+`20-1.asm` renders the source-derived chest on screen 1. A fresh Enter press
+collects it only while grounded, stopped and overlapping its rectangle.
+Resident collection state prevents duplication across room visits; carrying
+it does not unlock the cliff. Inventory and dropping remain separate lessons.
+
+New file: `items_inventory.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog18\20-1.asm --build-only
+```
+
+## Blog 19: visible three-item LIFO inventory
+
+Draft post: [`assembly\blog19\blog-post.md`](assembly/blog19/blog-post.md).
+
+`21-1.asm` adds three visible HUD slots, a true LIFO stack, full/empty feedback
+and safe transactional dropping. Extra item placements are explicitly teaching
+fixtures. `21-2.asm` seeds a carried axe beside the cliff to isolate unsafe-drop
+rejection and a safe retry. The requested LIFO order intentionally differs from
+the original game's slot rotation. Dropping the chest is not yet a puzzle trigger.
+
+`21-2` uses `_drop_test` variants of `constants` and `variables`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog19\21-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog19\21-2.asm --build-only
+```
+
+## Blog 20: physically place the chest to escape
+
+Draft post: [`assembly\blog20\blog-post.md`](assembly/blog20/blog-post.md).
+
+`22-1.asm` activates the recovered supporting chest only from a safe physical
+drop overlapping screen 2's source trigger. Carrying does not unlock the exit.
+The inventory fixtures are removed, the jump rise is calibrated to the obstacle,
+and a leftward jump over the wall reveals the sparse third screen near its
+bottom edge. The vertical link preserves the jump and uses the recovered
+hundred-row offset rather than spawning Dizzy above a cloud. Screen 4 is not
+connected yet.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog20\22-1.asm --build-only
+```
+
+## Blog 21: completing the four-screen route
+
+Draft post: [`assembly\blog21\blog-post.md`](assembly/blog21/blog-post.md).
+
+`23-1.asm` links screen 3's left edge to screen 4 and back, choosing an upper
+(cloud) or lower (ground) entry row from Dizzy's current height. Screen 4's
+left edge, the bridge, stays solid. The placed chest persists across the whole
+route, and screen 4's coin becomes reachable through the existing pickup.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog21\23-1.asm --build-only
+```
+
+## Blog 22: animated background scenery
+
+Draft post: [`assembly\blog22\blog-post.md`](assembly/blog22/blog-post.md).
+
+`24-1.asm` animates the starting beach's sea. `Build_Room` registers the room's
+wave-frame-0 records instead of baking them into the background; every hidden
+frame restores those strips, draws Dizzy, then overlays the current wave frame
+(source graphics 55-58, extracted to `assembly\blog22\assets`), advancing one
+frame every three interrupts like the original.
+
+New file: `water_animation.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog22\24-1.asm --build-only
+```
+
+## Blog 23: detecting hazards
+
+Draft post: [`assembly\blog23\blog-post.md`](assembly/blog23/blog-post.md).
+
+`25-1.asm` adds a five-byte hazard table (room, inclusive left/right/top/bottom)
+kept separate from the solid collision mask. `Check_Hazards` overlap-tests the
+body box after gravity each update and the border turns red while Dizzy is in
+the starting beach's sea. The rectangle is a tutorial adaptation traced from the
+visible water; contact has no consequence yet.
+
+New file: `hazards.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog23\25-1.asm --build-only
+```
+
+## Blog 24: death and restarting
+
+Draft post: [`assembly\blog24\blog-post.md`](assembly/blog24/blog-post.md).
+
+`26-1.asm` gives hazard contact a consequence. Dizzy has one life, as in the
+original, so contact starts a two-second death pause (input and physics skipped,
+border flashing, waves still animating) and then `Restart_Game` copies a
+boot-time snapshot of the 47-byte `Game_State` block back and re-enters room 1.
+The chest, coins, inventory and puzzle state all return to their start.
+
+New file: `death_restart.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog24\26-1.asm --build-only
+```
+
+## Blog 25: a moving actor
+
+Draft post: [`assembly\blog25\blog-post.md`](assembly/blog25/blog-post.md).
+
+`27-1.asm` adds the source game's bee to the fourth screen (graphics 327-330,
+extracted to `assembly\blog25\assets`). It patrols byte X 55-115 on row 100 at
+one byte per three-interrupt game frame, choosing left/right-facing frames from
+its velocity, and is restored/drawn per display page before Dizzy. It is not yet
+harmful. The `27-1` capture job uses unrecorded `("skip", s)` steps to replay
+the route to screen 4 before recording.
+
+New file: `bee_actor.asm`.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog25\27-1.asm --build-only
+```
+
+## Blog 26: enemy contact
+
+Draft post: [`assembly\blog26\blog-post.md`](assembly/blog26/blog-post.md).
+
+`28-1.asm` changes only two files in its copy of Blog 25's folder.
+`hazards.asm` adds a labelled `Bee_Hazard` record, and `bee_actor.asm` rewrites
+that record's left/right pixels (body box offsets 2-18, rows 109-121, excluding
+wings and stinger tip) whenever the bee moves. The existing hazard test and
+death/restart sequence then handle contact. Lethality is a tutorial rule. The
+`28-1` capture replays the route, jumps the boulder, climbs the rocks and jumps
+into the bee.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog26\28-1.asm --build-only
+```
+
+## Blog 27: the complete four-screen route
+
+Draft post: [`assembly\blog27\blog-post.md`](assembly/blog27/blog-post.md).
+
+`29-1.asm` adds no new code; its folder is a copy of Blog 26's and its symbol
+map is identical to `28-1`'s. The article maps each file to the post that
+introduced it. The `29-1` capture records the whole route without cuts: chest
+pickup, drop beside the screen-2 wall, the climb to screen 3, then screen 4,
+where Dizzy jumps the boulder, climbs the rocks and collects the coin while the
+bee patrols.
+
+```powershell
+python .\.vscode\sam_build.py .\assembly\blog27\29-1.asm --build-only
+```
+
+## Extract reference graphics without replacing existing assets
+
+The sprite extractor accepts the known raw MGT-format Treasure Island Dizzy
+disk and requires a **new output directory**. It checks the source hash and
+sector chain, then writes sprite assembly, a contact sheet and `provenance.json`.
+It does not export the original game code or copy the disk into its output.
+
+```powershell
+python .\.vscode\extract_tidizzy.py --disk "C:\path\to\TIDizzy.dsk" --output "C:\path\to\new-sprite-output"
+python .\.vscode\extract_tidizzy.py --rooms --disk "C:\path\to\TIDizzy.dsk" --output "C:\path\to\new-room-output"
+python -m unittest discover -s .\testing -p test_extract_tidizzy.py
+```
+
+The existing Blog 5 sprites are preserved: the extractor refuses an existing
+destination rather than overwriting it. Sprite extraction does not extract room
+layouts, collision rules or game logic. The separate `--rooms` mode exports the
+four selected scenery layouts, 34 reusable graphics, commented assembly draw
+records, packed previews and static
+collision masks with provenance. It excludes HUD, items and moving actors.
+The recovered route is native rooms 77, 76, 108, 107 (left, up, left); native
+106 is the bridge outside the four-screen slice.
+
 ## Debug in SimCoupe
 
 The included SimCoupe version uses **F9** to open the debugger (older versions

@@ -1,7 +1,8 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 4-2 - Striped Background                  |
+; | Program:    SAM Coupe Sprites Tutorial 4-2 - Striped Background                 |
 ; | Filename:   blog3\4-2.asm                                                       |
+; | Based on:   Tutorial 4 (blog3\4.asm)                                            |
 ; -----------------------------------------------------------------------------------
 ;
 ; Pixel colours and transparency masks can be stored separately, then paired at

@@ -1,0 +1,261 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Walking on the Ground</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog13/blog-post.md" target="_blank" rel="noreferrer noopener">previous post</a> deliberately kept Dizzy at a fixed height to isolate side collision. That made him hover over most of the beach. Now we give his feet a supporting surface.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This post teaches <strong>ground contact while walking</strong>: follow the uneven sand, reject a tall wall, and recognise a ledge. Gravity, free falling, physical jumping and room transitions are not included. Two small examples show the same support resolver in different static room previews.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">asset provenance</a> records the source-derived scenery and separate solidity masks. The movement rules below are independently written teaching code, not a reconstruction of the original engine.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Put the Feet on a Stable Surface</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Our cropped drawing remains 26 pixels by 22 rows. We calibrate a narrower, stable footprint around Dizzy's body and feet:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Box_Left:       EQU     8               ; Left inset from the drawing origin\nBox_Right:      EQU     17              ; Inclusive right collision edge\nBox_Top:        EQU     4               ; First body row\nBox_Bottom:     EQU     20              ; Last body row\nStep_Height:    EQU     3               ; Maximum nearby surface adjustment per pixel of X","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eBox_Left:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e       \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e8\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Left inset from the drawing origin\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eBox_Right:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e17\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Inclusive right collision edge\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eBox_Top:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e        \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e4\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; First body row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eBox_Bottom:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e20\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e              \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Last body row\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eStep_Height:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e3\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Maximum nearby surface adjustment per pixel of X\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Box_Left:       EQU     8               ; Left inset from the drawing origin
+Box_Right:      EQU     17              ; Inclusive right collision edge
+Box_Top:        EQU     4               ; First body row
+Box_Bottom:     EQU     20              ; Last body row
+Step_Height:    EQU     3               ; Maximum nearby surface adjustment per pixel of X</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Box_Left:</span><span style="color: #F6F6F4">       </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">8</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Left inset from the drawing origin</span></span>
+<span class="line"><span style="color: #62E884">Box_Right:</span><span style="color: #F6F6F4">      </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">17</span><span style="color: #F6F6F4">              </span><span style="color: #7B7F8B">; Inclusive right collision edge</span></span>
+<span class="line"><span style="color: #62E884">Box_Top:</span><span style="color: #F6F6F4">        </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">4</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; First body row</span></span>
+<span class="line"><span style="color: #62E884">Box_Bottom:</span><span style="color: #F6F6F4">     </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">20</span><span style="color: #F6F6F4">              </span><span style="color: #7B7F8B">; Last body row</span></span>
+<span class="line"><span style="color: #62E884">Step_Height:</span><span style="color: #F6F6F4">    </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">3</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Maximum nearby surface adjustment per pixel of X</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The ten-pixel width replaces the earlier eighteen-pixel test box so that an extended hand does not hold the feet above sloping sand. This remains a tutorial collision shape, independent of whichever animation frame is currently showing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Sprite_Y</code> is now mutable world state. The body must be clear from <code>Y + 4</code> through <code>Y + 20</code>. The row immediately below it, <code>Y + 21</code>, supplies support when at least one selected footprint pixel is solid.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Both tests read the separate static mask in pages 12-13, not the visible scenery or its palette.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Resolve Walking as Small, Supported Steps</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Horizontal requests are still divided into single-pixel candidates. For each candidate X, search from three rows above the current Y to three rows below it:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li>Probe the footprint's support row. Skip positions with nothing underneath.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Check the entire body rectangle. Reject positions embedded in sand, rock or another solid surface.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Accept the first supported, clear position and store its X and Y.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>Searching highest first lets the feet follow a small rise. Searching below the current feet lets them follow a small descent. Testing support before the body avoids scanning a full rectangle for positions that cannot be grounded anyway.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The search is bounded to the playfield and to the last row that fits the complete sprite. It cannot snap Dizzy onto a distant surface. A three-pixel surface adjustment is a deliberate teaching rule, not gravity or an exact copy of the original game.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">A Slope Is Not a Wall</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>A slope offers a nearby position with ground below and space for the body above. A tall wall does not.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>If no nearby supported position fits, we test horizontal movement at the unchanged Y. Solid rock blocks it. Clear space allows it, but sets <code>Grounded</code> to zero.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That last case is a ledge. <strong>This lesson intentionally holds Y steady after support is lost.</strong> The yellow border makes that unfinished physical behaviour explicit; it is not presented as grounded walking. Moving back onto reachable sand restores support and the black border. Falling is the next lesson.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The support state can remain unchanged while stationary because these examples have immutable scenery and no moving platforms.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Check Both Packed Alignments</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Solid_Row</code> checks only pixels inside the footprint. An even X begins with complete packed bytes. An odd X begins with a low nibble, then complete bytes, then a final high nibble.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Ignoring those partial-byte boundaries could make a neighbouring solid pixel block an otherwise clear body, or falsely claim there is ground under the feet. <code>Box_Clear</code> repeats the same row probe over the body's full height.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Interrupts remain disabled while the collision bank replaces the ROM mapping. The resolver restores the saved LMPR before reenabling interrupts. This preserves the established ROM-interrupt and palette conventions.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Restore the Old Y on Each Screen</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Once Y changes, restoring the old X alone leaves trails. Each physical display page now remembers its own previous Y as well:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Previous_Y_10:  DEFB    Initial_Row     ; Last row drawn on screen 10\nPrevious_Y_14:  DEFB    Initial_Row     ; Last row drawn on screen 14","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_Y_10:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    Initial_Row     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Last row drawn on screen 10\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003ePrevious_Y_14:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  DEFB    Initial_Row     \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Last row drawn on screen 14\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Previous_Y_10:  DEFB    Initial_Row     ; Last row drawn on screen 10
+Previous_Y_14:  DEFB    Initial_Row     ; Last row drawn on screen 14</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Previous_Y_10:</span><span style="color: #F6F6F4">  DEFB    Initial_Row     </span><span style="color: #7B7F8B">; Last row drawn on screen 10</span></span>
+<span class="line"><span style="color: #62E884">Previous_Y_14:</span><span style="color: #F6F6F4">  DEFB    Initial_Row     </span><span style="color: #7B7F8B">; Last row drawn on screen 14</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The hidden page's old X, old Y and old parity select its restoration rectangle. Drawing then uses the new world position. Animation-frame bounds never decide where the ground is.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0x90A7</code>, clear of the <code>0xFF00</code> stack. The existing bank allocation still fits a 256 KB SAM; no new graphics bank is needed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog13" target="_blank" rel="noreferrer noopener">blog13 folder</a>, so it builds on its own without reaching into any other folder. The main files are <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/16-1.asm" target="_blank" rel="noreferrer noopener"><code>16-1.asm</code></a> and <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/16-2.asm" target="_blank" rel="noreferrer noopener"><code>16-2.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Moved and changed:</strong> this post rewrites <code>Constrain_X</code> so each horizontal step also follows the ground. That makes it part of walking, so it moves into <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/walking.asm" target="_blank" rel="noreferrer noopener"><code>walking.asm</code></a>. <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/collision.asm" target="_blank" rel="noreferrer noopener"><code>collision.asm</code></a> now holds the solidity tests that walking, and later gravity, share: <code>Has_Support</code>, <code>Box_Clear</code> and <code>Solid_Row</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/constants.asm" target="_blank" rel="noreferrer noopener"><code>constants.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/dizzy_sprite.asm" target="_blank" rel="noreferrer noopener"><code>dizzy_sprite.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/paged_data.asm" target="_blank" rel="noreferrer noopener"><code>paged_data.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/rooms.asm" target="_blank" rel="noreferrer noopener"><code>rooms.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/screen_paging.asm" target="_blank" rel="noreferrer noopener"><code>screen_paging.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/walking.asm" target="_blank" rel="noreferrer noopener"><code>walking.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Only for 16-1:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/constants_cliff.asm" target="_blank" rel="noreferrer noopener"><code>constants_cliff.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/paged_data_cliff.asm" target="_blank" rel="noreferrer noopener"><code>paged_data_cliff.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/rooms_cliff.asm" target="_blank" rel="noreferrer noopener"><code>rooms_cliff.asm</code></a>. Each is a copy of the shared file of the same name, with the small change that example needs.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>New assets:</strong> <code>assets/screen-1-collision.bin</code>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Example 1: Follow the Beach and Meet the Cliff</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/16-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 16-1.asm</a> starts at X=120, Y=99 in a static preview of screen 2. That initial box is clear and supported.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/16-1.dsk" target="_blank" rel="noreferrer noopener">the 16-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog14/gifs/blog14-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog14/gifs/blog14-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows leftward and rightward surface-following, sustained blocking at the actual cliff, and moving away again. The trees remain decorative.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F16-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 16-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Example 2: Recognise the Real Beach Edge</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/16-2.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 16-2.asm</a> uses exactly the same resolver. Only the static room/mask and initial height change: screen 1 starts at X=120, Y=106.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/16-2.dsk" target="_blank" rel="noreferrer noopener">the 16-2 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog14/gifs/blog14-step2.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog14/gifs/blog14-step2.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>This recording shows the border changing from black to yellow beyond the sand and back to black on return. No water hazard, falling, death or room transition is implemented.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F16-2.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 16-2.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>Both web-emulator placeholders need their disks uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Controls</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog14\\16-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\sam_build.py .\\assembly\\blog14\\16-2.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 16-1 16-2","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog14\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e16\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog14\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e16\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e16\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e16\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog14\16-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog14\16-2.asm --build-only
+python .\.vscode\capture_gifs.py 16-1 16-2</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog14\</span><span style="color: #BF9EEE">16</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog14\</span><span style="color: #BF9EEE">16</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">16</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4"> </span><span style="color: #BF9EEE">16</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Hold Z or X to walk; Z still takes priority if both are held. Space retains the earlier animation-only action, not a physical jump. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The next post will make an unsupported player fall and land, reusing this collision box, support test and per-page X/Y restoration.</p>
+<!-- /wp:paragraph -->

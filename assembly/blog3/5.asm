@@ -2,6 +2,7 @@
 ; -----------------------------------------------------------------------------------
 ; | Program:    SAM Coupe Sprites Tutorial 5 - Interleaved Sprite Data              |
 ; | Filename:   blog3\5.asm                                                         |
+; | Based on:   Tutorial 4 (blog3\4.asm)                                            |
 ; -----------------------------------------------------------------------------------
 ;
 ; Tutorial 4 builds mask/pixel pairs from separate blocks at runtime. This version

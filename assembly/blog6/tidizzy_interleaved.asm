@@ -1,4 +1,11 @@
+;
+; -----------------------------------------------------------------------------------
+; | Program:    SAM Coupe Sprites Tutorials - Dizzy Frames in Original Colours      |
+; | Filename:   tidizzy_interleaved.asm                                             |
+; -----------------------------------------------------------------------------------
+;
 ; First 24 sprites exported from the Sprite Editor (original TIDizzy colour indexes)
+;
 
 ; Sprite 1: TIDizzy 1
 TIDizzy_1_Interleaved:

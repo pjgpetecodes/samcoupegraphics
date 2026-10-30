@@ -1,0 +1,221 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>A Physical Jump</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/blog-post.md" target="_blank" rel="noreferrer noopener">gravity lesson</a> gave Dizzy downward velocity and safe landings. This post lets a grounded player launch upward and collide with a ceiling.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The new concept is <strong>physical jumping</strong>. Space now changes velocity rather than merely choosing a roll or sideways-jump animation. Z and X still control horizontal movement, including while airborne. There are no items, hazards or room transitions yet.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">asset provenance</a> records the source-derived scenery. Our jump impulse and air control are teaching choices, not a claim to reproduce the original game's exact physics.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Detect a Press, Not a Held Key</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Space is bit zero of the active-low keyboard row at <code>0x7FFE</code>. <code>Space_Previous</code> stores that single bit from the preceding update.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>A jump requires both a released-to-pressed transition and <code>Grounded</code> set. We update the remembered bit even in mid-air. An airborne press is consumed, not queued for landing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This prevents two unwanted behaviours: repeated jumps while Space stays held, and a delayed jump caused by pressing Space before landing. Release and press again after landing to jump again.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Share One Signed Velocity</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Fall_Speed</code> becomes a signed eight-bit vertical velocity. Positive values mean downward; negative values mean upward.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Jump_Impulse:   EQU     246             ; Two's-complement minus ten","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eJump_Impulse:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e246\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e             \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Two's-complement minus ten\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Jump_Impulse:   EQU     246             ; Two's-complement minus ten</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Jump_Impulse:</span><span style="color: #F6F6F4">   </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">246</span><span style="color: #F6F6F4">             </span><span style="color: #7B7F8B">; Two's-complement minus ten</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>On a valid press we clear <code>Grounded</code> and store the impulse. Downward acceleration still adds one each update. The first upward request is therefore nine pixels, then eight, seven, and so on until the apex. Downward speed remains capped at four.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>These are distances per completed update, not per animation frame or a guaranteed physical interrupt interval. The arc lasts independently of the jump image sequence.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Leave the Ground Before Probing Support</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read jump input before resolving horizontal movement. Clearing <code>Grounded</code> disables the nearby-ground search while launching.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The vertical resolver checks the velocity sign before checking support beneath the feet. Otherwise the sand that enabled the jump would immediately cancel its upward impulse.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For negative velocity, apply acceleration, convert the remaining negative value to a positive upward pixel count, and test candidates one row at a time. At zero velocity, remain airborne at the apex; the next update begins downward acceleration.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Stop at a Ceiling Without Grounding</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Each upward candidate uses the existing full-body <code>Box_Clear</code> probe. Accept only entirely clear positions. On the first collision, retain the previous safe Y and clear upward speed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Crucially, a ceiling does <strong>not</strong> set <code>Grounded</code>. Gravity begins pulling Dizzy downward on the next update. The upper playfield limit at row 48 also stops upward motion without inventing a landing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Downward collision and landing remain the previous lesson's pixel-by-pixel resolver.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Animation Follows the Jump</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>A valid launch selects a left-facing jump sequence when Z is held; otherwise it selects the existing right-facing sequence, including for a vertical jump. Horizontal input retains Z priority.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>While airborne, ordinary walking selection does not override the jump image. If the sequence ends before landing, the existing idle sequence can display while physics continues. Landing selects walking or idle from the held direction.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Space no longer starts the old animation-only roll. That intentional control change is what separates this physical-jump lesson from the earlier animation demonstrations.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog15" target="_blank" rel="noreferrer noopener">blog15 folder</a>, so it builds on its own without reaching into any other folder. The main files are <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/18-1.asm" target="_blank" rel="noreferrer noopener"><code>18-1.asm</code></a> and <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/18-2.asm" target="_blank" rel="noreferrer noopener"><code>18-2.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>New:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/test_ceiling.asm" target="_blank" rel="noreferrer noopener"><code>test_ceiling.asm</code></a>: an artificial black bar used only to test upward collision.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/constants.asm" target="_blank" rel="noreferrer noopener"><code>constants.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/dizzy_sprite.asm" target="_blank" rel="noreferrer noopener"><code>dizzy_sprite.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/jump_gravity.asm" target="_blank" rel="noreferrer noopener"><code>jump_gravity.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Example 1: Jump, Hold, Release and Jump Again</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/18-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 18-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/18-1.dsk" target="_blank" rel="noreferrer noopener">the 18-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog16/gifs/blog16-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog16/gifs/blog16-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows three accepted jumps: a long held press produces one jump, the next fresh press produces another while an additional airborne press is ignored, and a final fresh press with X produces a rightward jump. Yellow marks airborne state; black marks landing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F18-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 18-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Example 2: An Explicit Ceiling Fixture</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The starting beach has no convenient overhead solid surface at the spawn. Rather than silently changing the collision properties of a decorative tree, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog16/18-2.asm" target="_blank" rel="noreferrer noopener">18-2.asm</a> adds a clearly artificial black test bar.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The bar spans pixels 110-173, rows 85-87. Startup writes it into both the authoritative scenery and the separate collision mask before copying scenery to the display pages. It is not original game geometry and must not be copied into the faithful final rooms.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The resolver itself is unchanged. The shorter jump stops beneath the bar and falls back onto the beach. Holding Space through that landing still does not launch another jump.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/18-2.dsk" target="_blank" rel="noreferrer noopener">the 18-2 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog16/gifs/blog16-step2.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog16/gifs/blog16-step2.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>Both accepted launches and returns were inspected in the 256 KB SimCoupe recording. Resident code/data end at <code>0x9166</code> for the beach and <code>0x9190</code> for the fixture example, below the <code>0xFF00</code> stack.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F18-2.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 18-2.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>Both web-emulator placeholders need their disks uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Build and Controls</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog16\\18-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\sam_build.py .\\assembly\\blog16\\18-2.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 18-1 18-2","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog16\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e18\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog16\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e18\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e18\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e18\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog16\18-1.asm --build-only
+python .\.vscode\sam_build.py .\assembly\blog16\18-2.asm --build-only
+python .\.vscode\capture_gifs.py 18-1 18-2</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog16\</span><span style="color: #BF9EEE">18</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog16\</span><span style="color: #BF9EEE">18</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">18</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4"> </span><span style="color: #BF9EEE">18</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">2</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps on a fresh grounded press, and reset stops the program.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next we will connect the first two rooms, replacing scenery and collision together and choosing safe entry positions without bypassing the cliff's later chest puzzle.</p>
+<!-- /wp:paragraph -->

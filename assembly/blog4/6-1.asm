@@ -2,6 +2,7 @@
 ; -----------------------------------------------------------------------------------
 ; | Program:    SAM Coupe Sprites Tutorial 6 - Animating Two Frames                 |
 ; | Filename:   blog4\6-1.asm                                                       |
+; | Based on:   Tutorial 5 (blog3\5.asm)                                            |
 ; -----------------------------------------------------------------------------------
 ;
 ; Tutorial 5 draws one interleaved mask/pixel sprite. This version keeps that setup

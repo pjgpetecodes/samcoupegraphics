@@ -1,0 +1,187 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Gravity and Landing</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog14/blog-post.md" target="_blank" rel="noreferrer noopener">ground-contact lesson</a> deliberately left Dizzy at the same height when he walked beyond reachable ground. The yellow border showed that his feet had lost support. Now that state causes a fall.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This post adds <strong>downward acceleration and landing</strong>, not jumping, hazards, death or room transitions. We keep the same starting beach, collision mask, ten-pixel footprint and small-step surface-following.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. The <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog10/assets/provenance.json" target="_blank" rel="noreferrer noopener">asset provenance</a> records the source-derived scenery. These are independently written tutorial physics, not a claim to reproduce the original game's exact movement.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Velocity Is Separate from Position</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>Sprite_Y</code> tells us where Dizzy is. <code>Fall_Speed</code> tells us how far downward he wants to travel during an update.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Maximum_Fall:   EQU     4               ; Maximum downward pixels per update\nFall_Speed:     DEFB    0               ; Start with no downward velocity\nFall_Remaining: DEFB    0               ; One-pixel candidates left to resolve","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eMaximum_Fall:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e4\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Maximum downward pixels per update\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eFall_Speed:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; Start with no downward velocity\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eFall_Remaining:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e DEFB    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e               \u003c/span\u003e\u003cspan style=\u0022color: #7B7F8B\u0022\u003e; One-pixel candidates left to resolve\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Maximum_Fall:   EQU     4               ; Maximum downward pixels per update
+Fall_Speed:     DEFB    0               ; Start with no downward velocity
+Fall_Remaining: DEFB    0               ; One-pixel candidates left to resolve</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Maximum_Fall:</span><span style="color: #F6F6F4">   </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">4</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Maximum downward pixels per update</span></span>
+<span class="line"><span style="color: #62E884">Fall_Speed:</span><span style="color: #F6F6F4">     DEFB    </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; Start with no downward velocity</span></span>
+<span class="line"><span style="color: #62E884">Fall_Remaining:</span><span style="color: #F6F6F4"> DEFB    </span><span style="color: #BF9EEE">0</span><span style="color: #F6F6F4">               </span><span style="color: #7B7F8B">; One-pixel candidates left to resolve</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>When unsupported, speed increases by one each completed update, capped at four. The requested distances are therefore one, two, three, four, four, and so on. These are update-based teaching constants, not a measured real-world acceleration. Rendering may take more than one physical interrupt, so <code>HALT</code> alone does not establish an exact 50 physics updates per second.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The program begins at X=120, Y=70, in clear sky, so gravity also works without a direction key being held. Once on the beach, walking continues to use the previous lesson's bounded surface-following.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Update Gravity Even While Idle</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The main loop resolves horizontal movement, applies gravity, then chooses and updates animation. Releasing Z and X must not pause a fall.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The gravity routine maps the existing collision pages with interrupts disabled. It probes directly beneath the current footprint. If there is support, it marks the player grounded and clears fall speed. Otherwise it marks the player airborne and accelerates.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Airborne horizontal movement checks body clearance at the current height. It deliberately skips the nearby-ground search: snapping an airborne player upward onto a platform would undermine the vertical collision resolver.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Resolve Each Downward Pixel</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Testing only <code>Y + Fall_Speed</code> could skip a thin platform. Instead, <code>Fall_Remaining</code> counts individual one-row candidates.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>For each candidate, <code>Box_Clear</code> checks the complete body rectangle. If it fits, accept that row and call <code>Has_Support</code> beneath the new feet. Stop immediately on contact; otherwise resolve the next pixel until the update's velocity is consumed.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The last accepted position stays above the first solid surface. Landing sets <code>Grounded</code> and clears <code>Fall_Speed</code>, so stepping off another ledge starts a fresh fall rather than reusing old velocity.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This works at either packed-pixel alignment because both probes reuse the preceding post's nibble-aware row checks.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Keep the Drawing Inside the Screen</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The last complete sprite origin is row 170. Reaching it without support stops downward travel at the bitmap boundary, clears accumulated speed, and leaves the player unsupported. It does not invent an invisible floor or a death state. Room exits and death handling are later lessons.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The starting beach has lower solid terrain beneath its visible water. In this example Dizzy can land on that terrain: water is <strong>not yet a hazard</strong>. Do not interpret that teaching simplification as a reproduction of the original game's swimming or snorkel rules.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Draw the Final Position</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Horizontal movement now returns without drawing. Gravity draws once after resolving the final X/Y; animation changes can still request a fresh drawing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The existing per-page previous X/Y state restores the correct old rectangle before drawing. ROM is restored before interrupts are enabled and before the next <code>HALT</code>. No new bank is needed; resident code/data remain below the stack, with the assembler enforcing the existing resident-memory limit.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The border remains a useful diagnostic: yellow while airborne, black while supported.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog14" target="_blank" rel="noreferrer noopener">blog14 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/17-1.asm" target="_blank" rel="noreferrer noopener"><code>17-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>New:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/jump_gravity.asm" target="_blank" rel="noreferrer noopener"><code>jump_gravity.asm</code></a>: gravity and landing.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/constants.asm" target="_blank" rel="noreferrer noopener"><code>constants.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/variables.asm" target="_blank" rel="noreferrer noopener"><code>variables.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/walking.asm" target="_blank" rel="noreferrer noopener"><code>walking.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog15/17-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 17-1.asm</a>, or download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/17-1.dsk" target="_blank" rel="noreferrer noopener">the 17-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog15/gifs/blog15-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog15/gifs/blog15-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording shows leaving the upper beach, falling with a yellow border, landing with a black border, and moving back along the solid surface. The initial stationary fall occurs during startup, before this recording begins.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F17-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 17-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog15\\17-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 17-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog15\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e17\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e17\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog15\17-1.asm --build-only
+python .\.vscode\capture_gifs.py 17-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog15\</span><span style="color: #BF9EEE">17</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">17</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z and X move; Z retains priority when both are held. Space still selects an animation-only action, not a physical jump. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Next we will give a grounded player an upward jump impulse and resolve ceilings, without letting a held Space key cause repeated jumps on landing.</p>
+<!-- /wp:paragraph -->

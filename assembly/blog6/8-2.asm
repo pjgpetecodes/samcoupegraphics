@@ -1,6 +1,6 @@
 ;
 ; -----------------------------------------------------------------------------------
-; | Program:    SAM Coupe Sprites Tutorial 8 - Part 2: Changing Colours                 |
+; | Program:    SAM Coupe Sprites Tutorial 8 - Part 2: Changing Colours             |
 ; | Filename:   blog6\8-2.asm                                                       |
 ; | Based on:   Tutorial 8 part 1 (blog6\8-1.asm)                                   |
 ; -----------------------------------------------------------------------------------

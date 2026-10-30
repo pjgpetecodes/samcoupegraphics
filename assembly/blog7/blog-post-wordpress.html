@@ -1,0 +1,373 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><a href="https://www.pjgcreations.co.uk/sam-coupe-assembly-language-programming/" target="_blank" rel="noreferrer noopener">Sam Coupe Assembly Language Programming</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-in-assembler-for-the-sam-coupe/" target="_blank" rel="noreferrer noopener">Graphics in Assembly for the SAM Coupé</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-transparency/" target="_blank" rel="noreferrer noopener">Making SAM Coupé Sprites Transparent</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-animation/" target="_blank" rel="noreferrer noopener">Animating SAM Coupé Sprites</a></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><a href="https://www.petecodes.co.uk/graphics-with-the-sam-coupe-keyboard-input/" target="_blank" rel="noreferrer noopener">Controlling SAM Coupé Sprites with the Keyboard</a></li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Making Room for Graphics with Memory Paging</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog6/blog-post.md" target="_blank" rel="noreferrer noopener">previous post's draft</a>, we loaded our own palette and added sideways jump animations. We also cropped the sprites so that the frames would fit beside our program.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Before we add scenery, we need somewhere to put it!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This time we are changing where the sprite data lives, not what Dizzy does. Z and X still animate walking, Space rolls, and holding Z or X while pressing Space plays a sideways jump. Dizzy stays in the same position; moving him across the screen comes next.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the sprites and helping with the series.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">What Is a Page?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The Z80 can address 64 KB at once. A standard SAM has 256 KB of RAM, so there is more memory than the processor can see at any one time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The SAM splits its RAM into 16 KB pages. A 256 KB machine has pages 0 to 15; a 512 KB machine has pages 0 to 31.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The CPU address space is divided into four sections;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Section</th><th>CPU addresses</th></tr></thead><tbody><tr><td>A</td><td><code>0x0000</code> to <code>0x3FFF</code></td></tr><tr><td>B</td><td><code>0x4000</code> to <code>0x7FFF</code></td></tr><tr><td>C</td><td><code>0x8000</code> to <code>0xBFFF</code></td></tr><tr><td>D</td><td><code>0xC000</code> to <code>0xFFFF</code></td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>The Lower Memory Page Register, LMPR at port 250, selects the page in section A. The following page appears in section B. The High Memory Page Register, HMPR at port 251, does the same for C and D.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>There are also ROM-mapping and protection flags, so a page number is not the whole register value. You can find the details in the <a href="https://github.com/stefandrissen/sam-coupe-technical-manual/blob/main/techmanual.md#memory" target="_blank" rel="noreferrer noopener">SAM technical manual's memory section</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We have already used LMPR to bring a hidden screen into view for drawing. Now we will use the same window for sprite data too.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Plan the Memory First</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Our example uses the following physical pages;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Pages</th><th>Contents</th></tr></thead><tbody><tr><td>1 and 2</td><td>Resident program, animation tables, palette, frame buffer and stack</td></tr><tr><td>3</td><td>Unused padding in the loaded code file</td></tr><tr><td>4 and 5</td><td>The same 38 cropped frames used in the previous example</td></tr><tr><td>10 and 11</td><td>First screen</td></tr><tr><td>14 and 15</td><td>Second screen</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Each MODE 4 screen needs 24 KB, so it occupies one whole page and half the next. Our two screen starting pages still differ by four, allowing the existing <code>XOR 4</code> page flip.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>All these pages exist on a 256 KB SAM. We leave HMPR alone, so the executing code and its stack never disappear when we change the lower mapping. SAMDOS calls our program with physical page 1 at <code>0x8000</code> and page 2 above it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is a standalone, reset-to-stop demonstration, not a routine which allocates RAM for a running BASIC program. It takes ownership of the listed pages and sets up its two screens explicitly.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 1: Put the Sprites in Their Own Pages</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We still begin the program with;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                ORG     0x8000\n                DUMP    1,0\n                AUTOEXEC","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                ORG     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0x8000\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DUMP    \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                AUTOEXEC\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                ORG     0x8000
+                DUMP    1,0
+                AUTOEXEC</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                ORG     </span><span style="color: #BF9EEE">0x8000</span></span>
+<span class="line"><span style="color: #F6F6F4">                DUMP    </span><span style="color: #BF9EEE">1</span><span style="color: #F6F6F4">,</span><span style="color: #BF9EEE">0</span></span>
+<span class="line"><span style="color: #F6F6F4">                AUTOEXEC</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>ORG</code> describes the CPU addresses we are assembling for. <code>DUMP</code> tells pyz80 which physical RAM page receives the bytes in the disk image. They are related, but they are not the same thing.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The code, palette and animation tables stay in the resident area. At the end we change both the origin and the output destination for the sprite include;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                ORG     0\n                DUMP    Sprite_Page,0\n                INCLUDE \u0022..\\blog6\\tidizzy_cropped.asm\u0022","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                ORG     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DUMP    Sprite_Page,\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                INCLUDE \u0022..\\blog6\\tidizzy_cropped.asm\u0022\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                ORG     0
+                DUMP    Sprite_Page,0
+                INCLUDE "..\blog6\tidizzy_cropped.asm"</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                ORG     </span><span style="color: #BF9EEE">0</span></span>
+<span class="line"><span style="color: #F6F6F4">                DUMP    Sprite_Page,</span><span style="color: #BF9EEE">0</span></span>
+<span class="line"><span style="color: #F6F6F4">                INCLUDE "..\blog6\tidizzy_cropped.asm"</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>Sprite_Page</code> is 4. We assemble the sprite labels from address zero because that is where we will see page 4 when we map it into section A. The include continues into physical page 5.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>We have not changed the frame data or its mask/pixel pairs. The animation tables still hold two-byte frame addresses, but those addresses now refer to the lower window <strong>when the sprite pages are mapped</strong>, not to permanently visible RAM.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>SAMDOS loads one code file spanning physical pages 1 through part of page 5. The gaps are padding in that file; <code>DUMP</code> is not a request for an extra runtime disk read. Booting this example therefore loads the banked sprites before our first instruction runs.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 2: Save the Original Lower Mapping</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We must be able to put the ROM and its working memory back before the next interrupt. At startup, with interrupts disabled, we save LMPR;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                IN      A,(LMPR)\n                LD      (Saved_LMPR),A","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eIN\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      A,(LMPR)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      (Saved_LMPR),A\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                IN      A,(LMPR)
+                LD      (Saved_LMPR),A</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">IN</span><span style="color: #F6F6F4">      A,(LMPR)</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      (Saved_LMPR),A</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Our mapping helper takes a physical page in A;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Map_Lower:      LD      C,A\n                LD      A,(Saved_LMPR)\n                AND     0b11000000\n                OR      0b00100000\n                OR      C\n                OUT     (LMPR),A\n                RET","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eMap_Lower:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      LD      C,A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Saved_LMPR)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eAND\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b11000000\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e0b00100000\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e      C\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Map_Lower:      LD      C,A
+                LD      A,(Saved_LMPR)
+                AND     0b11000000
+                OR      0b00100000
+                OR      C
+                OUT     (LMPR),A
+                RET</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Map_Lower:</span><span style="color: #F6F6F4">      LD      C,A</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      A,(Saved_LMPR)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">AND</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">0b11000000</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      </span><span style="color: #BF9EEE">0b00100000</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OR</span><span style="color: #F6F6F4">      C</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The lower five bits select the page. Bit 5 maps RAM in place of ROM 0. The top two flags are preserved rather than being replaced with a magic value.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This helper is used with the normal SAMDOS entry state: ROM 1 is not covering the stack, and lower RAM is writable. It is not a general-purpose way to change arbitrary caller mappings.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Restoring is deliberately small;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Restore_Lower:  LD      A,(Saved_LMPR)\n                OUT     (LMPR),A\n                RET","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eRestore_Lower:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e  LD      A,(Saved_LMPR)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eOUT\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     (LMPR),A\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eRET\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Restore_Lower:  LD      A,(Saved_LMPR)
+                OUT     (LMPR),A
+                RET</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Restore_Lower:</span><span style="color: #F6F6F4">  LD      A,(Saved_LMPR)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">OUT</span><span style="color: #F6F6F4">     (LMPR),A</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">RET</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>All calls to <code>Map_Lower</code> happen with interrupts disabled. We do not enable interrupts until the lower mapping has been restored.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Step 3: Copy One Frame Before Drawing</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>There is a catch. We cannot map sprite pages 4 and 5 and a hidden screen into the same lower window at the same time.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Instead, we keep one frame-sized buffer in resident memory;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Frame_Size:     EQU     Sprite_Bytes*Sprite_Rows*2\nFrame_Buffer:   DEFS    Frame_Size","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eFrame_Size:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003eEQU\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     Sprite_Bytes*Sprite_Rows*\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #62E884\u0022\u003eFrame_Buffer:\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e   DEFS    Frame_Size\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Frame_Size:     EQU     Sprite_Bytes*Sprite_Rows*2
+Frame_Buffer:   DEFS    Frame_Size</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #62E884">Frame_Size:</span><span style="color: #F6F6F4">     </span><span style="color: #97E1F1">EQU</span><span style="color: #F6F6F4">     Sprite_Bytes*Sprite_Rows*</span><span style="color: #BF9EEE">2</span></span>
+<span class="line"><span style="color: #62E884">Frame_Buffer:</span><span style="color: #F6F6F4">   DEFS    Frame_Size</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>That is <code>13 * 22 * 2</code>, or 572 bytes. The factor of two is important: each screen byte has a mask byte and a pixel byte.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><code>Draw_Frame</code> finds the selected frame address from the animation table, just as before. Once that address is in HL, it maps the sprite pages and copies the frame;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      A,Sprite_Page\n                CALL    Map_Lower\n                LD      DE,Frame_Buffer\n                LD      BC,Frame_Size\n                LDIR","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,Sprite_Page\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Map_Lower\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Frame_Buffer\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      BC,Frame_Size\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LDIR\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      A,Sprite_Page
+                CALL    Map_Lower
+                LD      DE,Frame_Buffer
+                LD      BC,Frame_Size
+                LDIR</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      A,Sprite_Page</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Map_Lower</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Frame_Buffer</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      BC,Frame_Size</span></span>
+<span class="line"><span style="color: #F6F6F4">                LDIR</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p><code>LDIR</code> can cross <code>0x3FFF</code> into <code>0x4000</code>: page 5 is already mapped after page 4. Frame 30 actually crosses this boundary, so the left-jump sequence is a useful check rather than only testing frames from the first page.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Now it is safe to replace the sprite mapping with the hidden screen;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"                LD      A,(Display_Page)\n                XOR     4\n                CALL    Map_Lower\n                CALL    Clear_Sprite\n                LD      DE,Frame_Buffer\n                LD      HL,Sprite_Start\n                CALL    Draw_Sprite\n                CALL    Restore_Lower","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      A,(Display_Page)\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eXOR\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e     \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e4\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Map_Lower\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Clear_Sprite\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      DE,Frame_Buffer\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                LD      HL,Sprite_Start\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Draw_Sprite\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003eCALL\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e    Restore_Lower\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"asm","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>                LD      A,(Display_Page)
+                XOR     4
+                CALL    Map_Lower
+                CALL    Clear_Sprite
+                LD      DE,Frame_Buffer
+                LD      HL,Sprite_Start
+                CALL    Draw_Sprite
+                CALL    Restore_Lower</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">                LD      A,(Display_Page)</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">XOR</span><span style="color: #F6F6F4">     </span><span style="color: #BF9EEE">4</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Map_Lower</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Clear_Sprite</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      DE,Frame_Buffer</span></span>
+<span class="line"><span style="color: #F6F6F4">                LD      HL,Sprite_Start</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Draw_Sprite</span></span>
+<span class="line"><span style="color: #F6F6F4">                </span><span style="color: #F286C4">CALL</span><span style="color: #F6F6F4">    Restore_Lower</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The existing masked drawing loop reads the resident buffer. It does not need to know that the original frame came from another page.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Finally we mark the frame ready and enable interrupts. The main loop waits with <code>HALT</code> and only flips to the completed hidden screen. We also keep reloading our palette after the ROM interrupt, as in the previous post.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Check the Space We Have Saved</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The assembled resident area ends at <code>0x8440</code>, including the frame buffer. The stack begins at <code>0xFF00</code>, well away from it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The 38 cropped frames occupy 21,736 bytes in pages 4 and 5 instead of living above our resident code. We have gained room for later program state without throwing away animation frames.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>There is now an extra 572-byte copy whenever a frame changes. That is a deliberate simplicity trade-off, not a promise that this is the fastest possible sprite system.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The source includes assembly-time checks for the resident limit and the expected sprite footprint. If we change the layout later, we should update the memory plan rather than just moving the stack and hoping!</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Full Assembly</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The complete source is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog7/9-1.asm" target="_blank" rel="noreferrer noopener">9-1.asm</a>. It includes the existing cropped sprites and palette from Blog 6, so keep the repository's folder structure.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Download the Disk Image</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/9-1.dsk" target="_blank" rel="noreferrer noopener">the 9-1 disk</a> to run in SimCoupe or transfer to a SAM.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog7/gifs/blog7-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog7/gifs/blog7-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The result should look familiar. The change is where we store the frames, not a new movement or physics system. The background starts black; keys 1 to 5 retain the previous palette demonstration.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">See the Result in the SAM Coupe Web Emulator</h2>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F9-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 9-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The embed uses the site's disk-hosting location. The new disk must be uploaded there before this embed can run; generating this draft does not publish or upload it.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Building and Running</h2>
+<!-- /wp:heading -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog7\\9-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 9-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog7\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e9\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e9\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog7\9-1.asm --build-only
+python .\.vscode\capture_gifs.py 9-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog7\</span><span style="color: #BF9EEE">9</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">9</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The capture job runs this example on a 256 KB SAM. Hold Z or X to animate walking; press Space alone or with a direction for the roll/jump sequences. Releasing a direction during a jump does not interrupt the sequence. Holding Space can start another roll after the previous one finishes, as before. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where to Go Next</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Now the frames are out of our program's way, we can give Dizzy a position and move him across the screen. We will keep the background plain while we learn that part, then introduce scenery and the separate job of restoring it behind a moving sprite.</p>
+<!-- /wp:paragraph -->

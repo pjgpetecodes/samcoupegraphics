@@ -1,0 +1,157 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>The Complete Four-Screen Route</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post introduces no new concepts. Since we first drew a background, seventeen posts have built a small Dizzy engine one idea at a time, and every piece is now in place. Here we take the finished files and play the whole route from the starting beach to the bee's meadow.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. This is independently written tutorial code: the scenery and sprites come from Treasure Island Dizzy, but the engine and its rules are our own.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Assembling the Finished Game</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>29-1.asm</code> is the same short main file as the last post, and this folder is a complete copy of the enemy-contact post's folder. Nothing in any feature file changes. Assembling <code>29-1.asm</code> gives exactly the same symbol map as <code>28-1.asm</code>, which is a quick way to prove that the final program is the code you've already read.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog26" target="_blank" rel="noreferrer noopener">blog26 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog27/29-1.asm" target="_blank" rel="noreferrer noopener"><code>29-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Nothing changes.</strong> Every file is an identical copy; only the main file's header comment is new.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Where Each Piece Came From</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Each file belongs to a post that introduced its idea. If something in the finished game puzzles you, this table shows where to look:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>File</th><th>What it does</th><th>Introduced in</th></tr></thead><tbody><tr><td><code>constants.asm</code></td><td>Ports, pages and tuning values</td><td>Memory paging (blog 7) onwards</td></tr><tr><td><code>screen_paging.asm</code></td><td>Paging, screen copies and page flips</td><td>Memory paging and static backgrounds (blogs 7 and 10)</td></tr><tr><td><code>dizzy_sprite.asm</code></td><td>Masked, animated drawing at any pixel</td><td>Transparency, animation and pixel positioning (blogs 3, 4 and 9)</td></tr><tr><td><code>rooms.asm</code></td><td>Room composition and exits</td><td>Room composition and connecting rooms (blogs 12 and 17)</td></tr><tr><td><code>collision.asm</code></td><td>Solidity mask and box tests</td><td>Horizontal collision (blog 13)</td></tr><tr><td><code>walking.asm</code></td><td>Walking and ground following</td><td>Ground contact and walking (blog 14)</td></tr><tr><td><code>jump_gravity.asm</code></td><td>Falling, landing and jumping</td><td>Gravity and jumping (blogs 15 and 16)</td></tr><tr><td><code>items_inventory.asm</code></td><td>Collecting, dropping and the inventory</td><td>The chest, the inventory and the escape (blogs 18 to 20)</td></tr><tr><td><code>water_animation.asm</code></td><td>The animated sea</td><td>Animated background scenery (blog 22)</td></tr><tr><td><code>hazards.asm</code></td><td>Deadly rectangles</td><td>Hazards and enemy contact (blogs 23 and 26)</td></tr><tr><td><code>death_restart.asm</code></td><td>The death pause and restart</td><td>Death and restarting (blog 24)</td></tr><tr><td><code>bee_actor.asm</code></td><td>The patrolling bee</td><td>A moving actor and enemy contact (blogs 25 and 26)</td></tr><tr><td><code>variables.asm</code></td><td>Shared state and the restart snapshot</td><td>Grows with every post</td></tr><tr><td><code>paged_data.asm</code></td><td>Sprites, scenery and collision data in upper pages</td><td>Banked data and the four-screen route (blogs 7 and 21)</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Walking the Route</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The recording below plays the whole route without cuts. Here's what happens, and which ideas each step relies on.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><!-- wp:list-item -->
+<li><strong>The starting beach.</strong> Dizzy walks left to the chest and presses Enter. The chest disappears from the sand and appears in the first inventory box. Walking follows the slope of the sand, and the sea to the right is a hazard.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>The rock wall.</strong> Walking left takes him through the room exit to the second screen, where a rock wall is too high to jump. Horizontal collision stops him at the rock face.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Using the chest.</strong> He drops the chest where he stands, right beside the wall. Placed there, it becomes a step he can stand on. He jumps onto it, and the inventory is empty again.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>Over the top.</strong> From the chest, a jump to the left carries him up over the wall into the third screen, and gravity brings him down onto solid ground.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>The meadow.</strong> Walking on reaches the fourth screen and the bee. Dizzy jumps the boulder, walks to the rock pile and jumps onto it, timing the jump so the bee is away at the far end of its patrol.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li><strong>The coin.</strong> Standing on the rocks, he presses Enter and the coin moves into the inventory, while the bee flies past overhead.</li>
+<!-- /wp:list-item --></ol>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>The coin is collected with exactly the same code that picked up the chest on the first screen. The data-driven item table means the fourth room needed no special code at all.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Read the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog27/29-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 29-1.asm</a>, and follow its <code>INCLUDE</code> lines into the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog27" target="_blank" rel="noreferrer noopener">other files in the blog27 folder</a>. You can also download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/29-1.dsk" target="_blank" rel="noreferrer noopener">the 29-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog27/gifs/blog27-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog27/gifs/blog27-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording runs from power-on to the coin. The chest moves into the inventory on the beach and out again beside the wall on the second screen. The border turns yellow while Dizzy is in the air. The run ends with the coin in the first inventory box and Dizzy standing safely on the rocks as the bee flies by.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0xA961</code>, the same as the previous post, because the program is identical.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F29-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 29-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog27\\29-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 29-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog27\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e29\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e29\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog27\29-1.asm --build-only
+python .\.vscode\capture_gifs.py 29-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog27\</span><span style="color: #BF9EEE">29</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">29</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps on a fresh grounded press, and Enter collects or drops while stopped on the ground. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Looking Back</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We started this series by copying a square onto the screen. Since then we've added transparency, animation, keyboard input, palettes and memory paging. Then came scenery, collision, gravity, jumping, items, an inventory, animated water, hazards, death, and a moving enemy, all kept in one tidy file per feature.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The engine is deliberately small, so there is plenty of room to take it further. You could add more screens from the original game, more items and puzzles, lives, a score, or sound. Every one of those is a single new idea, which you can add one at a time just as we have throughout the series.</p>
+<!-- /wp:paragraph -->

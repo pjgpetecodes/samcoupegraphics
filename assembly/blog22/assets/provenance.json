@@ -1,0 +1,27 @@
+{
+  "source_sha256": "76d31404b5f11605c0054aaf519f536dc3d7c78dbfffbf8a9bdaefc082a72512",
+  "graphics_table_offset": 49152,
+  "graphics": {
+    "55": {
+      "offset": 75461,
+      "width_bytes": 20,
+      "height": 4
+    },
+    "56": {
+      "offset": 75543,
+      "width_bytes": 20,
+      "height": 4
+    },
+    "57": {
+      "offset": 75625,
+      "width_bytes": 20,
+      "height": 4
+    },
+    "58": {
+      "offset": 75707,
+      "width_bytes": 20,
+      "height": 4
+    }
+  },
+  "scope": "Selected graphics only; no original game code."
+}

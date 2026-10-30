@@ -1,0 +1,207 @@
+<!-- wp:paragraph -->
+<p>Welcome to the latest in my series of posts on Graphics with the SAM Coupé.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>You can find the other posts in this series here;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"></ol>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">The GitHub Repo</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>You can find all the files for the series in my GitHub Repo <a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">here</a>;</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><a href="https://github.com/pjgpetecodes/samcoupegraphics" target="_blank" rel="noreferrer noopener">https://github.com/pjgpetecodes/samcoupegraphics</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading"><strong>Enemy Contact</strong></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>In the last post a bee started patrolling the grassy fourth screen, but it was harmless: Dizzy could fly straight through it. This post adds one concept: <strong>enemy contact</strong>. Touching the bee now costs Dizzy his only life, using the death and restart sequence we already have.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This is where splitting the program into files back in Blog 11 really pays off. Only two of the feature files change.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Thank you to Adrian Brown for supplying the graphics and helping with this series. This is independently written tutorial code. In our version touching the bee is fatal; treat that as a rule of this tutorial rather than an exact description of the original game.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Only Two Files Change</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>28-1.asm</code> is the same short main file as last time, and the folder is a complete copy of Blog 25's. Only two files change:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>File</th><th>Change</th></tr></thead><tbody><tr><td><code>hazards.asm</code></td><td>One new five-byte record in the hazard table</td></tr><tr><td><code>bee_actor.asm</code></td><td>Five body-box constants and six lines in <code>Advance_Bee</code></td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>Everything else, from walking to the inventory, is exactly the code you have already read.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Files in This Post</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>This post's folder starts as a complete copy of the <a href="https://github.com/pjgpetecodes/samcoupegraphics/tree/main/assembly/blog25" target="_blank" rel="noreferrer noopener">blog25 folder</a>, so it builds on its own without reaching into any other folder. The main file is <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog26/28-1.asm" target="_blank" rel="noreferrer noopener"><code>28-1.asm</code></a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>Changed:</strong> <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog26/bee_actor.asm" target="_blank" rel="noreferrer noopener"><code>bee_actor.asm</code></a>, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog26/hazards.asm" target="_blank" rel="noreferrer noopener"><code>hazards.asm</code></a>.</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Every other file is copied unchanged.</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">An Enemy Is a Moving Hazard</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We already have everything needed to kill Dizzy. The hazards post gave us <code>Check_Hazards</code>, which walks a table of rectangles and compares each one in the current room with Dizzy's body box. The death post made any contact start the flashing pause and the restart.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>So we don't need a separate enemy test at all. An enemy is simply a hazard whose rectangle moves. We add a record for the bee's body to the end of the hazard table and give it a label so the bee can find it:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"Hazard_Table:   DEFB 1,200,255,144,191        ; Starting beach sea\nBee_Hazard:     DEFB Bee_Room                 ; Room 4\n                DEFB left, right              ; Rewritten as the bee moves\n                DEFB Bee_Y+9, Bee_Y+21        ; Body top and bottom rows\n                DEFB 0                        ; End of table","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eHazard_Table:   DEFB 1,200,255,144,191        ; Starting beach sea\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eBee_Hazard:     DEFB Bee_Room                 ; Room 4\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFB left, right              ; Rewritten as the bee moves\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFB Bee_Y+9, Bee_Y+21        ; Body top and bottom rows\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003e                DEFB 0                        ; End of table\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>Hazard_Table:   DEFB 1,200,255,144,191        ; Starting beach sea
+Bee_Hazard:     DEFB Bee_Room                 ; Room 4
+                DEFB left, right              ; Rewritten as the bee moves
+                DEFB Bee_Y+9, Bee_Y+21        ; Body top and bottom rows
+                DEFB 0                        ; End of table</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">Hazard_Table:   DEFB 1,200,255,144,191        ; Starting beach sea</span></span>
+<span class="line"><span style="color: #F6F6F4">Bee_Hazard:     DEFB Bee_Room                 ; Room 4</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFB left, right              ; Rewritten as the bee moves</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFB Bee_Y+9, Bee_Y+21        ; Body top and bottom rows</span></span>
+<span class="line"><span style="color: #F6F6F4">                DEFB 0                        ; End of table</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The room byte means the record is ignored everywhere except the fourth screen, exactly like the sea is ignored outside the beach.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Which Part of the Bee Hurts?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The bee's frames are 22 × 22 pixels, but a lot of that is wings and empty space. If the whole frame were deadly, Dizzy would die when he was still visibly clear of the bee, which feels unfair. We measured the opaque pixels of all four frames and chose a smaller <strong>body box</strong>:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><thead><tr><th>Edge</th><th>Offset in the frame</th><th>Why</th></tr></thead><tbody><tr><td>Left</td><td>2</td><td>Leaves out the tip of the stinger</td></tr><tr><td>Right</td><td>18</td><td>Leaves out the tip of the antenna</td></tr><tr><td>Top</td><td>9</td><td>Leaves out the flapping wings</td></tr><tr><td>Bottom</td><td>21</td><td>The body reaches the last row</td></tr></tbody></table></figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>This is the same idea as Dizzy's own box, which already ignores the transparent margin round his sprite.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Keeping the Record in Step</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>The bee only moves horizontally, so the top and bottom rows never change. Every time <code>Advance_Bee</code> moves the bee, it rewrites just the left and right edges:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"pixel_x = Bee_X * 2\nBee_Hazard.left  = pixel_x + 2\nBee_Hazard.right = pixel_x + 18","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epixel_x = Bee_X * 2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eBee_Hazard.left  = pixel_x + 2\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003eBee_Hazard.right = pixel_x + 18\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"text","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>pixel_x = Bee_X * 2
+Bee_Hazard.left  = pixel_x + 2
+Bee_Hazard.right = pixel_x + 18</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">pixel_x = Bee_X * 2</span></span>
+<span class="line"><span style="color: #F6F6F4">Bee_Hazard.left  = pixel_x + 2</span></span>
+<span class="line"><span style="color: #F6F6F4">Bee_Hazard.right = pixel_x + 18</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>The bee's X is measured in bytes, two pixels each, so <code>ADD A,A</code> doubles it into pixels. The largest X the bee ever reaches is byte 116, and <code>116 × 2 + 18 = 250</code> still fits in a single byte, so the whole sum works in the accumulator with no 16-bit arithmetic. The starting values in the table use the same sums at assembly time, so the record is right even before the bee's first move.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Because <code>Advance_Bee</code> runs before <code>Check_Hazards</code> in each update, the test always uses the bee's current position.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Reaching the Bee</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>On the lower grass Dizzy can't reach the bee: its body rows are 109 to 121, and a jump from the ground only lifts Dizzy's body to about row 128. The pile of rocks near the tree is the way up. Its top is around row 151, 23 pixels above the grass, so from there a jump carries him into the bee's flight path whenever it patrols over the rocks.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>In our version that makes the rocks the dangerous spot on this screen: jump there only while the bee is away at the other end of its patrol.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">What Happens After Contact</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Nothing new. <code>Check_Hazards</code> sets <code>Hazard_Contact</code>, the main loop calls <code>Start_Death</code>, and Dizzy freezes where he touched the bee. The border flashes red for two seconds while the bee and the waves carry on, then <code>Restart_Game</code> copies the snapshot back and puts Dizzy on the starting beach with the chest restored.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>The bee's position isn't part of the restart snapshot. It keeps patrolling from wherever it was, and its hazard record keeps following it, so the two can never get out of step.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Source, Disk and Result</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Start with the <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog26/28-1.asm" target="_blank" rel="noreferrer noopener">line-by-line commented 28-1.asm</a>, then read the two changed files, <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog26/hazards.asm" target="_blank" rel="noreferrer noopener">hazards.asm</a> and <a href="https://github.com/pjgpetecodes/samcoupegraphics/blob/main/assembly/blog26/bee_actor.asm" target="_blank" rel="noreferrer noopener">bee_actor.asm</a>. You can also download <a href="https://github.com/pjgpetecodes/samcoupegraphics/raw/refs/heads/main/disks/28-1.dsk" target="_blank" rel="noreferrer noopener">the 28-1 disk</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"full","linkDestination":"media","align":"center"} -->
+<figure class="wp-block-image aligncenter size-full"><a href="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog26/gifs/blog26-step1.gif"><img src="https://raw.githubusercontent.com/pjgpetecodes/samcoupegraphics/main/assembly/blog26/gifs/blog26-step1.gif" alt=""/></a></figure>
+<!-- /wp:image -->
+
+<!-- wp:paragraph -->
+<p>The 256 KB SimCoupe recording starts once Dizzy has completed the route to screen 4, jumped the boulder and climbed onto the rocks. He jumps on the spot as the bee comes back towards him. The jump that meets its body turns the border red, Dizzy freezes while the bee flies on, and two seconds later he is back on the starting beach with the chest in its original place.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Resident code/data end at <code>0xA961</code>, 19 bytes more than last time for the new hazard record and the six new instructions.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<iframe src="https://www.petecodes.co.uk/samcoupe/?d1=https%3A%2F%2Fwww.petecodes.co.uk%2Fsamcoupe%2Fdisks%2F28-1.dsk" width="100%" height="620" style="border:0;max-width:900px;display:block;margin:0 auto;" allow="autoplay; fullscreen" loading="lazy" title="SAM Coupé emulator - 28-1.dsk"></iframe>
+<!-- /wp:html -->
+
+<!-- wp:paragraph -->
+<p>The web-emulator placeholder needs its disk uploaded to the site's separate disk-hosting location before publication.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:kevinbatdorf/code-block-pro {"code":"python .\\.vscode\\sam_build.py .\\assembly\\blog26\\28-1.asm \u002d\u002dbuild-only\npython .\\.vscode\\capture_gifs.py 28-1","codeHTML":"\u003cpre class=\u0022shiki dracula-soft\u0022 style=\u0022background-color: #282A36\u0022 tabindex=\u00220\u0022\u003e\u003ccode\u003e\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\sam_build.py .\\assembly\\blog26\\\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e28\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1.\u003c/span\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003easm \u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e\u002d\u002d\u003c/span\u003e\u003cspan style=\u0022color: #97E1F1\u0022\u003ebuild-only\u003c/span\u003e\u003c/span\u003e\n\u003cspan class=\u0022line\u0022\u003e\u003cspan style=\u0022color: #F6F6F4\u0022\u003epython .\\.vscode\\capture_gifs.py \u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e28\u003c/span\u003e\u003cspan style=\u0022color: #F286C4\u0022\u003e-\u003c/span\u003e\u003cspan style=\u0022color: #BF9EEE\u0022\u003e1\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e","language":"powershell","theme":"dracula-soft","bgColor":"#282A36","textColor":"#f6f6f4","fontSize":".875rem","fontFamily":"Code-Pro-JetBrains-Mono","lineHeight":"1.25rem","clampFonts":false,"lineNumbers":false,"headerType":"none","disablePadding":false,"footerType":"none","enableMaxHeight":false,"seeMoreType":"","seeMoreString":"","seeMoreAfterLine":"","seeMoreTransition":false,"seeMoreCollapse":false,"seeMoreCollapseString":"","highlightingHover":false,"lineHighlightColor":"rgba(251, 251, 239, 0.2)","copyButton":true,"copyButtonType":"heroicons","copyButtonUseTextarea":true,"useTabs":false} -->
+<div class="wp-block-kevinbatdorf-code-block-pro" data-code-block-pro-font-family="Code-Pro-JetBrains-Mono" style="font-size:.875rem;font-family:Code-Pro-JetBrains-Mono,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;line-height:1.25rem;--cbp-tab-width:2;tab-size:var(--cbp-tab-width, 2)"><span role="button" tabindex="0" style="color:#f6f6f4;display:none" aria-label="Copy" class="code-block-pro-copy-button"><pre class="code-block-pro-copy-button-pre" aria-hidden="true"><textarea class="code-block-pro-copy-button-textarea" tabindex="-1" aria-hidden="true" readonly>python .\.vscode\sam_build.py .\assembly\blog26\28-1.asm --build-only
+python .\.vscode\capture_gifs.py 28-1</textarea></pre><svg xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path class="with-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path><path class="without-check" stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></span><pre class="shiki dracula-soft" style="background-color: #282A36" tabindex="0"><code><span class="line"><span style="color: #F6F6F4">python .\.vscode\sam_build.py .\assembly\blog26\</span><span style="color: #BF9EEE">28</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1.</span><span style="color: #F6F6F4">asm </span><span style="color: #F286C4">--</span><span style="color: #97E1F1">build-only</span></span>
+<span class="line"><span style="color: #F6F6F4">python .\.vscode\capture_gifs.py </span><span style="color: #BF9EEE">28</span><span style="color: #F286C4">-</span><span style="color: #BF9EEE">1</span></span></code></pre></div>
+<!-- /wp:kevinbatdorf/code-block-pro -->
+
+<!-- wp:paragraph -->
+<p>Z/X move, Space jumps on a fresh grounded press, and Enter collects or drops while stopped on the ground. Reset to stop.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>That completes the engine for our four screens. The final post puts it all together and walks through the whole route.</p>
+<!-- /wp:paragraph -->
