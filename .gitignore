@@ -11,3 +11,5 @@
 *-release/
 *.tgz
 __pycache__/
+/assembly/blog5/TIDizzy.dsk
+/private/tidizzy-source/
